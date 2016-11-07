@@ -18,6 +18,9 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     brew install bison
     brew install boost
     brew install shared-mime-info
+    brew install dcraw
+    brew install gphoto2
+    brew install libraw
     ```
 
 3. And some more:
@@ -51,11 +54,9 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     export INDI_ROOT=~/IndiRoot
     export INDI_DIR=${INDI_ROOT}/indi-stuff
     export KSTARS_DIR=${INDI_ROOT}/kstars-stuff
-    export CMAKE_DIR=${INDI_ROOT}/cmake-stuff
 
     mkdir ${INDI_DIR}
     mkdir ${KSTARS_DIR}
-    mkdir ${CMAKE_DIR}
 
     cd ${INDI_DIR}/
 
