@@ -7,8 +7,6 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 echo $DIR
 
-source "${DIR}/build-env.sh"
-
 function statusBanner
 {
     echo ""
@@ -29,7 +27,13 @@ function brewInstallIfNeeded
     fi
 }
 
-time brewInstallIfNeeded qt5 --with-dbus
+if [ ! -d ~/Qt/5.7/clang_64/bin ]
+then
+	echo "Installing qt5, because I didn't find it"
+	time brewInstallIfNeeded qt5 --with-dbus
+else	
+	echo "qt5 found in home dir"
+fi
 
 brewInstallIfNeeded cmake
 brewInstallIfNeeded wget
@@ -57,6 +61,8 @@ brewInstallIfNeeded eigen
 brewInstallIfNeeded astrometry-net
 brewInstallIfNeeded xplanet
 # brewInstallIfNeeded gsl
+
+source "${DIR}/build-env.sh"
 
 
 # From here on out exit if there is a failure
