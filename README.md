@@ -217,27 +217,27 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
 
     a. The Data Directory
 
-        ```console
-        mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
-        cp -r ${KSTARS_DIR}/share/kstars/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
-        ```
+    ```console
+    mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
+    cp -r ${KSTARS_DIR}/share/kstars/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
+    ```
 
     b. The indi drivers
 
-        ```console
-        mkdir  -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
-        cp /usr/local/bin/indi* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-        cp /usr/local/share/indi/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-        ```
+    ```console
+    mkdir  -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
+    cp /usr/local/bin/indi* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+    cp /usr/local/share/indi/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+    ```
 
     c. The astrometry files
 
-        ```console
-        mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry 
-        cp -r $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-        cp -r $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-        cp $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
-        ```
+    ```console
+    mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry 
+    cp -r $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+    cp -r $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+    cp $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
+    ```
 
 10. If you would like gsc so that the simulators can have nice stars to work with, then install gsc following these insructions: WE NEED TO WRAP THIS UP IN THE APP next.
 	http://www.indilib.org/support/tutorials/139-indi-library-on-raspberry-pi.html
