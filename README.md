@@ -54,6 +54,7 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     export INDI_ROOT=~/IndiRoot
     export INDI_DIR=${INDI_ROOT}/indi-stuff
     export KSTARS_DIR=${INDI_ROOT}/kstars-stuff
+    export GSC_DIR=${INDI_ROOT}/gsc
 
     mkdir ${INDI_DIR}
     mkdir ${KSTARS_DIR}
@@ -99,6 +100,7 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     ```
 
     Set some build variables:
+    > NOTE - these can be set by sourcing `build-env.sh`
 
     ```console
     export Qt5_DIR=~/Qt/5.7/clang_64/bin
@@ -188,7 +190,9 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     git clone --branch unix3 git://anongit.kde.org/emerge.git
     mkdir etc
     cp emerge/kdesettings.mac etc/kdesettings.ini
-
+    ```
+    
+    ```console
     export Qt5_DIR=~/Qt/5.7/clang_64/bin
     export PATH=$(brew --prefix gettext)/bin:$PATH
     export CMAKE_LIBRARY_PATH=$(brew --prefix gettext)/lib
@@ -198,44 +202,52 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     export Qt5DBus_DIR=$Qt5_DIR
     export Qt5Test_DIR=$Qt5_DIR
     export Qt5Network_DIR=$Qt5_DIR
+    ```
+    > NOTE - the above can be set by sourcing `build-env.sh`
+    
+    then run "emerge":
+    
+    ```console
     . emerge/kdeenv.sh
     emerge kstars
     ```
+    > NOTE- If you get errors on the first line, you probably messed up the `.gitconfig` stuff
 
 9. You will need to get several folders into the app.
+
     a. The Data Directory
 
-    ```console
-    mkdir ~/${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
-    cp -r ~/${KSTARS_DIR}/share/kstars/* ~/${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
-    ```
+        ```console
+        mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
+        cp -r ${KSTARS_DIR}/share/kstars/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
+        ```
 
     b. The indi drivers
 
-    ```console
-    mkdir ~/${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
-    cp /usr/local/bin/indi* ~/${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-    cp /usr/local/share/indi/* ~/${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-    ```
+        ```console
+        mkdir  -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
+        cp /usr/local/bin/indi* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+        cp /usr/local/share/indi/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+        ```
 
     c. The astrometry files
 
-    ```console
-    mkdir ~/${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry 
-    cp -r $(brew --prefix astrometry-net)/bin ~/${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-    cp -r $(brew --prefix astrometry-net)/lib ~/${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-    cp $(brew --prefix astrometry-net)/etc/astrometry.cfg ~/${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
-    ```
+        ```console
+        mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry 
+        cp -r $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+        cp -r $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+        cp $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
+        ```
 
 10. If you would like gsc so that the simulators can have nice stars to work with, then install gsc following these insructions: WE NEED TO WRAP THIS UP IN THE APP next.
-http://www.indilib.org/support/tutorials/139-indi-library-on-raspberry-pi.html
+	http://www.indilib.org/support/tutorials/139-indi-library-on-raspberry-pi.html
 
     a. Find a folder on your hard drive in a terminal window and use these commands:
 
     ```console
-    mkdir ~/gsc
-    cd ~/gsc
-    wget -O bincats_GSC_1.2.tar.gz http://cdsarc.u-strasbg.fr/viz- bin/nph-Cat/tar.gz?bincats/GSC_1.2
+    mkdir -p ${GSC_DIR}
+    cd ${GSC_DIR}
+    wget -O bincats_GSC_1.2.tar.gz "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/tar.gz?bincats/GSC_1.2"
     tar -xvzf bincats_GSC_1.2.tar.gz
     cd src
     make
@@ -245,10 +257,24 @@ http://www.indilib.org/support/tutorials/139-indi-library-on-raspberry-pi.html
     cp ~/gsc/bin/regions.* /gsc
     ```
 
-    > I had a couple of problems. First, it needed both of the regions files in a subfolder called bin inside the final gsc folder. Second, I had to copy all the folders that began with N and S to the final gsc folder (but NOT in the bin subfolder). Third, I had trouble getting the environment variable permanent, so you will note I made the final line install to /gsc not ~/gsc
+    > I had a couple of problems. First, it needed both of the regions files in
+    > a subfolder called bin inside the final gsc folder. Second, I had to copy
+    > all the folders that began with N and S to the final gsc folder (but NOT
+    > in the bin subfolder). Third, I had trouble getting the environment
+    > variable permanent, so you will note I made the final line install to /gsc
+    > not ~/gsc
 
 
+11.  Bundling it up
+    (This is a wip)
+    
+	```console
+	cd ~/Users/username/kf
+	macdeployqt Applications/KDE/kstars.app -dmg
 
+	if you get macdeployqyt command not found:
+	export Qt5_DIR=/Users/username/Qt5.7.0/5.7/clang_64/bin
+	```
 
 
 
