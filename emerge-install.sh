@@ -278,5 +278,13 @@ EOF
 make -f makefile.osx
 make -f makefile.osx install_emerge
 
-rm -rf /Applications/KDE
-cp -r ${KSTARS_DIR}/Applications/KDE /Applications/
+##########################################
+statusBanner "Set up some xplanet pictures"
+
+cd ${INDI_ROOT}
+curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz
+tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
+rm maps_alien-1.0.tar.gz
+
+# rm -rf /Applications/KDE
+# cp -r ${KSTARS_DIR}/Applications/KDE /Applications/

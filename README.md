@@ -274,10 +274,21 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
 	${Qt5_DIR}/bin/macdeployqt Applications/KDE/kstars.app -dmg
 	```
 
+12. Local stuff!
+
+    Add some images for xplanet:
+```console
+cd ${INDI_ROOT}
+curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz
+tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
+```
+
+
 ## Still to do:
 
 [GSC Data](http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=600#11840)
-[XPlanet images](http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=600#11847)
+
+(DONE) [XPlanet images](http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=600#11847)
 
 
 
