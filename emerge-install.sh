@@ -197,7 +197,6 @@ make install
 ### Let's try emerge.
 statusBanner "EMERGING!"
 
-
 if [ ! -f ~/.gitconfig -o $(grep -c kde.org ~/.gitconfig) -eq 0 ]
 then
 cat << EOF >> ~/.gitconfig
@@ -217,28 +216,56 @@ mkdir -p ${KSTARS_DIR}/
 
 cd ${KSTARS_DIR}/
 
-git clone --branch unix3 git://anongit.kde.org/emerge.git
+if [ ! -d emerge ]
+then
+	git clone --branch unix3 git://anongit.kde.org/emerge.git
+else
+	echo "Emerge already exists, checking for updates"
+	cd emerge
+	git pull
+	cd ${KSTARS_DIR}/	
+fi
+
 mkdir -p etc
-cp emerge/kdesettings.mac etc/kdesettings.ini
-
-
+cp -f emerge/kdesettings.mac etc/kdesettings.ini
 . emerge/kdeenv.sh
-emerge kstars
+time emerge kstars
+statusBanner EMERGE COMPLETE!
 
 ##########################################
 statusBanner "Prepping some other stuff"
 
 statusBanner "The Data Directory"
 mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
-cp -r ${KSTARS_DIR}/share/kstars/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
+cp -rf ${KSTARS_DIR}/share/kstars/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
 
 statusBanner "The indi drivers"
-mkdir ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
-cp /usr/local/bin/indi* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-cp /usr/local/share/indi/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
+cp -f /usr/local/bin/indi* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+cp -f /usr/local/share/indi/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
 
 statusBanner "The astrometry files"
-mkdir ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry 
-cp -r $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-cp -r $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-cp $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
+mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry 
+cp -rf $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+cp -rf $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+cp -f $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
+
+##########################################
+statusBanner "Gathering GSC info"
+
+mkdir -p ${GSC_DIR}
+cd ${GSC_DIR}
+GSC_TB=${INDI_ROOT}/bincats_GSC_1.2.tar.gz
+[ -f ${GSC_TB} ] || wget -O ${GSC_TB} "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/tar.gz?bincats/GSC_1.2"
+tar -xzf ${GSC_TB}
+cd src
+
+make
+
+
+
+mv gsc.exe gsc
+sudo cp gsc /usr/local/bin/
+cd ..
+cp ~/gsc/bin/regions.* /gsc
+
