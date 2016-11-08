@@ -253,19 +253,30 @@ cp -f $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applicati
 ##########################################
 statusBanner "Gathering GSC info"
 
+GSC_TB=${INDI_ROOT}/bincats_GSC_1.2.tar.gz
+
 mkdir -p ${GSC_DIR}
 cd ${GSC_DIR}
-GSC_TB=${INDI_ROOT}/bincats_GSC_1.2.tar.gz
 [ -f ${GSC_TB} ] || wget -O ${GSC_TB} "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/tar.gz?bincats/GSC_1.2"
 tar -xzf ${GSC_TB}
 cd src
 
-make
+cat << EOF > makefile.osx
+include makefile
 
+#############################################################################
+install_emerge: \$(PGMS) genreg.exe phase2
+	echo target DIR IS \$(GSC_TARGET_DIR)
+	mkdir -p \${GSC_TARGET_DIR}/bin
+	\$(COPY) gsc.exe      \$(GSC_TARGET_DIR)/bin/gsc
+	\$(COPY) decode.exe   \$(GSC_TARGET_DIR)/bin/decode
+	\$(COPY) -rf ../N???? \$(GSC_TARGET_DIR)/
+	\$(COPY) -rf ../S???? \$(GSC_TARGET_DIR)/
+	GSCDAT=\$(GSC_TARGET_DIR); export GSCDAT; genreg.exe -b -c -d
+EOF
 
+make -f makefile.osx
+make -f makefile.osx install_emerge
 
-mv gsc.exe gsc
-sudo cp gsc /usr/local/bin/
-cd ..
-cp ~/gsc/bin/regions.* /gsc
-
+rm -rf /Applications/KDE
+cp -r ${KSTARS_DIR}/Applications/KDE /Applications/

@@ -244,6 +244,7 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
 
     a. Find a folder on your hard drive in a terminal window and use these commands:
 
+    NOTE : This part is changing in the build script.
     ```console
     mkdir -p ${GSC_DIR}
     cd ${GSC_DIR}
