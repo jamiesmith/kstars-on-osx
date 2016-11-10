@@ -12,7 +12,7 @@ cat <<EOF
 options:
 	-3 also build third party stuff
 EOF
-exit
+exit 9
 }
 
 function buildThirdParty
@@ -52,7 +52,6 @@ endif (\${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 # endforeach()
 
 # endif (GSL_FOUND)
-
 
 # 3rdparty/indi-eqmod/ ?
 
@@ -119,8 +118,6 @@ fi
 
 # Some things all should have
 #
-brewInstall bash-completion
-brew tap homebrew/completions
 brewInstallIfNeeded cmake
 brewInstallIfNeeded wget
 brewInstallIfNeeded coreutils
