@@ -23,6 +23,7 @@ export Qt5DBus_DIR=$Qt5_DIR
 export Qt5Test_DIR=$Qt5_DIR
 export Qt5Network_DIR=$Qt5_DIR
 export GSC_TARGET_DIR=${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/gsc
+# ??? export ECM_DIR=$(brew --prefix kf5-extra-cmake-modules)/share/ECM                         
 
 echo "INDI_ROOT          is [${INDI_ROOT}]"
 echo "INDI_DIR           is [${INDI_DIR}]"

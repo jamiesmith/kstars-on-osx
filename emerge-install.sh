@@ -5,30 +5,48 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BUILD_3RDPARTY=""
+ANNOUNCE=""
+INDI_ONLY=""
 
 function dieUsage
 {
 cat <<EOF
 options:
 	-3 also build third party stuff
+	-a Announce stuff as you go
+	-i Just do indi build, not emerge
 EOF
 exit 9
 }
 
-function buildThirdParty
+function exitEarly
 {
-	#### Third Party Stuff
-	# Let's add GPHOTO
-	#
+	announce "$*"
+	trap - EXIT
+	exit 0
+}
+
+function announce
+{
+	[ -n "$ANNOUNCE" ] && say -v Daniel "$*"
+	statusBanner "$*"
+}
+function patchThirdPartyCmake
+{
 	cd ${INDI_DIR}
-	THIRD_PARTY_CMAKE=${INDI_DIR}/indi/3rdparty/CMakeLists.txt
+	CMAKE=${INDI_DIR}/indi/3rdparty/CMakeLists.txt
 
-	if [ $(grep -c Darwin ${THIRD_PARTY_CMAKE}) -eq 0 ]
+	if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
 	then
-	    echo "Adding GPHOTO to the 3rd party stuff"
+		echo $CMAKE Already Patched
+		return
+	fi
 
-		cat << EOF >> $THIRD_PARTY_CMAKE
+	statusBanner "Patching $CMAKE"
 
+	cat << EOF >> $CMAKE
+
+### AUTO_PATCHED
 message("Adding GPhoto Driver")
 if (\${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 option(WITH_GPHOTO "Install GPhoto Driver" On)
@@ -38,28 +56,112 @@ add_subdirectory(indi-gphoto)
 endif(WITH_GPHOTO)
 
 endif (\${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-#
-# find_package(GSL REQUIRED)
-# if (GSL_FOUND)
-#    include_directories(${GSL_INCLUDE_DIRS})
-#    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS GSL_FOUND)
-#    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${CMAKE_GSL_CXX_FLAGS})
-
-# get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-# foreach(dir ${dirs})
-#   message(STATUS "JRS dir='${dir}'")
-# endforeach()
-
-# endif (GSL_FOUND)
-
-# 3rdparty/indi-eqmod/ ?
-
 EOF
+}
+
+function patchEqmodCmake
+{
+	cd ${INDI_DIR}
+	CMAKE=${INDI_DIR}/indi/3rdparty/indi-eqmod/CMakeLists.txt
+
+	if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
+	then
+		echo $CMAKE Already Patched
+		return
 	fi
 
+	statusBanner "Patching $CMAKE"
+
+	cat << EOF >> $CMAKE
+### AUTO_PATCHED
+find_package(GSL  REQUIRED)
+
+if (GSL_FOUND)
+	include_directories(\${GSL_INCLUDE_DIRS})
+endif (GSL_FOUND)
+EOF
+}
+
+function patchAlignmentCmake
+{
+	cd ${INDI_DIR}
+	CMAKE=${INDI_DIR}/indi/libindi/libs/indibase/alignment/CMakeLists.txt
+
+	if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
+	then
+		echo $CMAKE Already Patched
+		return
+	fi
+
+	statusBanner "Patching $CMAKE"
+	sed -i '' 's#target_link_libraries(AlignmentDriver ${GSL_LIBRARIES})#target_link_libraries(AlignmentDriver -L/usr/local/lib ${GSL_LIBRARIES})#' $CMAKE	
+	echo "" >> ${CMAKE}
+	echo "### AUTO_PATCHED" >> ${CMAKE}
+}
+
+function patchTopCmake
+{
+	cd ${INDI_DIR}
+	CMAKE=${INDI_DIR}/indi/libindi/CMakeLists.txt
+
+	if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
+	then
+		echo $CMAKE Already Patched
+		return
+	fi
+
+	statusBanner "Patching $CMAKE"
+	[ -f ${CMAKE}.orig ] || cp ${CMAKE} ${CMAKE}.orig
+    awk '1;/set \(indiclient_SRCS/{c=4}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/libs/lilxml.c"}' ${CMAKE} > ${CMAKE}.zzz
+    awk '1;/set \(indiclient_SRCS/{c=5}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/base64.c"}' ${CMAKE}.zzz > ${CMAKE}
+
+    awk '1;/set \(indiclientqt_SRCS/{c=4}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/libs/lilxml.c"}' ${CMAKE} > ${CMAKE}.zzz
+    awk '1;/set \(indiclientqt_SRCS/{c=5}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/base64.c"}' ${CMAKE}.zzz > ${CMAKE}
+	
+    rm ${CMAKE}.zzz
+
+	echo "" >> ${CMAKE}
+	echo "### AUTO_PATCHED" >> ${CMAKE}
+}
+
+function patchMaxdomeiiCmake
+{
+	cd ${INDI_DIR}
+	CMAKE=${INDI_DIR}/indi/3rdparty/indi-maxdomeii/CMakeLists.txt
+
+	if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
+	then
+		echo $CMAKE Already Patched
+		return
+	fi
+	
+	statusBanner "Patching $CMAKE"
+	# First, nova needs to be all caps
+	#
+	sed -i '' 's|Nova REQUIRED|NOVA REQUIRED|' $CMAKE
+	
+	# second, need to also include ln_types.h
+	#
+	[ -f ${CMAKE}.orig ] || cp ${CMAKE} ${CMAKE}.orig
+    awk '1;/NOVA REQUIRED/{c=1}c&&!--c{print "### AUTO_PATCHED\nfind_path(LN_INCLUDE_DIR libnova/ln_types.h)"}' ${CMAKE} > ${CMAKE}.zzz
+    awk '1;/NOVA_INCLUDE_DIR/{c=1}c&&!--c{print "### AUTO_PATCHED\ninclude_directories( ${LN_INCLUDE_DIR})"}' ${CMAKE}.zzz > ${CMAKE}
+
+	rm ${CMAKE}.zzz
+
+	echo "" >> ${CMAKE}
+	echo "### AUTO_PATCHED" >> ${CMAKE}
+}
+
+function buildThirdParty
+{
+	patchThirdPartyCmake
+	patchEqmodCmake
+	patchMaxdomeiiCmake
+	
+	cd ${INDI_DIR}
 	mkdir -p ${INDI_DIR}/build/3rdparty
 	cd ${INDI_DIR}/build/3rdparty
+	rm -rf ${INDI_DIR}/build/3rdparty/*
 
 	statusBanner "Configure indi third-party"
 	cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty
@@ -71,11 +173,17 @@ EOF
 	make install	
 }
 
-while getopts "3" option
+while getopts "3ai" option
 do
     case $option in 
 	3)
 		BUILD_3RDPARTY="yep"
+		;;
+	a)
+		ANNOUNCE="yep"
+		;;
+	i)
+		INDI_ONLY="yep"
 		;;
 	*)
 		dieUsage "Unsupported opthon $option"
@@ -104,52 +212,61 @@ function brewInstallIfNeeded
     fi
 }
 
+function scriptDied
+{
+    announce "Something failed"
+}
+trap scriptDied EXIT
+
+function installBrewDependencies
+{
+	announce "Installing brew dependencies"
+
+	if [ ! -d ~/Qt/5.7/clang_64/bin ]
+	then
+		echo "Checking brew for qt5, because I didn't find it"
+		time brewInstallIfNeeded qt5 --with-dbus
+	else	
+		echo "qt5 found in home dir"
+	fi
+
+	brewInstallIfNeeded cmake
+	brewInstallIfNeeded wget
+	brewInstallIfNeeded coreutils
+	brewInstallIfNeeded p7zip
+	brewInstallIfNeeded gettext
+	brewInstallIfNeeded ninja
+	brewInstallIfNeeded python3
+	brewInstallIfNeeded ninja
+	brewInstallIfNeeded bison
+	brewInstallIfNeeded boost
+	brewInstallIfNeeded shared-mime-info
+
+	# These for gphoto
+	#
+	brewInstallIfNeeded dcraw
+	brewInstallIfNeeded gphoto2
+	brewInstallIfNeeded libraw
+
+	brew tap homebrew/science
+	brewInstallIfNeeded pkgconfig
+	brewInstallIfNeeded cfitsio
+	brewInstallIfNeeded cmake
+	brewInstallIfNeeded eigen
+	brewInstallIfNeeded astrometry-net
+	brewInstallIfNeeded xplanet
+	brewInstallIfNeeded gsl
+
+	brew tap polakovic/astronomy
+	brewInstall polakovic/astronomy/libnova
+}
+
 ##########################################
 # This is where the bulk of it starts!
 #
-
-if [ ! -d ~/Qt/5.7/clang_64/bin ]
-then
-	echo "Installing qt5, because I didn't find it"
-	time brewInstallIfNeeded qt5 --with-dbus
-else	
-	echo "qt5 found in home dir"
-fi
-
-# Some things all should have
-#
-brewInstallIfNeeded cmake
-brewInstallIfNeeded wget
-brewInstallIfNeeded coreutils
-brewInstallIfNeeded p7zip
-brewInstallIfNeeded gettext
-brewInstallIfNeeded ninja
-brewInstallIfNeeded python3
-brewInstallIfNeeded ninja
-brewInstallIfNeeded bison
-brewInstallIfNeeded boost
-brewInstallIfNeeded shared-mime-info
-
-# These for gphoto
-#
-brewInstallIfNeeded dcraw
-brewInstallIfNeeded gphoto2
-brewInstallIfNeeded libraw
-
-brew tap homebrew/science
-brewInstallIfNeeded pkgconfig
-brewInstallIfNeeded cfitsio
-brewInstallIfNeeded cmake
-brewInstallIfNeeded eigen
-brewInstallIfNeeded astrometry-net
-brewInstallIfNeeded xplanet
-# brewInstallIfNeeded gsl
-
-brew tap jamiesmith/astronomy
-brewInstallIfNeeded jamiesmith/astronomy/libnova
-
 source "${DIR}/build-env.sh"
 
+installBrewDependencies
 
 # From here on out exit if there is a failure
 set -e
@@ -157,35 +274,9 @@ set -e
 mkdir -p ${INDI_DIR}
 mkdir -p ${KSTARS_DIR}
 
-##########################################                                                                                                                                
-# GSL- seem to need this for the 3rdparty stuff
-
-# statusBanner "BUILDING GSL STUFF"
-#
-# cd ${INDI_DIR}/
-#
-# if [ ! -f gsl-2.1 ]
-# then
-#     curl -L --silent -O http://gnu.prunk.si/gsl/gsl-2.1.tar.gz
-#     tar xzf gsl-2.1.tar.gz
-#     rm gsl-2.1.tar.gz
-# else
-#     statusBanner "GSL Already downloaded"
-# fi
-#
-# cd gsl-2.1
-#
-# [ ! -f Makefile ] && ./configure
-#
-# statusBanner "make gsl"
-# make
-#
-# statusBanner "make install gsl"
-# make install
-
 ##########################################
 # Indi
-statusBanner "BUILDING LIBINDI STUFF"
+announce "BUILDING LIB INDI STUFF"
 
 cd ${INDI_DIR}/
 
@@ -195,21 +286,18 @@ then
 
     git clone https://github.com/indilib/indi.git
     cd indi/libindi
-
-    awk '1;/set \(indiclient_SRCS/{c=4}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/libs/lilxml.c"}' CMakeLists.txt > CMakeLists.zzz
-    awk '1;/set \(indiclient_SRCS/{c=5}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/base64.c"}' CMakeLists.zzz > CMakeLists.txt
-
-    awk '1;/set \(indiclientqt_SRCS/{c=4}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/libs/lilxml.c"}' CMakeLists.txt > CMakeLists.zzz
-    awk '1;/set \(indiclientqt_SRCS/{c=5}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/base64.c"}' CMakeLists.zzz > CMakeLists.txt
-
-    rm CMakeLists.zzz
-    ALIGNMENT_CMAKE=${INDI_DIR}/indi/libindi/libs/indibase/alignment/CMakeLists.txt
-    sed -i '' 's#target_link_libraries(AlignmentDriver ${GSL_LIBRARIES})#target_link_libraries(AlignmentDriver -L/usr/local/lib ${GSL_LIBRARIES})#' $ALIGNMENT_CMAKE
 else
+	cd indi
+	git pull
     statusBanner "indilib already cloned and patched"    
+	cd ${INDI_DIR}/
 fi
 
+patchTopCmake
+patchAlignmentCmake
+
 mkdir -p ${INDI_DIR}/build/libindi
+rm -rf ${INDI_DIR}/build/libindi/*
 cd ${INDI_DIR}/build/libindi
 
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/libindi
@@ -225,14 +313,16 @@ make install
 
 if [ -n "${BUILD_3RDPARTY}" ]
 then
-	statusBanner "Executing 3rd Party Build as directed"
+	announce "Executing third Party Build as directed"
 	buildThirdParty
 else
-	statusBanner "Skipping 3rd Party Build as directed"
+	statusBanner "Skipping third Party Build as directed"
 fi
 
+[ -n "$INDI_ONLY" ] && exitEarly "Building Indi Only"
+
 ### Let's try emerge.
-statusBanner "EMERGING!"
+announce "Running the emerge!"
 
 if [ ! -f ~/.gitconfig -o $(grep -c kde.org ~/.gitconfig) -eq 0 ]
 then
@@ -267,7 +357,8 @@ mkdir -p etc
 cp -f emerge/kdesettings.mac etc/kdesettings.ini
 . emerge/kdeenv.sh
 time emerge kstars
-statusBanner EMERGE COMPLETE!
+
+announce EMERGE COMPLETE
 
 ##########################################
 statusBanner "Prepping some other stuff"
@@ -323,5 +414,12 @@ curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1
 tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
 rm maps_alien-1.0.tar.gz
 
+announce "Script execution complete"
+
 # rm -rf /Applications/KDE
 # cp -r ${KSTARS_DIR}/Applications/KDE /Applications/
+
+# Finally, remove the trap
+trap - EXIT
+
+
