@@ -4,8 +4,86 @@
 # run in to a gsl error.
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+BUILD_3RDPARTY=""
 
-echo $DIR
+function dieUsage
+{
+cat <<EOF
+options:
+	-3 also build third party stuff
+EOF
+exit
+}
+
+function buildThirdParty
+{
+	#### Third Party Stuff
+	# Let's add GPHOTO
+	#
+	cd ${INDI_DIR}
+	THIRD_PARTY_CMAKE=${INDI_DIR}/indi/3rdparty/CMakeLists.txt
+
+	if [ $(grep -c Darwin ${THIRD_PARTY_CMAKE}) -eq 0 ]
+	then
+	    echo "Adding GPHOTO to the 3rd party stuff"
+
+		cat << EOF >> $THIRD_PARTY_CMAKE
+
+message("Adding GPhoto Driver")
+if (\${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+option(WITH_GPHOTO "Install GPhoto Driver" On)
+
+if (WITH_GPHOTO)
+add_subdirectory(indi-gphoto)
+endif(WITH_GPHOTO)
+
+endif (\${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+#
+# find_package(GSL REQUIRED)
+# if (GSL_FOUND)
+#    include_directories(${GSL_INCLUDE_DIRS})
+#    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS GSL_FOUND)
+#    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${CMAKE_GSL_CXX_FLAGS})
+
+# get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+# foreach(dir ${dirs})
+#   message(STATUS "JRS dir='${dir}'")
+# endforeach()
+
+# endif (GSL_FOUND)
+
+
+# 3rdparty/indi-eqmod/ ?
+
+EOF
+	fi
+
+	mkdir -p ${INDI_DIR}/build/3rdparty
+	cd ${INDI_DIR}/build/3rdparty
+
+	statusBanner "Configure indi third-party"
+	cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty
+
+	statusBanner "make indi third-party"
+	make
+
+	statusBanner "make install indi third-party"
+	make install	
+}
+
+while getopts "3" option
+do
+    case $option in 
+	3)
+		BUILD_3RDPARTY="yep"
+		;;
+	*)
+		dieUsage "Unsupported opthon $option"
+		;;
+    esac
+done
+shift $((${OPTIND} - 1)) 
 
 function statusBanner
 {
@@ -27,6 +105,10 @@ function brewInstallIfNeeded
     fi
 }
 
+##########################################
+# This is where the bulk of it starts!
+#
+
 if [ ! -d ~/Qt/5.7/clang_64/bin ]
 then
 	echo "Installing qt5, because I didn't find it"
@@ -35,6 +117,10 @@ else
 	echo "qt5 found in home dir"
 fi
 
+# Some things all should have
+#
+brewInstall bash-completion
+brew tap homebrew/completions
 brewInstallIfNeeded cmake
 brewInstallIfNeeded wget
 brewInstallIfNeeded coreutils
@@ -61,6 +147,9 @@ brewInstallIfNeeded eigen
 brewInstallIfNeeded astrometry-net
 brewInstallIfNeeded xplanet
 # brewInstallIfNeeded gsl
+
+brew tap jamiesmith/astronomy
+brewInstallIfNeeded jamiesmith/astronomy/libnova
 
 source "${DIR}/build-env.sh"
 
@@ -137,62 +226,13 @@ make
 statusBanner "make install indi"
 make install
 
-
-#### Third Party Stuff
-# Let's add GPHOTO
-#
-cd ${INDI_DIR}
-THIRD_PARTY_CMAKE=${INDI_DIR}/indi/3rdparty/CMakeLists.txt
-
-if [ $(grep -c Darwin ${THIRD_PARTY_CMAKE}) -eq 0 ]
+if [ -n "${BUILD_3RDPARTY}" ]
 then
-    echo "Adding GPHOTO to the 3rd party stuff"
-    
-cat << EOF >> $THIRD_PARTY_CMAKE
-
-message("Adding GPhoto Driver")
-if (\${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-option(WITH_GPHOTO "Install GPhoto Driver" On)
-
-if (WITH_GPHOTO)
-add_subdirectory(indi-gphoto)
-endif(WITH_GPHOTO)
-
-endif (\${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-#
-# find_package(GSL REQUIRED)
-# if (GSL_FOUND)
-#    include_directories(${GSL_INCLUDE_DIRS})
-#    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS GSL_FOUND)
-#    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${CMAKE_GSL_CXX_FLAGS})
-
-# get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-# foreach(dir ${dirs})
-#   message(STATUS "JRS dir='${dir}'")
-# endforeach()
-
-# endif (GSL_FOUND)
-
-
-# 3rdparty/indi-eqmod/ ?
-
-EOF
+	statusBanner "Executing 3rd Party Build as directed"
+	buildThirdParty
+else
+	statusBanner "Skipping 3rd Party Build as directed"
 fi
-
-mkdir -p ${INDI_DIR}/build/3rdparty
-cd ${INDI_DIR}/build/3rdparty
-
-statusBanner "Configure indi third-party"
-cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty
-
-statusBanner "make indi third-party"
-make
-
-statusBanner "make install indi third-party"
-make install
-
-### NOTE : I haven't done the emerge stuff on my machine yet, so this part is not automated.
 
 ### Let's try emerge.
 statusBanner "EMERGING!"
@@ -246,8 +286,8 @@ cp -f /usr/local/share/indi/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents
 
 statusBanner "The astrometry files"
 mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry 
-cp -rf $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-cp -rf $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+cp -Rf $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+cp -Rf $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
 cp -f $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
 
 ##########################################
