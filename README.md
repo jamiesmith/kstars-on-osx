@@ -45,7 +45,7 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     ```
     To download QT5 from their website, you can go here: www.qt.io/download-open-source/
 
-6. I followed these instructions to build INDI from source and get it installed on the Mac in the proper location, but since then we have found that it is much easier to install using homebrew dependencies which we put (and you already did) in step 3: indilib.org/forum/general/210-howto-buil...st-libindi-ekos.html
+6. I followed these instructions to build INDI from source and get it installed on the Mac in the proper location, but since then we have found that it is much easier to install using homebrew dependencies which we put (and you already did) in step 3: http://indilib.org/forum/general/210-howto-building-latest-libindi-ekos.html
     Do this at the command line:
 
     ```console
