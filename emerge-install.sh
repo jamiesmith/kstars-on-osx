@@ -7,13 +7,14 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BUILD_3RDPARTY=""
 ANNOUNCE=""
 INDI_ONLY=""
-
+SKIP_BREW=""
 function dieUsage
 {
 cat <<EOF
 options:
 	-3 also build third party stuff
 	-a Announce stuff as you go
+	-b Skip brew (only use this if you know you already have them)
 	-i Just do indi build, not emerge
 EOF
 exit 9
@@ -173,32 +174,27 @@ function buildThirdParty
 	make install	
 }
 
-while getopts "3ai" option
+while getopts "3abi" option
 do
     case $option in 
-	3)
-		BUILD_3RDPARTY="yep"
-		;;
-	a)
-		ANNOUNCE="yep"
-		;;
-	i)
-		INDI_ONLY="yep"
-		;;
-	*)
-		dieUsage "Unsupported opthon $option"
-		;;
+		3)
+			BUILD_3RDPARTY="yep"
+			;;
+		a)
+			ANNOUNCE="yep"
+			;;
+		b)
+			SKIP_BREW="yep"
+			;;
+		i)
+			INDI_ONLY="yep"
+			;;
+		*)
+			dieUsage "Unsupported opthon $option"
+			;;
     esac
 done
 shift $((${OPTIND} - 1)) 
-
-function statusBanner
-{
-    echo ""
-    echo "############################################################"
-    echo "# $*"
-    echo "############################################################"
-}
 
 function brewInstallIfNeeded
 {
@@ -216,7 +212,6 @@ function scriptDied
 {
     announce "Something failed"
 }
-trap scriptDied EXIT
 
 function installBrewDependencies
 {
@@ -266,10 +261,17 @@ function installBrewDependencies
 #
 source "${DIR}/build-env.sh"
 
-installBrewDependencies
+if [ -z "$SKIP_BREW" ]
+then
+	installBrewDependencies
+else
+	announce "Skipping brew dependencies"
+fi
 
 # From here on out exit if there is a failure
+#
 set -e
+trap scriptDied EXIT
 
 mkdir -p ${INDI_DIR}
 mkdir -p ${KSTARS_DIR}
@@ -363,63 +365,45 @@ announce EMERGE COMPLETE
 ##########################################
 statusBanner "Prepping some other stuff"
 
+##########################################
 statusBanner "The Data Directory"
 mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
 cp -rf ${KSTARS_DIR}/share/kstars/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
 
+##########################################
 statusBanner "The indi drivers"
 mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
 cp -f /usr/local/bin/indi* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
 cp -f /usr/local/share/indi/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
 
-statusBanner "The astrometry files"
-mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry 
-cp -Rf $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-cp -Rf $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-cp -f $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
+##########################################
+# statusBanner "The astrometry files"
+# mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry
+# cp -Rf $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+# cp -Rf $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+# cp -f  $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
 
 ##########################################
-statusBanner "Gathering GSC info"
+statusBanner "Set up some xplanet pictures - this is failing..."
 
-GSC_TB=${INDI_ROOT}/bincats_GSC_1.2.tar.gz
+# cd ${INDI_ROOT}
+# curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz
+# tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
+# rm maps_alien-1.0.tar.gz
+#
+# mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
+# cp -rf $(brew --prefix xplanet)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
+# cp -rf $(brew --prefix xplanet)/share ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
 
-mkdir -p ${GSC_DIR}
-cd ${GSC_DIR}
-[ -f ${GSC_TB} ] || wget -O ${GSC_TB} "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/tar.gz?bincats/GSC_1.2"
-tar -xzf ${GSC_TB}
-cd src
-
-cat << EOF > makefile.osx
-include makefile
-
-#############################################################################
-install_emerge: \$(PGMS) genreg.exe phase2
-	echo target DIR IS \$(GSC_TARGET_DIR)
-	mkdir -p \${GSC_TARGET_DIR}/bin
-	\$(COPY) gsc.exe      \$(GSC_TARGET_DIR)/bin/gsc
-	\$(COPY) decode.exe   \$(GSC_TARGET_DIR)/bin/decode
-	\$(COPY) -rf ../N???? \$(GSC_TARGET_DIR)/
-	\$(COPY) -rf ../S???? \$(GSC_TARGET_DIR)/
-	GSCDAT=\$(GSC_TARGET_DIR); export GSCDAT; genreg.exe -b -c -d
-EOF
-
-make -f makefile.osx
-make -f makefile.osx install_emerge
-
-##########################################
-statusBanner "Set up some xplanet pictures"
-
-cd ${INDI_ROOT}
-curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz
-tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
-rm maps_alien-1.0.tar.gz
-
-announce "Script execution complete"
-
-# rm -rf /Applications/KDE
-# cp -r ${KSTARS_DIR}/Applications/KDE /Applications/
+# ##########################################
+# announce "Fixing the dir names and such"
+# ${DIR}/fix-libraries.sh
+#
+# ##########################################
+# announce "Building DMG"
+# cd ${KSTARS_DIR}
+# ${Qt5_DIR}/bin/macdeployqt Applications/KDE/kstars.app -dmg
 
 # Finally, remove the trap
 trap - EXIT
-
-
+announce "Script execution complete"

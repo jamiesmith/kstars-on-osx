@@ -1,12 +1,20 @@
 #!/bin/bash
 
 # This file will make it easier to use the scripts and do stuff on command line
+#
+function statusBanner
+{
+    echo ""
+    echo "############################################################"
+    echo "# $*"
+    echo "############################################################"
+}
+
 
 export INDI_ROOT=~/IndiRoot
 export INDI_DIR=${INDI_ROOT}/indi-stuff
 export KSTARS_DIR=${INDI_ROOT}/kstars-stuff
 export GSC_DIR=${INDI_ROOT}/gsc
-
 
 if [ -d ~/Qt/5.7/clang_64/bin ]
 then
@@ -23,7 +31,6 @@ export Qt5DBus_DIR=$Qt5_DIR
 export Qt5Test_DIR=$Qt5_DIR
 export Qt5Network_DIR=$Qt5_DIR
 export GSC_TARGET_DIR=${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/gsc
-# ??? export ECM_DIR=$(brew --prefix kf5-extra-cmake-modules)/share/ECM                         
 
 echo "INDI_ROOT          is [${INDI_ROOT}]"
 echo "INDI_DIR           is [${INDI_DIR}]"
