@@ -14,7 +14,6 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     brew install gettext
     brew install ninja
     brew install python3
-    brew install ninja
     brew install bison
     brew install boost
     brew install shared-mime-info
@@ -29,7 +28,6 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     brew tap homebrew/science
     brew install pkgconfig
     brew install cfitsio
-    brew install cmake
     brew install eigen
     brew install astrometry-net 
     ```
