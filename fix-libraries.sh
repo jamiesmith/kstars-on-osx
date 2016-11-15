@@ -12,8 +12,21 @@ source "${DIR}/build-env.sh" > /dev/null
 FILES_TO_COPY=()
 FRAMEWORKS_DIR="${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Frameworks"
 INDI_DIR="${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi"
+DRY_RUN_ONLY=""
 
 mkdir -p "${FRAMEWORKS_DIR}"
+
+function dieUsage
+{
+    # I really wish that getopt supported the long args.
+    #
+    echo $*
+cat <<EOF
+options:
+    -d Dry run only (just show what you are going to do)
+EOF
+exit 9
+}
 
 function addFileToCopy
 {
@@ -60,10 +73,19 @@ function processTarget
         # echo "              $entry \\"
         # echo "              $newname \\"
         # echo "              $target"
-        install_name_tool -change \
-            $entry \
-            $newname \
-            $target
+        
+        if [ -z "${DRY_RUN_ONLY}" ]
+        then
+            install_name_tool -change \
+                $entry \
+                $newname \
+                $target
+        else
+            echo "    install_name_tool -change \\"
+            echo "        $entry \\"
+            echo "        $newname \\"
+            echo "        $target"
+        fi            
 
 		addFileToCopy "$entry"
 	done
@@ -88,16 +110,30 @@ function copyFilesToFrameworks
         if [ ! -f "${FRAMEWORKS_DIR}/${base}" ]
         then
         	echo "HAVE TO COPY [$libFile] from [${filename}] to Frameworks"
-            cp "${filename}" "${FRAMEWORKS_DIR}"
+            [ -z "${DRY_RUN_ONLY}" ] && cp "${filename}" "${FRAMEWORKS_DIR}"
             
             # Seem to need this for the macqtdeploy
             #
-            chmod +w "${FRAMEWORKS_DIR}/${base}"
+            [ -z "${DRY_RUN_ONLY}" ] && chmod +w "${FRAMEWORKS_DIR}/${base}"
         else
         	echo "Skipping Copy: $libFile already in Frameworks "
         fi
     done
 }
+
+
+while getopts "d" option
+do
+    case $option in
+        d)
+            DRY_RUN_ONLY="yep"
+            ;;
+        *)
+            dieUsage "Unsupported option $option"
+            ;;
+    esac
+done
+shift $((${OPTIND} - 1))
 
 cd ${KSTARS_DIR}
 
