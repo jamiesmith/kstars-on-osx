@@ -240,7 +240,6 @@ function installBrewDependencies
     brew tap homebrew/science
     brewInstallIfNeeded pkgconfig
     brewInstallIfNeeded cfitsio
-    brewInstallIfNeeded cmake
     brewInstallIfNeeded eigen
     brewInstallIfNeeded astrometry-net
     brewInstallIfNeeded xplanet
