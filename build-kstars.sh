@@ -226,7 +226,6 @@ function installBrewDependencies
     brewInstallIfNeeded gettext
     brewInstallIfNeeded ninja
     brewInstallIfNeeded python3
-    brewInstallIfNeeded ninja
     brewInstallIfNeeded bison
     brewInstallIfNeeded boost
     brewInstallIfNeeded shared-mime-info
