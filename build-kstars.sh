@@ -440,6 +440,11 @@ echo "BUILD_KSTARS_CMAKE  = ${BUILD_KSTARS_CMAKE}"
 echo "BUILD_KSTARS_EMERGE = ${BUILD_KSTARS_EMERGE}"
 echo "SKIP_BREW           = ${SKIP_BREW}"
 
+if [ -z "$BUILD_KSTARS_CMAKE" ] && [ -z "$BUILD_KSTARS_EMERGE" ] && [ -z "$BUILDING_KSTARS" ]
+then
+    DRY_RUN_ONLY="yep"
+fi
+
 [ -n "${DRY_RUN_ONLY}" ] && exitEarly "Dry Run Only"
 
 if [ -z "$SKIP_BREW" ]

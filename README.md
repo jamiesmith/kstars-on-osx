@@ -268,6 +268,9 @@ on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?st
     (This is a wip)
     
 	```console
+	cd ${KSTARS_DIR}/Applications/KDE/
+	${Qt5_DIR}/bin/macdeployqt kstars.app -dmg
+
 	cd ${KSTARS_DIR}
 	${Qt5_DIR}/bin/macdeployqt Applications/KDE/kstars.app -dmg
 	```
