@@ -34,11 +34,11 @@ If your computer is faster than your internet connection then just build it:
 
 Downloading and run the build script.
 ```console
-mkdir ~/Projects
+mkdir -p ~/Projects
 cd ~/Projects/
 git clone github.com/jamiesmith/kstars-on-osx.git
 cd ~/Projects/kstars-on-osx
-. build-kstars.sh -3aei
+./build-kstars.sh -3aei
 ```
 
 # Manual Steps
