@@ -12,6 +12,10 @@ Prerequisites for the whole process are:
 [Apple Developer Site](developer.apple.com/download/) or from the 
 [app store](https://itunes.apple.com/us/app/xcode/id497799835)
 
+### Install Homebrew
+
+`/usr/bin/ruby -e "$(curl -fsSL raw.githubusercontent.com/Homebrew/install/master/install)"`
+
 ### QT
 
 [QT.io](www.qt.io/download-open-source/).  Either install this in `~/Qt/`,
@@ -25,10 +29,6 @@ The install selections I chose:
 If your computer is faster than your internet connection then just build it:
 
 `brew install qt5 --with-dbus`
-
-### Install Homebrew
-
-`/usr/bin/ruby -e "$(curl -fsSL raw.githubusercontent.com/Homebrew/install/master/install)"`
 
 ### Download the scripts (this stuff)
 
