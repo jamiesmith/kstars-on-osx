@@ -301,7 +301,7 @@ function emergeKstars
     ### Let's try emerge.
     announce "Running the emerge!"
 
-    if [ ! -f ~/.gitconfig -o $(grep -c kde.org ~/.gitconfig) -eq 0 ]
+    if [ ! -f ~/.gitconfig ] || [ $(grep -c kde.org ~/.gitconfig) -eq 0 ]
     then
     cat << EOF >> ~/.gitconfig
 
