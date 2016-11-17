@@ -443,13 +443,13 @@ then
 fi
 
 echo ""
-echo "ANNOUNCE            = ${ANNOUNCE}"
-echo "BUILDING_KSTARS     = ${BUILDING_KSTARS}"
-echo "BUILD_3RDPARTY      = ${BUILD_3RDPARTY}"
-echo "BUILD_INDI          = ${BUILD_INDI}"
-echo "BUILD_KSTARS_CMAKE  = ${BUILD_KSTARS_CMAKE}"
-echo "BUILD_KSTARS_EMERGE = ${BUILD_KSTARS_EMERGE}"
-echo "SKIP_BREW           = ${SKIP_BREW}"
+echo "ANNOUNCE            = ${ANNOUNCE:-Nope}"
+echo "BUILDING_KSTARS     = ${BUILDING_KSTARS:-Nope}"
+echo "BUILD_3RDPARTY      = ${BUILD_3RDPARTY:-Nope}"
+echo "BUILD_INDI          = ${BUILD_INDI:-Nope}"
+echo "BUILD_KSTARS_CMAKE  = ${BUILD_KSTARS_CMAKE:-Nope}"
+echo "BUILD_KSTARS_EMERGE = ${BUILD_KSTARS_EMERGE:-Nope}"
+echo "SKIP_BREW           = ${SKIP_BREW:-Nope}"
 
 if [ -z "$BUILD_KSTARS_CMAKE" ] && [ -z "$BUILD_KSTARS_EMERGE" ] && [ -z "$BUILDING_KSTARS" ]
 then

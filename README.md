@@ -14,9 +14,14 @@ Prerequisites for the whole process are:
 
 ### QT
 
-[QT.io](www.qt.io/download-open-source/).  Either install this in ~/Qt/ (in
-your home dir), or install it via brew - this is NOT automated because it takes
-hours.
+[QT.io](www.qt.io/download-open-source/).  Either install this in `~/Qt/`,
+`~/Qt5.7.0` (both in your home dir), or install it via brew - this is 
+NOT automated because it takes hours.  Note that the install from qt takes
+quite a long time, and the installer appears to become unresponsive before
+it starts copying stuff.  I used the offline file, but you can use either.  
+The install selections I chose:
+![qt install options](/images/qt-install-options.png "qt install options")
+
 If your computer is faster than your internet connection then just build it:
 
 `brew install qt5 --with-dbus`
