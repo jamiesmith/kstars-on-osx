@@ -3,6 +3,43 @@
 This has a couple of my enhancements (mostly lazy commands) added to the nice work that rlancaste & Gonzothegreat have done
 on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=564#11793
 
+Note that there is an effort to automate this - see the `build-kstars.sh`.
+
+Prerequisites for the whole process are:
+
+### Installing Xcode and accept the license agreements
+
+[Apple Developer Site](developer.apple.com/download/) or from the 
+[app store](https://itunes.apple.com/us/app/xcode/id497799835)
+
+### QT
+
+[QT.io](www.qt.io/download-open-source/).  Either install this in ~/Qt/ (in
+your home dir), or install it via brew - this is NOT automated because it takes
+hours.
+If your computer is faster than your internet connection then just build it:
+
+`brew install qt5 --with-dbus`
+
+### Install Homebrew
+
+`/usr/bin/ruby -e "$(curl -fsSL raw.githubusercontent.com/Homebrew/install/master/install)"`
+
+### Download the scripts (this stuff)
+
+Downloading and run the build script.
+```console
+mkdir ~/Projects
+cd ~/Projects/
+git clone github.com/jamiesmith/kstars-on-osx.git
+cd ~/Projects/kstars-on-osx
+. build-kstars.sh -3aei
+```
+
+# Manual Steps
+
+Hopefully these stay up-to-date.
+
 1. Make sure you have home-brew installed [brew.sh](http://brew.sh)
 2. Make sure that you have core depndencies git, make, and cmake installed.
 

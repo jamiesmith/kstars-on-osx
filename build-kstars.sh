@@ -20,22 +20,25 @@ function dieUsage
 {
     # I really wish that getopt supported the long args.
     #
+	echo ""
     echo $*
+	echo ""
+
 cat <<EOF
-options:
-    -3 Also build third party stuff
-    -a Announce stuff as you go
-    -c Build kstars via cmake (ONLY one of -c or -e can be used)
-    -d Dry run only (just show what you are going to do)
-    -e Build kstars via emerge
-    -i Build libindi
-    -s Skip brew (only use this if you know you already have them)
+	options:
+	    -3 Also build third party stuff
+	    -a Announce stuff as you go
+	    -c Build kstars via cmake (ONLY one of -c or -e can be used)
+	    -d Dry run only (just show what you are going to do)
+	    -e Build kstars via emerge
+	    -i Build libindi
+	    -s Skip brew (only use this if you know you already have them)
     
-So, to build a complete emerge you would do:
-    $0 -3aei
+	To build a complete emerge you would do:
+	    $0 -3aei
     
-So, to build a complete cmake build you would do:
-    $0 -3aci    
+	To build a complete cmake build you would do:
+	    $0 -3aci    
 EOF
 exit 9
 }
@@ -207,17 +210,18 @@ function scriptDied
     announce "Something failed"
 }
 
+function checkForQT
+{
+	if [ -z "$Qt5_DIR" ]
+	then
+		dieUsage "Cannot proceed, qt not installed - see the readme."
+	fi
+}
+
 function installBrewDependencies
 {
     announce "Installing brew dependencies"
 
-    if [ ! -d ~/Qt/5.7/clang_64/bin ]
-    then
-        echo "Checking brew for qt5, because I didn't find it"
-        time brewInstallIfNeeded qt5 --with-dbus
-    else    
-        echo "qt5 found in home dir"
-    fi
 
     brewInstallIfNeeded cmake
     brewInstallIfNeeded wget
@@ -243,6 +247,8 @@ function installBrewDependencies
     brewInstallIfNeeded astrometry-net
     brewInstallIfNeeded xplanet
     brewInstallIfNeeded gsl
+	brewInstallIfNeeded python
+	pip install pyfits
 
     brewInstallIfNeeded jamiesmith/astronomy/libnova
     brewInstallIfNeeded jamiesmith/astronomy/gsc
@@ -383,6 +389,11 @@ function buildKstars
 ##########################################
 # This is where the bulk of it starts!
 #
+
+# Before anything, check for QT:
+#
+checkForQT
+
 while getopts "3acdeis" option
 do
     case $option in
