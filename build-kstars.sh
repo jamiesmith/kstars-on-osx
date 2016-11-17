@@ -248,6 +248,7 @@ function installBrewDependencies
     brewInstallIfNeeded xplanet
     brewInstallIfNeeded gsl
 	brewInstallIfNeeded python
+    brewInstallIfNeeded wcslib
 	pip install pyfits
 
     brewInstallIfNeeded jamiesmith/astronomy/libnova
@@ -525,16 +526,30 @@ then
     # cp -f  $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
 
     ##########################################
-    statusBanner "Set up some xplanet pictures - this is failing..."
+    statusBanner "Set up some xplanet pictures..."
 
-    # cd ${INDI_ROOT}
-    # curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz
-    # tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
-    # rm maps_alien-1.0.tar.gz
+    # this sometimes fails, let's not abort the script if it does
     #
-    # mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
-    # cp -rf $(brew --prefix xplanet)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
-    # cp -rf $(brew --prefix xplanet)/share ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
+    cd ${INDI_ROOT}
+    rm -f maps_alien-1.0.tar.gz
+
+    set +e
+    curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz
+    dl_res=$?
+    set -e
+    
+    if [ $dl_res -ne 0 ]
+    then
+        announce "Xplanet map download failed, skipping copies"
+    else
+        tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
+        rm maps_alien-1.0.tar.gz
+        xplanet_dir=${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
+
+        mkdir -p ${xplanet_dir}
+        cp -rf $(brew --prefix xplanet)/bin ${xplanet_dir}
+        cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
+    fi
 
     # ##########################################
     # announce "Fixing the dir names and such"

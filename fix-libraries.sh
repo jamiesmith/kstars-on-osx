@@ -62,12 +62,17 @@ function processTarget
 
         # the pathToFrameworks should end in a slash
         #
-		if [[ "$entry" == @rpath* ]]
-		then
-			newname="@rpath/${pathToFrameworks}Frameworks/${baseEntry}"
-		else
-			newname="@executable_path/${pathToFrameworks}Frameworks/${baseEntry}"
-		fi
+        # if [[ "$entry" == @rpath* ]]
+        # then
+        #     newname="@rpath/${pathToFrameworks}Frameworks/${baseEntry}"
+        # else
+        #     newname="@executable_path/${pathToFrameworks}Frameworks/${baseEntry}"
+        # fi
+        
+        # Now I think that the @rpaths need to change to @executable_path
+        #
+		newname="@executable_path/${pathToFrameworks}Frameworks/${baseEntry}"
+		
         echo "     change $entry -> $newname"
         # echo "          install_name_tool -change \\"
         # echo "              $entry \\"
