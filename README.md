@@ -24,7 +24,7 @@ NOT automated because it takes hours.  Note that the install from qt takes
 quite a long time, and the installer appears to become unresponsive before
 it starts copying stuff.  I used the offline file, but you can use either.  
 The install selections I chose:
-   ![qt install options](/images/qt-install-options.png "qt install options" 400x381)
+   ![qt install options](/images/qt-install-options.png "qt install options"){:height="400px" width="381px"}
 
 If your computer is faster than your internet connection then just build it:
 
