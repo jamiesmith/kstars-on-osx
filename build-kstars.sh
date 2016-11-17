@@ -432,14 +432,10 @@ then
     dieUsage "Only one KSTARS build type allowed" 
 fi
 
-if [ -d "${KSTARS_DIR}" ]
+if [ -d "${KSTARS_DIR}" ] || [ -d "${INDI_DIR}" ]
 then
-    dieUsage "OK, I really need to start from scratch, please remove the ${KSTARS_DIR}"    
-fi
-
-if [ -d "${INDI_DIR}" ]
-then
-    dieUsage "OK, I really need to start from scratch, please remove the ${INDI_DIR}"    
+    dieUsage "This script really need to start \
+        from scratch, please remove the ${KSTARS_DIR} and ${INDI_DIR}"    
 fi
 
 echo ""
@@ -503,7 +499,7 @@ then
     #
     if [ -d "${KSTARS_DIR}/share/kstars" ]
     then
-        typeset src_dir="$HOME/usr/local/share/kstars"
+        typeset src_dir="${KSTARS_DIR}/share/kstars"
         echo "copying from $src_dir"
         cp -rf $src_dir/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
     elif [ -d "$HOME/usr/local/share/kstars" ]
