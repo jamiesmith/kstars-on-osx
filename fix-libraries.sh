@@ -14,6 +14,7 @@ FRAMEWORKS_DIR="${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Frameworks"
 INDI_DIR="${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi"
 DRY_RUN_ONLY=""
 
+IGNORED_OTOOL_OUTPUT="/Qt|qt5|${KSTARS_DIR}|/usr/lib/|/System/"
 mkdir -p "${FRAMEWORKS_DIR}"
 
 function dieUsage
@@ -45,7 +46,7 @@ function processTarget
 {
 	target=$1
 
-	entries=$(otool -L $target | sed '1d' | awk '{print $1}' | egrep -v "qt5|${KSTARS_DIR}|^/usr/lib/|^/System/|@rpath")
+	entries=$(otool -L $target | sed '1d' | awk '{print $1}' | egrep -v "$IGNORED_OTOOL_OUTPUT")
     echo "Processing $target"
     
     relativeRoot="${KSTARS_DIR}/Applications/KDE/kstars.app/Contents"
@@ -80,7 +81,7 @@ function processTarget
         #
 		newname="@executable_path/${pathToFrameworks}${baseEntry}"
 		
-        echo "     change $entry -> $newname"
+        echo "    change $entry -> $newname"
         # echo "          install_name_tool -change \\"
         # echo "              $entry \\"
         # echo "              $newname \\"
@@ -94,17 +95,17 @@ function processTarget
                 $target
 
         else
-            echo "    install_name_tool -change \\"
-            echo "        $entry \\"
-            echo "        $newname \\"
-            echo "        $target"
+            echo "        install_name_tool -change \\"
+            echo "            $entry \\"
+            echo "            $newname \\"
+            echo "            $target"
         fi            
 
 		addFileToCopy "$entry"
 	done
     echo ""
     echo "   otool for $target after"
-    otool -L $target | grep executable_path| awk '{printf("\t%s\n", $0)}'
+    otool -L $target | egrep -v "$IGNORED_OTOOL_OUTPUT" | awk '{printf("\t%s\n", $0)}'
     
 }
 
@@ -132,6 +133,15 @@ function copyFilesToFrameworks
             # Seem to need this for the macqtdeploy
             #
             [ -z "${DRY_RUN_ONLY}" ] && chmod +w "${FRAMEWORKS_DIR}/${base}"
+
+
+        	echo "HAVE TO COPY [$base] from [${filename}] to Indi"
+            [ -z "${DRY_RUN_ONLY}" ] && cp "${filename}" "${INDI_DIR}"
+            
+            # Seem to need this for the macqtdeploy
+            #
+            [ -z "${DRY_RUN_ONLY}" ] && chmod +w "${INDI_DIR}/${base}"			
+			
         else
             echo ""
         	echo "Skipping Copy: $libFile already in Frameworks "
@@ -155,12 +165,13 @@ shift $((${OPTIND} - 1))
 
 cd ${KSTARS_DIR}
 
-# statusBanner "Processing kstars executable"
-# processTarget "${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kstars"
+statusBanner "Processing kstars executable"
+processTarget "${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kstars"
 
 # Also cheat, and add libindidriver.1.dylib to the list
 #
 addFileToCopy "libindidriver.1.dylib"
+addFileToCopy "libindi.1.dylib"
 
 statusBanner "Copying first round of files"
 copyFilesToFrameworks
@@ -171,7 +182,6 @@ statusBanner "Processing libindidriver library"
 #
 processTarget ${FRAMEWORKS_DIR}/libindidriver.1.dylib
 
-exit
 statusBanner "Processing all of the files in the indi dir"
 
 # Then do all of the files in the indi Dir
