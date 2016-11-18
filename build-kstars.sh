@@ -247,9 +247,9 @@ function installBrewDependencies
     brewInstallIfNeeded astrometry-net
     brewInstallIfNeeded xplanet
     brewInstallIfNeeded gsl
-	brewInstallIfNeeded python
-    brewInstallIfNeeded wcslib
-	pip install pyfits
+    # brewInstallIfNeeded python
+    # brewInstallIfNeeded wcslib
+    # pip install pyfits
 
     brewInstallIfNeeded jamiesmith/astronomy/libnova
     brewInstallIfNeeded jamiesmith/astronomy/gsc
@@ -399,27 +399,27 @@ while getopts "3acdeis" option
 do
     case $option in
         3)
-            BUILD_3RDPARTY="yep"
+            BUILD_3RDPARTY="Yep"
             ;;
         a)
-            ANNOUNCE="yep"
+            ANNOUNCE="Yep"
             ;;
         c)
-            BUILD_KSTARS_CMAKE="yep"
-            BUILDING_KSTARS="yep"
+            BUILD_KSTARS_CMAKE="Yep"
+            BUILDING_KSTARS="Yep"
             ;;
         d)
-            DRY_RUN_ONLY="yep"
+            DRY_RUN_ONLY="Yep"
             ;;
         e)
-            BUILD_KSTARS_EMERGE="yep"
-            BUILDING_KSTARS="yep"
+            BUILD_KSTARS_EMERGE="Yep"
+            BUILDING_KSTARS="Yep"
             ;;
         i)
-            BUILD_INDI="yep"
+            BUILD_INDI="Yep"
             ;;
         s)
-            SKIP_BREW="yep"
+            SKIP_BREW="Yep"
             ;;
         *)
             dieUsage "Unsupported option $option"
@@ -435,7 +435,7 @@ fi
 
 if [ -d "${KSTARS_DIR}" ] || [ -d "${INDI_DIR}" ]
 then
-    dieUsage "This script really need to start \
+    dieUsage "This script really needs to start \
         from scratch, please remove the ${KSTARS_DIR} and ${INDI_DIR}"    
 fi
 
@@ -450,7 +450,7 @@ echo "SKIP_BREW           = ${SKIP_BREW:-Nope}"
 
 if [ -z "$BUILD_KSTARS_CMAKE" ] && [ -z "$BUILD_KSTARS_EMERGE" ] && [ -z "$BUILDING_KSTARS" ]
 then
-    DRY_RUN_ONLY="yep"
+    DRY_RUN_ONLY="Yep"
 fi
 
 [ -n "${DRY_RUN_ONLY}" ] && exitEarly "Dry Run Only"
@@ -552,18 +552,25 @@ then
     fi
 
     # ##########################################
-    # announce "Fixing the dir names and such"
-    # ${DIR}/fix-libraries.sh
+    announce "Tarring up kstars"
+    cd $INDI_ROOT
+    rm -f kstars-stuff.tgz
+    tar czf kstars-stuff.tgz kstars-stuff
+    ls -l kstars-stuff.tgz
+    
+    announce "Fixing the dir names and such"
+    ${DIR}/fix-libraries.sh
     #
 fi
 
 if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
+    set +e
     echo "no op right now"
     # ##########################################
-    # announce "Building DMG"
-    # cd ${KSTARS_DIR}
-    # ${Qt5_DIR}/bin/macdeployqt Applications/KDE/kstars.app -dmg
+    announce "Building DMG"
+    cd ${KSTARS_DIR}/Applications/KDE
+    macdeployqt kstars.app -dmg
 fi
 
 # Finally, remove the trap

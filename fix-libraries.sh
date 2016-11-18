@@ -45,16 +45,23 @@ function processTarget
 {
 	target=$1
 
-	entries=$(otool -L $target | sed '1d' | awk '{print $1}' | egrep -v "qt5|${KSTARS_DIR}|^/usr/lib/|^/System/")
+	entries=$(otool -L $target | sed '1d' | awk '{print $1}' | egrep -v "qt5|${KSTARS_DIR}|^/usr/lib/|^/System/|@rpath")
     echo "Processing $target"
     
     relativeRoot="${KSTARS_DIR}/Applications/KDE/kstars.app/Contents"
     
     pathDiff=${target#${relativeRoot}*}
+
     # Need to calculate the path to the frameworks dir
     #
-    pathToFrameworks=$(echo $(dirname "${pathDiff}") | awk -F/ '{for (i = 1; i < NF ; i++) {printf("../")} }')
-    
+    if [[ "$pathDiff" == /Frameworks/* ]]
+    then
+        pathToFrameworks=""
+    else        
+        pathToFrameworks=$(echo $(dirname "${pathDiff}") | awk -F/ '{for (i = 1; i < NF ; i++) {printf("../")} }')
+        pathToFrameworks="${pathToFrameworks}Frameworks/"
+    fi
+        
 	for entry in $entries
 	do
 		baseEntry=$(basename $entry)
@@ -71,7 +78,7 @@ function processTarget
         
         # Now I think that the @rpaths need to change to @executable_path
         #
-		newname="@executable_path/${pathToFrameworks}Frameworks/${baseEntry}"
+		newname="@executable_path/${pathToFrameworks}${baseEntry}"
 		
         echo "     change $entry -> $newname"
         # echo "          install_name_tool -change \\"
@@ -85,6 +92,7 @@ function processTarget
                 $entry \
                 $newname \
                 $target
+
         else
             echo "    install_name_tool -change \\"
             echo "        $entry \\"
@@ -94,6 +102,10 @@ function processTarget
 
 		addFileToCopy "$entry"
 	done
+    echo ""
+    echo "   otool for $target after"
+    otool -L $target | grep executable_path| awk '{printf("\t%s\n", $0)}'
+    
 }
 
 function copyFilesToFrameworks
@@ -114,13 +126,14 @@ function copyFilesToFrameworks
 
         if [ ! -f "${FRAMEWORKS_DIR}/${base}" ]
         then
-        	echo "HAVE TO COPY [$libFile] from [${filename}] to Frameworks"
+        	echo "HAVE TO COPY [$base] from [${filename}] to Frameworks"
             [ -z "${DRY_RUN_ONLY}" ] && cp "${filename}" "${FRAMEWORKS_DIR}"
             
             # Seem to need this for the macqtdeploy
             #
             [ -z "${DRY_RUN_ONLY}" ] && chmod +w "${FRAMEWORKS_DIR}/${base}"
         else
+            echo ""
         	echo "Skipping Copy: $libFile already in Frameworks "
         fi
     done
@@ -142,8 +155,8 @@ shift $((${OPTIND} - 1))
 
 cd ${KSTARS_DIR}
 
-statusBanner "Processing kstars executable"
-processTarget "${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kstars"
+# statusBanner "Processing kstars executable"
+# processTarget "${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kstars"
 
 # Also cheat, and add libindidriver.1.dylib to the list
 #
@@ -154,10 +167,11 @@ copyFilesToFrameworks
 
 statusBanner "Processing libindidriver library"
 
-# Also need to process libindidriver.1.dylib
+# need to process libindidriver.1.dylib
 #
 processTarget ${FRAMEWORKS_DIR}/libindidriver.1.dylib
 
+exit
 statusBanner "Processing all of the files in the indi dir"
 
 # Then do all of the files in the indi Dir
@@ -172,6 +186,8 @@ do
         statusBanner "Processing indi file $base"
         processTarget $file
     else
+        echo ""
+        echo ""
         echo "Skipping $base, not executable"
     fi
 done
