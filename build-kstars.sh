@@ -566,11 +566,12 @@ fi
 if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
     set +e
-    echo "no op right now"
+
     # ##########################################
     announce "Building DMG"
     cd ${KSTARS_DIR}/Applications/KDE
     macdeployqt kstars.app -dmg
+	ls -l kstars.dmg
 fi
 
 # Finally, remove the trap
