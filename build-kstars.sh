@@ -623,7 +623,7 @@ then
     announce "Tarring up kstars"
     cd $INDI_ROOT
     rm -f kstars-stuff.tgz
-    tar czf kstars-stuff.tgz kstars-stuff
+    tar czf kstars-stuff.tgz ${USING_KSTARS_DIR}
     ls -l kstars-stuff.tgz
     
     announce "Fixing the dir names and such"
