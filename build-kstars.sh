@@ -572,7 +572,7 @@ then
         echo "copying from $src_dir"
         cp -rf $src_dir/* ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
     else
-        announce "Cannot find kstarts data"
+        announce "Cannot find k stars data"
     fi
 
     ##########################################
@@ -619,8 +619,8 @@ then
         cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
     fi
 
-    # ##########################################
-    announce "Tarring up kstars"
+    ###########################################
+    announce "Tarring up k stars"
     cd $INDI_ROOT
     rm -f kstars-stuff.tgz
     tar czf kstars-stuff.tgz ${USING_KSTARS_DIR}
@@ -635,7 +635,7 @@ if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
     set +e
 
-    # ##########################################
+    ###########################################
     announce "Building DMG"
     cd ${KSTARS_EMERGE_DIR}/Applications/KDE
     macdeployqt kstars.app -dmg
