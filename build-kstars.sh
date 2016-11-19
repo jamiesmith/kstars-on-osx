@@ -15,6 +15,8 @@ BUILD_KSTARS_CMAKE=""
 BUILD_KSTARS_EMERGE=""
 BUILDING_KSTARS=""
 DRY_RUN_ONLY=""
+FORCE_RUN=""
+USING_KSTARS_DIR=""
 
 function dieUsage
 {
@@ -31,6 +33,7 @@ cat <<EOF
 	    -c Build kstars via cmake (ONLY one of -c or -e can be used)
 	    -d Dry run only (just show what you are going to do)
 	    -e Build kstars via emerge
+	    -f Force build even if there are script updates
 	    -i Build libindi
 	    -s Skip brew (only use this if you know you already have them)
     
@@ -263,6 +266,8 @@ function installBrewDependencies
 
 function buildLibIndi
 {
+	mkdir -p ${INDI_DIR}
+	
     ##########################################
     # Indi
     announce "building lib indi stuff"
@@ -311,6 +316,8 @@ function buildLibIndi
 
 function emergeKstars
 {
+	mkdir -p ${KSTARS_EMERGE_DIR}
+	
     ### Let's try emerge.
     announce "Running the emerge!"
 
@@ -328,10 +335,10 @@ EOF
         echo "looks like gitconfig is done"
     fi
 
-    export KSTARS_DIR=${INDI_ROOT}/kstars-stuff
-    mkdir -p ${KSTARS_DIR}/
+    export KSTARS_EMERGE_DIR=${INDI_ROOT}/kstars-stuff
+    mkdir -p ${KSTARS_EMERGE_DIR}/
 
-    cd ${KSTARS_DIR}/
+    cd ${KSTARS_EMERGE_DIR}/
 
     if [ ! -d emerge ]
     then
@@ -340,7 +347,7 @@ EOF
         echo "Emerge already exists, checking for updates"
         cd emerge
         git pull
-        cd ${KSTARS_DIR}/    
+        cd ${KSTARS_EMERGE_DIR}/    
     fi
 
     mkdir -p etc
@@ -353,8 +360,10 @@ EOF
 
 function buildKstars
 {
+	mkdir -p ${KSTARS_EMERGE_DIR}
+	
     announce "Building k stars via c make"
-    cd ${KSTARS_DIR}/
+    cd ${KSTARS_CMAKE_DIR}/
 
     git clone git://anongit.kde.org/kstars.git
 
@@ -371,8 +380,8 @@ function buildKstars
         Contents/MacOS/kstars \
         Contents/Info.plist
     do
-        relroot_app=${KSTARS_DIR}/Applications/KDE/kstars.app
-        relroot_build=${KSTARS_DIR}/kstars-build/kstars/kstars.app
+        relroot_app=${KSTARS_CMAKE_DIR}/Applications/KDE/kstars.app
+        relroot_build=${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app
         if [ ! -f ${relroot_app}/${path} ]
         then
             echo ${relroot_app}/${path} is missing
@@ -388,9 +397,42 @@ function buildKstars
     # ln -s ~/usr/local/share/kstars/* ~/Library/Application\ Support/kstars/
     #
     statusBanner "The indi drivers"
-    mkdir -p ${KSTARS_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/bin/indi*    ${KSTARS_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/share/indi/* ${KSTARS_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
+    mkdir -p ${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
+    cp -f /usr/local/bin/indi*    ${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
+    cp -f /usr/local/share/indi/* ${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
+}
+
+function checkUpToDate
+{
+	
+	localVersion=$(git log --pretty=%H ...refs/heads/master^ | head -n 1)
+	remoteVersion=$(git ls-remote origin -h refs/heads/master | cut -f1)
+	
+	echo ""
+	echo ""
+	if [ "${localVersion}" != "${remoteVersion}" ]
+	then
+
+		if [ -n "$FORCE_RUN" ]
+		then
+			announce "Script is out of date"
+			echo ""
+			echo "override with a -f"
+			echo ""
+			echo "There is a newer version of the script available, please update - run"
+			echo "cd $DIR ; git pull"
+
+			echo "Aborting run"
+			exit 9
+		else
+			echo "WARNING: Script is out of date"
+			
+			echo "Forcing run"
+		fi
+	else
+		echo "Script is up-to-date"
+		echo ""
+	fi	
 }
 
 ##########################################
@@ -400,6 +442,8 @@ function buildKstars
 # Before anything, check for QT:
 #
 checkForQT
+
+checkUpToDate
 
 while getopts "3acdeis" option
 do
@@ -420,6 +464,9 @@ do
         e)
             BUILD_KSTARS_EMERGE="Yep"
             BUILDING_KSTARS="Yep"
+            ;;
+        f)
+            FORCE_RUN="Yep"
             ;;
         i)
             BUILD_INDI="Yep"
@@ -456,10 +503,19 @@ then
     dieUsage "Only one KSTARS build type allowed" 
 fi
 
-if [ -d "${KSTARS_DIR}" ] || [ -d "${INDI_DIR}" ]
+if [ -n "${BUILD_INDI}" ] && [ -d "${INDI_DIR}" ]
 then
-    dieUsage "This script really needs to start \
-        from scratch, please remove the ${KSTARS_DIR} and ${INDI_DIR}"    
+	dieUsage "${INDI_DIR} already exists"
+fi
+
+if [ -n "${BUILD_KSTARS_EMERGE}" ] && [ -d "${KSTARS_EMERGE_DIR}" ]
+then
+	dieUsage "${KSTARS_EMERGE_DIR} already exists"
+fi
+
+if [ -n "${BUILD_KSTARS_CMAKE}" ] && [ -d "${KSTARS_CMAKE_DIR}" ]
+then
+	dieUsage "${KSTARS_CMAKE_DIR} already exists"
 fi
 
 if [ -z "$BUILD_KSTARS_CMAKE" ] && [ -z "$BUILD_KSTARS_EMERGE" ] && [ -z "$BUILD_INDI" ]
@@ -474,8 +530,6 @@ fi
 set -e
 trap scriptDied EXIT
 
-mkdir -p ${INDI_DIR}
-mkdir -p ${KSTARS_DIR}
 
 if [ -n "${BUILD_INDI}" ]
 then
@@ -486,9 +540,12 @@ fi
 
 if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
+	USING_KSTARS_DIR="${KSTARS_EMERGE_DIR}"
     emergeKstars
+	
 elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
+	USING_KSTARS_DIR="${KSTARS_CMAKE_DIR}"
     buildKstars
 else
     announce "Not building k stars"
@@ -501,37 +558,40 @@ then
 
     ##########################################
     statusBanner "The Data Directory"
-    mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
+    mkdir -p ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
 
     # Seems that emerge and cmake put these in different places
     #
-    if [ -d "${KSTARS_DIR}/share/kstars" ]
+    if [ -d "${KSTARS_EMERGE_DIR}/share/kstars" ]
     then
-        typeset src_dir="${KSTARS_DIR}/share/kstars"
+        typeset src_dir="${KSTARS_EMERGE_DIR}/share/kstars"
         echo "copying from $src_dir"
-        cp -rf $src_dir/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
+        cp -rf $src_dir/* ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
     elif [ -d "$HOME/usr/local/share/kstars" ]
     then
         typeset src_dir="$HOME/usr/local/share/kstars"
         echo "copying from $src_dir"
-        cp -rf $src_dir/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
+        cp -rf $src_dir/* ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
     else
         announce "Cannot find kstarts data"
     fi
 
     ##########################################
     statusBanner "The indi drivers"
-    mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/bin/indi*    ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-    cp -f /usr/local/share/indi/* ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+    mkdir -p ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
+    cp -f /usr/local/bin/indi*    ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+    cp -f /usr/local/share/indi/* ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
 
     ##########################################
     # statusBanner "The astrometry files"
-    # mkdir -p ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry
-    # cp -Rf $(brew --prefix astrometry-net)/bin ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-    # cp -Rf $(brew --prefix astrometry-net)/lib ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-    # cp -f  $(brew --prefix astrometry-net)/etc/astrometry.cfg ${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
-
+	# if [ -n "${USING_KSTARS_DIR}" ]
+	# then
+	# 	sourceDir="$(brew --prefix astrometry-net)"
+	#     mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry
+	#     cp -Rf ${sourceDir}/bin ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+	#     cp -Rf ${sourceDir}/lib ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+	#     cp -f  ${sourceDir}/etc/astrometry.cfg${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
+	# fi
     ##########################################
     statusBanner "Set up some xplanet pictures..."
 
@@ -551,7 +611,7 @@ then
     else
         tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
         rm maps_alien-1.0.tar.gz
-        xplanet_dir=${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
+        xplanet_dir=${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
 
         mkdir -p ${xplanet_dir}
         cp -rf $(brew --prefix xplanet)/bin ${xplanet_dir}
@@ -576,7 +636,7 @@ then
 
     # ##########################################
     announce "Building DMG"
-    cd ${KSTARS_DIR}/Applications/KDE
+    cd ${KSTARS_EMERGE_DIR}/Applications/KDE
     macdeployqt kstars.app -dmg
 	ls -l kstars.dmg
 fi
