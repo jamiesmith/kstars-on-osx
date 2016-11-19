@@ -371,23 +371,26 @@ function buildKstars
     make
     make install
     
-    # A few files seem to be missing
-    #
+    relroot_app=${KSTARS_CMAKE_DIR}/Applications/KDE/kstars.app
+    relroot_build=${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app
+
+	mkdir -p ${relroot_app}/Contents/Resources
+	
     for path in Contents/Resources/KSTARS_APP_SRCS.icns \
         Contents/MacOS/kstars \
         Contents/Info.plist
     do
-        relroot_app=${KSTARS_CMAKE_DIR}/Applications/KDE/kstars.app
-        relroot_build=${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app
         if [ ! -f ${relroot_app}/${path} ]
         then
             echo ${relroot_app}/${path} is missing
-            cp ${relroot_build}/${path}  ${relroot_app}/${path} 
+			echo "BUILD: ${relroot_build}/${path}"
+			echo "APP:   ${relroot_app}/${path}"
+            cp ${relroot_build}/${path}  ${relroot_app}/${path}
         else
-            echo ${relroot_app}/${path} already there            
-        fi        
+            echo ${relroot_app}/${path} already there
+        fi
     done
-
+	
     # This way we have to copy some stuff, too
     # I honestly don't know if we should do this or not.
     #
@@ -621,20 +624,19 @@ then
 
     ###########################################
     announce "Tarring up k stars"
+	tarname=$(basename ${USING_KSTARS_DIR})
     cd $INDI_ROOT
-    rm -f kstars-stuff.tgz
-    tar czf kstars-stuff.tgz ${USING_KSTARS_DIR}
-    ls -l kstars-stuff.tgz
-    
-    announce "Fixing the dir names and such"
-    ${DIR}/fix-libraries.sh
-    #
+    rm -f ${tarname}.tgz
+    tar czf ${tarname}.tgz ${tarname}
+    ls -l ${tarname}.tgz
 fi
 
 if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
     set +e
 
+    announce "Fixing the dir names and such"
+    ${DIR}/fix-libraries.sh
     ###########################################
     announce "Building DMG"
     cd ${KSTARS_EMERGE_DIR}/Applications/KDE

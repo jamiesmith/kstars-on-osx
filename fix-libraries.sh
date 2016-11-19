@@ -10,11 +10,11 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "${DIR}/build-env.sh" > /dev/null
 
 FILES_TO_COPY=()
-FRAMEWORKS_DIR="${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Frameworks"
-INDI_DIR="${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi"
+FRAMEWORKS_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Frameworks"
+INDI_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi"
 DRY_RUN_ONLY=""
 
-IGNORED_OTOOL_OUTPUT="/Qt|qt5|${KSTARS_DIR}|/usr/lib/|/System/"
+IGNORED_OTOOL_OUTPUT="/Qt|qt5|${KSTARS_EMERGE_DIR}|/usr/lib/|/System/"
 mkdir -p "${FRAMEWORKS_DIR}"
 
 function dieUsage
@@ -49,7 +49,7 @@ function processTarget
 	entries=$(otool -L $target | sed '1d' | awk '{print $1}' | egrep -v "$IGNORED_OTOOL_OUTPUT")
     echo "Processing $target"
     
-    relativeRoot="${KSTARS_DIR}/Applications/KDE/kstars.app/Contents"
+    relativeRoot="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents"
     
     pathDiff=${target#${relativeRoot}*}
 
@@ -163,10 +163,10 @@ do
 done
 shift $((${OPTIND} - 1))
 
-cd ${KSTARS_DIR}
+cd ${KSTARS_EMERGE_DIR}
 
 statusBanner "Processing kstars executable"
-processTarget "${KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kstars"
+processTarget "${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kstars"
 
 # Also cheat, and add libindidriver.1.dylib to the list
 #
