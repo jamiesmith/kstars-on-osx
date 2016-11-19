@@ -26,10 +26,6 @@ it starts copying stuff.  I used the offline file, but you can use either.
 The install selections I chose:
    ![qt install options](/images/qt-install-options.png "qt install options")
 
-If your computer is faster than your internet connection then just build it:
-
-`brew install qt5 --with-dbus`
-
 ### Download the scripts (this stuff)
 
 Downloading and run the build script.  
