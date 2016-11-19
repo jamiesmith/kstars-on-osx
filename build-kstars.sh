@@ -403,8 +403,7 @@ function buildKstars
 }
 
 function checkUpToDate
-{
-	
+{	
 	localVersion=$(git log --pretty=%H ...refs/heads/master^ | head -n 1)
 	remoteVersion=$(git ls-remote origin -h refs/heads/master | cut -f1)
 	
