@@ -592,7 +592,7 @@ then
 	#     mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry
 	#     cp -Rf ${sourceDir}/bin ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
 	#     cp -Rf ${sourceDir}/lib ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-	#     cp -f  ${sourceDir}/etc/astrometry.cfg${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
+	#     cp -f  ${sourceDir}/etc/astrometry.cfg ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
 	# fi
     ##########################################
     statusBanner "Set up some xplanet pictures..."
