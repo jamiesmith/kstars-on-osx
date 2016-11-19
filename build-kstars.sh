@@ -335,9 +335,6 @@ EOF
         echo "looks like gitconfig is done"
     fi
 
-    export KSTARS_EMERGE_DIR=${INDI_ROOT}/kstars-stuff
-    mkdir -p ${KSTARS_EMERGE_DIR}/
-
     cd ${KSTARS_EMERGE_DIR}/
 
     if [ ! -d emerge ]
