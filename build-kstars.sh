@@ -589,10 +589,12 @@ then
 	if [ -n "${USING_KSTARS_DIR}" ]
 	then
 		sourceDir="$(brew --prefix astrometry-net)"
-	    mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry
-	    cp -Rf ${sourceDir}/bin ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-	    cp -Rf ${sourceDir}/lib ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-	    cp -f  ${sourceDir}/etc/astrometry.cfg ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
+		targetDir="${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry"
+	    mkdir -p ${targetDir}
+		
+	    cp -Rf ${sourceDir}/bin ${targetDir}/
+	    cp -Rf ${sourceDir}/lib ${targetDir}/
+	    cp -f  ${sourceDir}/etc/astrometry.cfg ${targetDir}/bin/
 	fi
     ##########################################
     statusBanner "Set up some xplanet pictures..."
