@@ -360,7 +360,7 @@ EOF
 
 function buildKstars
 {
-	mkdir -p ${KSTARS_EMERGE_DIR}
+	mkdir -p ${KSTARS_CMAKE_DIR}
 	
     announce "Building k stars via c make"
     cd ${KSTARS_CMAKE_DIR}/
