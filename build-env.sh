@@ -15,7 +15,6 @@ export INDI_ROOT=~/IndiRoot
 export INDI_DIR=${INDI_ROOT}/indi-stuff
 export KSTARS_EMERGE_DIR=${INDI_ROOT}/kstars-emerge
 export KSTARS_CMAKE_DIR=${INDI_ROOT}/kstars-cmake
-export USING_KSTARS_DIR=""
 export GSC_DIR=${INDI_ROOT}/gsc
 export MACOSX_DEPLOYMENT_TARGET=10.10
 

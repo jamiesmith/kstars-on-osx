@@ -405,16 +405,17 @@ function buildKstars
 function checkUpToDate
 {	
 	cd "$DIR"
+
 	localVersion=$(git log --pretty=%H ...refs/heads/master^ | head -n 1)
 	remoteVersion=$(git ls-remote origin -h refs/heads/master | cut -f1)
 	cd - > /dev/null
-	
 	echo ""
 	echo ""
+
 	if [ "${localVersion}" != "${remoteVersion}" ]
 	then
 
-		if [ -n "$FORCE_RUN" ]
+		if [ -z "$FORCE_RUN" ]
 		then
 			announce "Script is out of date"
 			echo ""
