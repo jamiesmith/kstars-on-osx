@@ -585,15 +585,15 @@ then
     cp -f /usr/local/share/indi/* ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
 
     ##########################################
-    # statusBanner "The astrometry files"
-	# if [ -n "${USING_KSTARS_DIR}" ]
-	# then
-	# 	sourceDir="$(brew --prefix astrometry-net)"
-	#     mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry
-	#     cp -Rf ${sourceDir}/bin ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-	#     cp -Rf ${sourceDir}/lib ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
-	#     cp -f  ${sourceDir}/etc/astrometry.cfg ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
-	# fi
+    statusBanner "The astrometry files"
+	if [ -n "${USING_KSTARS_DIR}" ]
+	then
+		sourceDir="$(brew --prefix astrometry-net)"
+	    mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry
+	    cp -Rf ${sourceDir}/bin ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+	    cp -Rf ${sourceDir}/lib ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/
+	    cp -f  ${sourceDir}/etc/astrometry.cfg ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin/
+	fi
     ##########################################
     statusBanner "Set up some xplanet pictures..."
 
