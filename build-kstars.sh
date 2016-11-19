@@ -69,6 +69,9 @@ function patchThirdPartyCmake
 
     statusBanner "Patching $CMAKE"
 
+    echo '' >> ${CMAKE}
+    echo '' >> ${CMAKE}
+    echo '' >> ${CMAKE}
     echo '### AUTO_PATCHED' >> ${CMAKE}
     echo 'message("Adding GPhoto Driver")' >> ${CMAKE}
     echo 'if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")' >> ${CMAKE}
@@ -79,6 +82,9 @@ function patchThirdPartyCmake
     echo 'endif(WITH_GPHOTO)' >> ${CMAKE}
     echo '' >> ${CMAKE}
     echo 'endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")' >> ${CMAKE}
+	
+    echo '' >> ${CMAKE}
+    echo '' >> ${CMAKE}
 }
 
 function patchEqmodCmake
