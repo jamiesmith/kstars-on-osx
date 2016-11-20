@@ -17,6 +17,58 @@ BUILDING_KSTARS=""
 DRY_RUN_ONLY=""
 FORCE_RUN=""
 USING_KSTARS_DIR=""
+FORCE_BREW_QT=""
+
+function processOptions
+{
+	while getopts "3acdeiqs" option
+	do
+	    case $option in
+	        3)
+	            BUILD_3RDPARTY="Yep"
+	            ;;
+	        a)
+	            ANNOUNCE="Yep"
+	            ;;
+	        c)
+	            BUILD_KSTARS_CMAKE="Yep"
+	            BUILDING_KSTARS="Yep"
+	            ;;
+	        d)
+	            DRY_RUN_ONLY="Yep"
+	            ;;
+	        e)
+	            BUILD_KSTARS_EMERGE="Yep"
+	            BUILDING_KSTARS="Yep"
+	            ;;
+	        f)
+	            FORCE_RUN="Yep"
+	            ;;
+	        i)
+	            BUILD_INDI="Yep"
+	            ;;
+			q)
+				FORCE_BREW_QT="Yep"
+				;;
+	        s)
+	            SKIP_BREW="Yep"
+	            ;;
+	        *)
+	            dieUsage "Unsupported option $option"
+	            ;;
+	    esac
+	done
+	shift $((${OPTIND} - 1))
+
+	echo ""
+	echo "ANNOUNCE            = ${ANNOUNCE:-Nope}"
+	echo "BUILDING_KSTARS     = ${BUILDING_KSTARS:-Nope}"
+	echo "BUILD_3RDPARTY      = ${BUILD_3RDPARTY:-Nope}"
+	echo "BUILD_INDI          = ${BUILD_INDI:-Nope}"
+	echo "BUILD_KSTARS_CMAKE  = ${BUILD_KSTARS_CMAKE:-Nope}"
+	echo "BUILD_KSTARS_EMERGE = ${BUILD_KSTARS_EMERGE:-Nope}"
+	echo "SKIP_BREW           = ${SKIP_BREW:-Nope}"
+}
 
 function dieUsage
 {
@@ -36,6 +88,7 @@ cat <<EOF
 	    -e Build kstars via emerge
 	    -f Force build even if there are script updates
 	    -i Build libindi
+		-q Use the brew-installed qt
 	    -s Skip brew (only use this if you know you already have them)
     
 	To build a complete emerge you would do:
@@ -340,7 +393,15 @@ EOF
 
     if [ ! -d emerge ]
     then
+		set +e
         git clone --branch unix3 git://anongit.kde.org/emerge.git
+		res=$?
+		set -e
+		if [ $res -ne 0 ]
+		then
+	        git clone --branch unix3 https://github.com/KDE/emerge
+		fi
+		
     else
         echo "Emerge already exists, checking for updates"
         cd emerge
@@ -446,7 +507,7 @@ function checkUpToDate
 function postProcessKstars
 {
     ##########################################
-    statusBanner "Prepping some other stuff"
+    statusBanner "Post-processing KStars Build"
 	echo "USING_KSTARS_DIR=${USING_KSTARS_DIR}"
     ##########################################
     statusBanner "The Data Directory"
@@ -530,52 +591,9 @@ function postProcessKstars
 #
 checkForQT
 
+processOptions $@
+
 checkUpToDate
-
-while getopts "3acdeis" option
-do
-    case $option in
-        3)
-            BUILD_3RDPARTY="Yep"
-            ;;
-        a)
-            ANNOUNCE="Yep"
-            ;;
-        c)
-            BUILD_KSTARS_CMAKE="Yep"
-            BUILDING_KSTARS="Yep"
-            ;;
-        d)
-            DRY_RUN_ONLY="Yep"
-            ;;
-        e)
-            BUILD_KSTARS_EMERGE="Yep"
-            BUILDING_KSTARS="Yep"
-            ;;
-        f)
-            FORCE_RUN="Yep"
-            ;;
-        i)
-            BUILD_INDI="Yep"
-            ;;
-        s)
-            SKIP_BREW="Yep"
-            ;;
-        *)
-            dieUsage "Unsupported option $option"
-            ;;
-    esac
-done
-shift $((${OPTIND} - 1))
-
-echo ""
-echo "ANNOUNCE            = ${ANNOUNCE:-Nope}"
-echo "BUILDING_KSTARS     = ${BUILDING_KSTARS:-Nope}"
-echo "BUILD_3RDPARTY      = ${BUILD_3RDPARTY:-Nope}"
-echo "BUILD_INDI          = ${BUILD_INDI:-Nope}"
-echo "BUILD_KSTARS_CMAKE  = ${BUILD_KSTARS_CMAKE:-Nope}"
-echo "BUILD_KSTARS_EMERGE = ${BUILD_KSTARS_EMERGE:-Nope}"
-echo "SKIP_BREW           = ${SKIP_BREW:-Nope}"
 
 
 if [ -z "$SKIP_BREW" ]
