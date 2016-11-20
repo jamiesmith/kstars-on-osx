@@ -24,6 +24,8 @@ then
 elif [ -d ~/Qt5.7.0/5.7/clang_64/bin ]
 then
 	export Qt5_DIR=~/Qt5.7.0/5.7/clang_64/bin
+else
+	export Qt5_DIR=$(brew --prefix qt5)
 fi
 
 export PATH=$(brew --prefix gettext)/bin:$PATH

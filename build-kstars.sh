@@ -29,6 +29,7 @@ function dieUsage
 cat <<EOF
 	options:
 	    -3 Also build third party stuff
+		   (This only happens if you are building indi)
 	    -a Announce stuff as you go
 	    -c Build kstars via cmake (ONLY one of -c or -e can be used)
 	    -d Dry run only (just show what you are going to do)
@@ -375,6 +376,7 @@ function buildKstars
     relroot_build=${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app
 
 	mkdir -p ${relroot_app}/Contents/Resources
+	mkdir -p ${relroot_app}/Contents/MacOS
 	
     for path in Contents/Resources/KSTARS_APP_SRCS.icns \
         Contents/MacOS/kstars \
@@ -382,14 +384,18 @@ function buildKstars
     do
         if [ ! -f ${relroot_app}/${path} ]
         then
-            echo ${relroot_app}/${path} is missing
-			echo "BUILD: ${relroot_build}/${path}"
-			echo "APP:   ${relroot_app}/${path}"
-            cp ${relroot_build}/${path}  ${relroot_app}/${path}
+            echo ${relroot_app}/${path} is missing, fixing.
+			cp ${relroot_build}/${path}  ${relroot_app}/${path}
         else
-            echo ${relroot_app}/${path} already there
+            echo "${relroot_app}/${path} already there"
         fi
     done
+	
+	# I honestly cannot figure out why the kstars is losing its exec bit when I 
+	# copy it.
+	# 
+	echo "Putting back exec bit for ${relroot_app}/Contents/MacOS/kstars"
+	chmod +x ${relroot_app}/Contents/MacOS/kstars
 	
     # This way we have to copy some stuff, too
     # I honestly don't know if we should do this or not.
@@ -435,6 +441,85 @@ function checkUpToDate
 		echo "Script is up-to-date"
 		echo ""
 	fi	
+}
+
+function postProcessKstars
+{
+    ##########################################
+    statusBanner "Prepping some other stuff"
+	echo "USING_KSTARS_DIR=${USING_KSTARS_DIR}"
+    ##########################################
+    statusBanner "The Data Directory"
+    echo mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
+	mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
+	
+    # Seems that emerge and cmake put these in different places
+    #
+    if [ -d "${USING_KSTARS_DIR}/share/kstars" ]
+    then
+        typeset src_dir="${USING_KSTARS_DIR}/share/kstars"
+        echo "copying from $src_dir"
+        cp -rf $src_dir/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
+    elif [ -d "$HOME/usr/local/share/kstars" ]
+    then
+        typeset src_dir="$HOME/usr/local/share/kstars"
+        echo "copying from $src_dir"
+        cp -rf $src_dir/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
+    else
+        announce "Cannot find k stars data"
+    fi
+
+    ##########################################
+    statusBanner "The indi drivers"
+    mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
+    cp -f /usr/local/bin/indi*    ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+    cp -f /usr/local/share/indi/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+
+    ##########################################
+    statusBanner "The astrometry files"
+	if [ -n "${USING_KSTARS_DIR}" ]
+	then
+		sourceDir="$(brew --prefix astrometry-net)"
+		targetDir="${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry"
+	    mkdir -p ${targetDir}
+	
+	    cp -Rf ${sourceDir}/bin ${targetDir}/
+	    cp -Rf ${sourceDir}/lib ${targetDir}/
+	    cp -f  ${sourceDir}/etc/astrometry.cfg ${targetDir}/bin/
+	fi
+    ##########################################
+    statusBanner "Set up some xplanet pictures..."
+
+    # this sometimes fails, let's not abort the script if it does
+    #
+    cd ${INDI_ROOT}
+    rm -f maps_alien-1.0.tar.gz
+
+    set +e
+    curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz
+    dl_res=$?
+    set -e
+
+    if [ $dl_res -ne 0 ]
+    then
+        announce "Xplanet map download failed, skipping copies"
+    else
+        tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
+        rm maps_alien-1.0.tar.gz
+        xplanet_dir=${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
+
+        mkdir -p ${xplanet_dir}
+        cp -rf $(brew --prefix xplanet)/bin ${xplanet_dir}
+        cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
+    fi
+
+    ###########################################
+    announce "Tarring up k stars"
+	tarname=$(basename ${USING_KSTARS_DIR})
+    cd $INDI_ROOT
+    rm -f ${tarname}.tgz
+    tar czf ${tarname}.tgz ${tarname}
+    ls -l ${tarname}.tgz
 }
 
 ##########################################
@@ -555,80 +640,7 @@ fi
 
 if [ -n "${BUILDING_KSTARS}" ]
 then
-    ##########################################
-    statusBanner "Prepping some other stuff"
-
-    ##########################################
-    statusBanner "The Data Directory"
-    mkdir -p ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
-
-    # Seems that emerge and cmake put these in different places
-    #
-    if [ -d "${KSTARS_EMERGE_DIR}/share/kstars" ]
-    then
-        typeset src_dir="${KSTARS_EMERGE_DIR}/share/kstars"
-        echo "copying from $src_dir"
-        cp -rf $src_dir/* ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
-    elif [ -d "$HOME/usr/local/share/kstars" ]
-    then
-        typeset src_dir="$HOME/usr/local/share/kstars"
-        echo "copying from $src_dir"
-        cp -rf $src_dir/* ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
-    else
-        announce "Cannot find k stars data"
-    fi
-
-    ##########################################
-    statusBanner "The indi drivers"
-    mkdir -p ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/bin/indi*    ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-    cp -f /usr/local/share/indi/* ${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-
-    ##########################################
-    statusBanner "The astrometry files"
-	if [ -n "${USING_KSTARS_DIR}" ]
-	then
-		sourceDir="$(brew --prefix astrometry-net)"
-		targetDir="${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry"
-	    mkdir -p ${targetDir}
-		
-	    cp -Rf ${sourceDir}/bin ${targetDir}/
-	    cp -Rf ${sourceDir}/lib ${targetDir}/
-	    cp -f  ${sourceDir}/etc/astrometry.cfg ${targetDir}/bin/
-	fi
-    ##########################################
-    statusBanner "Set up some xplanet pictures..."
-
-    # this sometimes fails, let's not abort the script if it does
-    #
-    cd ${INDI_ROOT}
-    rm -f maps_alien-1.0.tar.gz
-
-    set +e
-    curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz
-    dl_res=$?
-    set -e
-    
-    if [ $dl_res -ne 0 ]
-    then
-        announce "Xplanet map download failed, skipping copies"
-    else
-        tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
-        rm maps_alien-1.0.tar.gz
-        xplanet_dir=${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
-
-        mkdir -p ${xplanet_dir}
-        cp -rf $(brew --prefix xplanet)/bin ${xplanet_dir}
-        cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
-    fi
-
-    ###########################################
-    announce "Tarring up k stars"
-	tarname=$(basename ${USING_KSTARS_DIR})
-    cd $INDI_ROOT
-    rm -f ${tarname}.tgz
-    tar czf ${tarname}.tgz ${tarname}
-    ls -l ${tarname}.tgz
+	postProcessKstars
 fi
 
 if [ -n "${BUILD_KSTARS_EMERGE}" ]
