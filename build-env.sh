@@ -16,17 +16,22 @@ export INDI_DIR=${INDI_ROOT}/indi-stuff
 export KSTARS_EMERGE_DIR=${INDI_ROOT}/kstars-emerge
 export KSTARS_CMAKE_DIR=${INDI_ROOT}/kstars-cmake
 export GSC_DIR=${INDI_ROOT}/gsc
-export MACOSX_DEPLOYMENT_TARGET=10.10
 
-if [ -d ~/Qt/5.7/clang_64/bin ]
+if [ -z "${FORCE_BREW_QT}" ]
 then
-	export Qt5_DIR=~/Qt/5.7/clang_64/bin
-elif [ -d ~/Qt5.7.0/5.7/clang_64/bin ]
-then
-	export Qt5_DIR=~/Qt5.7.0/5.7/clang_64/bin
+	export MACOSX_DEPLOYMENT_TARGET=10.10
+	if [ -d ~/Qt/5.7/clang_64/bin ]
+	then
+		export Qt5_DIR=~/Qt/5.7/clang_64/bin
+	elif [ -d ~/Qt5.7.0/5.7/clang_64/bin ]
+	then
+		export Qt5_DIR=~/Qt5.7.0/5.7/clang_64/bin
+	else
+		export Qt5_DIR=$(brew --prefix qt5)
+	fi
 else
 	export Qt5_DIR=$(brew --prefix qt5)
-fi
+fi	
 
 export PATH=$(brew --prefix gettext)/bin:$PATH
 export CMAKE_LIBRARY_PATH=$(brew --prefix gettext)/lib
