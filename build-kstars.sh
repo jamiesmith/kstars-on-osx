@@ -281,6 +281,55 @@ function checkForQT
 	fi
 }
 
+function installPatchedKf5Stuff
+{
+    # Cleanup steps:
+    #     brew uninstall `brew list -1 | grep '^kf5-'`
+    #     rm -rf ~/Library/Caches/Homebrew/kf5-*
+    #     brew untap haraldf/kf5
+    #     ls /usr/local/Homebrew/Library/Taps
+    #     brew remove qt5
+
+    if [ -d ~/Qt/5.7/clang_64 ]
+    then
+    	export SUBSTITUTE=~/Qt/5.7/clang_64
+    elif [ -d ~/Qt5.7.0/5.7/clang_64 ]
+    then
+    	export SUBSTITUTE=~/Qt5.7.0/5.7/clang_64
+    else
+        echo "Cannot figure out where QT is."
+        exit 9
+    fi
+
+    brew tap haraldf/kf5
+
+    cd $(brew --repo haraldf/homebrew-kf5)
+
+    echo $SUBSTITUTE
+    count=$(cat *.rb | grep -c CMAKE_PREFIX_PATH)
+    if [ $count -le 1 ]
+    then
+        echo "Hacking kf5 Files"
+        sed -i '' "s@*args@\"-DCMAKE_PREFIX_PATH=${SUBSTITUTE}\", *args@g" *.rb
+        sed -i '' '/depends_on "qt5"/,/^/d' *.rb
+    else
+        echo "kf5 Files already hacked, er, patched, skipping"
+    fi
+
+    brew link --force gettext
+    mkdir -p /usr/local/lib/libexec
+    brewInstallIfNeeded haraldf/kf5/kf5-kcoreaddons
+    brewInstallIfNeeded haraldf/kf5/kf5-kauth
+    brewInstallIfNeeded haraldf/kf5/kf5-kcrash
+    brewInstallIfNeeded haraldf/kf5/kf5-knotifications
+    brewInstallIfNeeded haraldf/kf5/kf5-kplotting
+    brewInstallIfNeeded haraldf/kf5/kf5-kxmlgui
+    brewInstallIfNeeded haraldf/kf5/kf5-kdoctools
+    brewInstallIfNeeded haraldf/kf5/kf5-knewstuff
+    
+    cd - > /dev/null
+}
+
 function installBrewDependencies
 {
     announce "Installing brew dependencies"
@@ -316,6 +365,8 @@ function installBrewDependencies
 
     brewInstallIfNeeded jamiesmith/astronomy/libnova
     brewInstallIfNeeded jamiesmith/astronomy/gsc
+    
+    installPatchedKf5Stuff
 }
 
 function buildLibIndi
