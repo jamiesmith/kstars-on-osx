@@ -70,13 +70,10 @@ function processOptions
 	echo "SKIP_BREW           = ${SKIP_BREW:-Nope}"
 }
 
-function dieUsage
+function usage
 {
     # I really wish that getopt supported the long args.
     #
-	echo ""
-    echo $*
-	echo ""
 
 cat <<EOF
 	options:
@@ -97,7 +94,23 @@ cat <<EOF
 	To build a complete cmake build you would do:
 	    $0 -3aci    
 EOF
-exit 9
+}
+
+function dieUsage
+{
+	echo ""
+    echo $*
+	echo ""
+	usage
+	exit 9
+}
+
+function dieError
+{
+	echo ""
+    echo $*
+	echo ""
+	exit 9
 }
 
 function exitEarly
@@ -290,6 +303,8 @@ function installPatchedKf5Stuff
     #     ls /usr/local/Homebrew/Library/Taps
     #     brew remove qt5
 
+	# I think that the qt5 stuff can just be the dir...
+	#
     if [ -d ~/Qt/5.7/clang_64 ]
     then
     	export SUBSTITUTE=~/Qt/5.7/clang_64
@@ -441,31 +456,85 @@ EOF
     fi
 
     cd ${KSTARS_EMERGE_DIR}/
+	
+	version=craft
 
-    if [ ! -d emerge ]
-    then
-		set +e
-        git clone --branch unix3 git://anongit.kde.org/emerge.git
-		res=$?
-		set -e
-		if [ $res -ne 0 ]
+	if [ "$version" == "emerge" ]
+	then
+
+		# working against the mirror until the branch is caught up.
+		#
+		git clone --branch unix3 https://github.com/KDE/emerge
+	    mkdir -p etc
+	    cp -f emerge/kdesettings.mac etc/kdesettings.ini
+
+	    . emerge/kdeenv.sh
+		
+		cmd=""
+
+		if [ $(which emerge) ]
 		then
-	        git clone --branch unix3 https://github.com/KDE/emerge
+			echo "Found emerge"
+			cmd=$(which emerge)
+		else
+			echo "emerge not found"
+		fi
+				
+		if [ $(which craft) ]
+		then
+			echo "Found craft"
+			cmd=$(which craft)
+		else
+			echo "craft not found"
 		fi
 		
-    else
-        echo "Emerge already exists, checking for updates"
-        cd emerge
-        git pull
-        cd ${KSTARS_EMERGE_DIR}/    
-    fi
+		[ -z "$cmd" ] && dieError "Could not find an emerge or craft option"
+	
+	    time ${cmd} kstars
+	else
+	    # git clone --branch unix3 git://anongit.kde.org/craft.git
+	    git clone git://anongit.kde.org/craft.git
 
-    mkdir -p etc
-    cp -f emerge/kdesettings.mac etc/kdesettings.ini
-    . emerge/kdeenv.sh
-    time emerge kstars
+	    mkdir -p etc
+	    cp -f craft/kdesettings.mac etc/kdesettings.ini
+	    . craft/kdeenv.sh
+		
+		cmd=""
 
-    announce EMERGE COMPLETE
+		if [ $(which emerge) ]
+		then
+			echo "Found emerge"
+			cmd=$(which emerge)
+		else
+			echo "emerge not found"
+		fi
+				
+		if [ $(which craft) ]
+		then
+			echo "Found craft"
+			cmd=$(which craft)
+			
+			# There seems to be a bug in the file - try this:
+			# sed -i '' "s@crafteRoot@craftRoot@" "$cmd"
+			# statusBanner "Patching $cmd"
+			# rm -f $cmd
+			# echo cp ${INDI_ROOT}/craft $cmd
+			# cp ${INDI_ROOT}/craft $cmd
+			# cat ${cmd}
+			# chmod +x ${cmd}
+		else
+			echo "craft not found"
+		fi
+		
+		echo "In the script craftRoot is [$craftRoot]"
+		export craftRoot
+		export crafteRoot=$craftRoot
+		[ -z "$cmd" ] && dieError "Could not find an emerge or craft option"
+	
+	    time ${cmd} kstars
+	fi
+	
+    announce "EMERGE COMPLETE"
 }
 
 function buildKstars
@@ -626,12 +695,13 @@ function postProcessKstars
     fi
 
     ###########################################
-    announce "Tarring up k stars"
-	tarname=$(basename ${USING_KSTARS_DIR})
-    cd $INDI_ROOT
-    rm -f ${tarname}.tgz
-    tar czf ${tarname}.tgz ${tarname}
-    ls -l ${tarname}.tgz
+	# Uncomment this if the fix-libraries breaks
+	#     announce "Tarring up k stars"
+	# tarname=$(basename ${USING_KSTARS_DIR})
+	#     cd $INDI_ROOT
+	#     rm -f ${tarname}.tgz
+	#     tar czf ${tarname}.tgz ${tarname}
+	#     ls -l ${tarname}.tgz
 }
 
 ##########################################
