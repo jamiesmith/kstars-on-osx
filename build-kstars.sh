@@ -513,15 +513,6 @@ EOF
 		then
 			echo "Found craft"
 			cmd=$(which craft)
-			
-			# There seems to be a bug in the file - try this:
-			# sed -i '' "s@crafteRoot@craftRoot@" "$cmd"
-			# statusBanner "Patching $cmd"
-			# rm -f $cmd
-			# echo cp ${INDI_ROOT}/craft $cmd
-			# cp ${INDI_ROOT}/craft $cmd
-			# cat ${cmd}
-			# chmod +x ${cmd}
 		else
 			echo "craft not found"
 		fi
