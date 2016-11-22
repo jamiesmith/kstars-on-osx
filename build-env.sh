@@ -21,12 +21,12 @@ export GSC_DIR=${INDI_ROOT}/gsc
 if [ -z "${FORCE_BREW_QT}" ]
 then
 	export MACOSX_DEPLOYMENT_TARGET=10.10
-	if [ -d ~/Qt/5.7/clang_64/bin ]
+	if [ -d ~/Qt/5.7/clang_64 ]
 	then
-		export Qt5_DIR=~/Qt/5.7/clang_64/bin
-	elif [ -d ~/Qt5.7.0/5.7/clang_64/bin ]
+		export Qt5_DIR=~/Qt/5.7/clang_64
+	elif [ -d ~/Qt5.7.0/5.7/clang_64 ]
 	then
-		export Qt5_DIR=~/Qt5.7.0/5.7/clang_64/bin
+		export Qt5_DIR=~/Qt5.7.0/5.7/clang_64
 	else
 		export Qt5_DIR=$(brew --prefix qt5)
 	fi
@@ -34,7 +34,7 @@ else
 	export Qt5_DIR=$(brew --prefix qt5)
 fi	
 
-export PATH=$(brew --prefix gettext)/bin:$PATH
+export PATH=$(brew --prefix gettext)/bin:${Qt5_DIR}/bin:$PATH
 export CMAKE_LIBRARY_PATH=$(brew --prefix gettext)/lib
 export CMAKE_INCLUDE_PATH=$(brew --prefix gettext)/include export PATH=$(brew --prefix bison)/bin:$PATH
 export PATH=$Qt5_DIR:$PATH
