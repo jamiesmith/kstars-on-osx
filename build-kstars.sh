@@ -381,7 +381,12 @@ function installBrewDependencies
     brewInstallIfNeeded jamiesmith/astronomy/libnova
     brewInstallIfNeeded jamiesmith/astronomy/gsc
     
-    installPatchedKf5Stuff
+	# Only do this if we are doing a cmake build
+	#
+	if [ -n "$BUILD_KSTARS_CMAKE" ]
+	then
+	    installPatchedKf5Stuff
+	fi
 }
 
 function buildLibIndi
