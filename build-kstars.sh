@@ -841,7 +841,7 @@ then
     cd ${KSTARS_EMERGE_DIR}/Applications/KDE
     macdeployqt kstars.app -executable=${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/MacOS/kioslave
     
-    #Setting up some short paths
+   	#Setting up some short paths
     KSTARS_APP=${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app
     UNCOMPRESSED_DMG=${KSTARS_EMERGE_DIR}/Applications/KDE/KStarsUncompressed.dmg
     
@@ -854,11 +854,17 @@ then
 	DEV=$(echo $DEVS | cut -f 1 -d ' ')
 	VOLUME=$(mount |grep ${DEV} | cut -f 3 -d ' ')
 	
+	# copy in and set volume icon
+	cp ${DIR}/DMGIcon.icns ${VOLUME}/DMGIcon.icns
+	mv ${VOLUME}/DMGIcon.icns ${VOLUME}/.VolumeIcon.icns
+	SetFile -c icnC ${VOLUME}/.VolumeIcon.icns
+	SetFile -a C ${VOLUME}
+
 	# copy in background image
 	mkdir -p ${VOLUME}/Pictures
 	cp ${KSTARS_EMERGE_DIR}/share/kstars/kstars.png ${VOLUME}/Pictures/background.jpg
 	
-	# symlink Applications folder
+	# symlink Applications folder, arrange icons, set background image, set folder attributes, hide pictures folder
 	ln -s /Applications/ ${VOLUME}/Applications
 	set_bundle_display_options ${VOLUME}
 	mv ${VOLUME}/Pictures ${VOLUME}/.Pictures
