@@ -652,6 +652,13 @@ function postProcessKstars
     cp -f /usr/local/bin/indi*    ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
     cp -f /usr/local/share/indi/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
 
+	##########################################
+	statusBanner "The gsc executable"
+	sourceDir="$(brew --prefix gsc)"
+	cp -f ${sourceDir}/bin/gsc ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+	#This is needed so we will be able to run the install_name_tool on it.
+	chmod +w ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/gsc
+
     ##########################################
     statusBanner "The astrometry files"
 	if [ -n "${USING_KSTARS_DIR}" ]
@@ -663,6 +670,9 @@ function postProcessKstars
 	    cp -Rf ${sourceDir}/bin ${targetDir}/
 	    cp -Rf ${sourceDir}/lib ${targetDir}/
 	    cp -f  ${sourceDir}/etc/astrometry.cfg ${targetDir}/bin/
+	    
+	    #This is needed so we will be able to run the install_name_tool on them.
+	    chmod +w ${targetDir}/bin/*
 	fi
     ##########################################
     statusBanner "Set up some xplanet pictures..."
@@ -699,6 +709,37 @@ function postProcessKstars
 	#     tar czf ${tarname}.tgz ${tarname}
 	#     ls -l ${tarname}.tgz
 }
+
+function set_bundle_display_options() {
+	osascript <<-EOF
+		tell application "Finder"
+			set f to POSIX file ("${1}" as string) as alias
+			tell folder f
+				open
+				tell container window
+					set toolbar visible to false
+					set statusbar visible to false
+					set current view to icon view
+					delay 1 -- sync
+					set the bounds to {20, 50, 300, 400}
+				end tell
+				delay 1 -- sync
+				set icon size of the icon view options of container window to 64
+				set arrangement of the icon view options of container window to not arranged
+				set position of item "Applications" to {100,150}
+				set position of item "KStars.app" to {340, 150}
+				set background picture of the icon view options of container window to file "background.jpg" of folder "Pictures"
+				set the bounds of the container window to {0, 0, 440, 270}
+				update without registering applications
+				delay 5 -- sync
+				close
+			end tell
+			delay 5 -- sync
+		end tell
+	EOF
+ }
+
+
 
 ##########################################
 # This is where the bulk of it starts!
@@ -781,14 +822,57 @@ fi
 if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
     set +e
+    
+    announce "Copying k i o slave."
+    #Do we need kio_http_cache_cleaner??  or any others?
+    cp -f ${KSTARS_EMERGE_DIR}/lib/libexec/kf5/kioslave ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/MacOS/
+
+	announce "Copying plugins"
+    mkdir ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
+	cp -Rf ${KSTARS_EMERGE_DIR}/lib/plugins/* ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/
 
     announce "Fixing the dir names and such"
     ${DIR}/fix-libraries.sh
+    ${DIR}/fix-plugins.sh
+    
+    
     ###########################################
     announce "Building DMG"
     cd ${KSTARS_EMERGE_DIR}/Applications/KDE
-    macdeployqt kstars.app -dmg
-	ls -l kstars.dmg
+    macdeployqt kstars.app -executable=${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/MacOS/kioslave
+    
+    #Setting up some short paths
+    KSTARS_APP=${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app
+    UNCOMPRESSED_DMG=${KSTARS_EMERGE_DIR}/Applications/KDE/KStarsUncompressed.dmg
+    
+	#Create and attach DMG
+    hdiutil create -srcfolder ${KSTARS_APP} -size 190m -fs HFS+ -format UDRW -volname KStars ${UNCOMPRESSED_DMG}
+    hdiutil attach ${UNCOMPRESSED_DMG}
+    
+    # Obtain device information
+	DEVS=$(hdiutil attach ${UNCOMPRESSED_DMG} | cut -f 1)
+	DEV=$(echo $DEVS | cut -f 1 -d ' ')
+	VOLUME=$(mount |grep ${DEV} | cut -f 3 -d ' ')
+	
+	# copy in background image
+	mkdir -p ${VOLUME}/Pictures
+	cp ${KSTARS_EMERGE_DIR}/share/kstars/kstars.png ${VOLUME}/Pictures/background.jpg
+	
+	# symlink Applications folder
+	ln -s /Applications/ ${VOLUME}/Applications
+	set_bundle_display_options ${VOLUME}
+	mv ${VOLUME}/Pictures ${VOLUME}/.Pictures
+ 
+	# Unmount the disk image
+	hdiutil detach $DEV
+ 
+	# Convert the disk image to read-only
+	hdiutil convert ${UNCOMPRESSED_DMG} -format UDBZ -o ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.dmg
+	
+	# Remove the Read Write DMG
+	rm ${UNCOMPRESSED_DMG}
+		
+	
 fi
 
 # Finally, remove the trap

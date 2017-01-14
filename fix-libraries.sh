@@ -12,9 +12,12 @@ source "${DIR}/build-env.sh" > /dev/null
 FILES_TO_COPY=()
 FRAMEWORKS_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Frameworks"
 INDI_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi"
+XPLANET_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/bin"
+ASTROMETRY_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin"
+KIO_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/kf5/kio"
 DRY_RUN_ONLY=""
 
-IGNORED_OTOOL_OUTPUT="/Qt|qt5|${KSTARS_EMERGE_DIR}|/usr/lib/|/System/"
+IGNORED_OTOOL_OUTPUT="/Qt|qt5|${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/|/usr/lib/|/System/"
 mkdir -p "${FRAMEWORKS_DIR}"
 
 function dieUsage
@@ -79,7 +82,7 @@ function processTarget
         
         # Now I think that the @rpaths need to change to @executable_path
         #
-		newname="@executable_path/${pathToFrameworks}${baseEntry}"
+		newname="@loader_path/${pathToFrameworks}${baseEntry}"
 		
         echo "    change $entry -> $newname"
         # echo "          install_name_tool -change \\"
@@ -121,26 +124,26 @@ function copyFilesToFrameworks
         then
             filename=$libFile
         else
-            # see if I can find it
-            filename=$(find /usr/local -name "${base}")
+            # see if I can find it, NOTE:  I had to add the last part and the echo because the find produced multiple results breaking the file copy into frameworks.
+            filename=$(echo $(find /usr/local -name "${base}")| cut -d" " -f1)
         fi    
 
         if [ ! -f "${FRAMEWORKS_DIR}/${base}" ]
         then
         	echo "HAVE TO COPY [$base] from [${filename}] to Frameworks"
-            [ -z "${DRY_RUN_ONLY}" ] && cp "${filename}" "${FRAMEWORKS_DIR}"
+            [ -z "${DRY_RUN_ONLY}" ] && cp -L "${filename}" "${FRAMEWORKS_DIR}"
             
             # Seem to need this for the macqtdeploy
             #
             [ -z "${DRY_RUN_ONLY}" ] && chmod +w "${FRAMEWORKS_DIR}/${base}"
 
 
-        	echo "HAVE TO COPY [$base] from [${filename}] to Indi"
-            [ -z "${DRY_RUN_ONLY}" ] && cp "${filename}" "${INDI_DIR}"
+        	#echo "HAVE TO COPY [$base] from [${filename}] to Indi"
+            #[ -z "${DRY_RUN_ONLY}" ] && cp "${filename}" "${INDI_DIR}"
             
             # Seem to need this for the macqtdeploy
             #
-            [ -z "${DRY_RUN_ONLY}" ] && chmod +w "${INDI_DIR}/${base}"			
+            #[ -z "${DRY_RUN_ONLY}" ] && chmod +w "${INDI_DIR}/${base}"			
 			
         else
             echo ""
@@ -167,6 +170,9 @@ cd ${KSTARS_EMERGE_DIR}
 
 statusBanner "Processing kstars executable"
 processTarget "${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kstars"
+
+statusBanner "Processing kioslave executable"
+processTarget "${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kioslave"
 
 # Also cheat, and add libindidriver.1.dylib to the list
 #
@@ -202,9 +208,103 @@ do
     fi
 done
 
-statusBanner "Copying second round of files"
+statusBanner "Copying second round of files for indi"
 copyFilesToFrameworks
 
-statusBanner "The following files are now in frameworks:"
+statusBanner "Processing all of the files in the xplanet dir"
+
+# Then do all of the files in the xplanet Dir
+#
+FILES_TO_COPY=()
+for file in ${XPLANET_DIR}/*
+do
+    base=$(basename $file)
+    
+    if [ -x $file ]
+    then
+        statusBanner "Processing xplanet file $base"
+        processTarget $file
+    else
+        echo ""
+        echo ""
+        echo "Skipping $base, not executable"
+    fi
+done
+
+statusBanner "Copying third round of files for xplanet"
+copyFilesToFrameworks
+
+statusBanner "Processing all of the files in the astrometry dir"
+
+# Then do all of the files in the astrometry Dir
+#
+FILES_TO_COPY=()
+for file in ${ASTROMETRY_DIR}/*
+do
+    base=$(basename $file)
+    
+    if [ -x $file ]
+    then
+        statusBanner "Processing astrometry file $base"
+        processTarget $file
+    else
+        echo ""
+        echo ""
+        echo "Skipping $base, not executable"
+    fi
+done
+
+statusBanner "Copying fourth round of files for astrometry"
+copyFilesToFrameworks
+
+#For some reason, this is not working,the path is all wrong and I had to put in a separate script.
+
+statusBanner "Processing all of the files in the plugins/kf5/kio dir"
+
+# Then do all of the files in the kio Dir
+#
+FILES_TO_COPY=()
+for file in ${KIO_DIR}/*
+do
+    base=$(basename $file)
+    
+    if [ -x $file ]
+    then
+        statusBanner "Processing kio file $base"
+        processTarget $file
+    else
+        echo ""
+        echo ""
+        echo "Skipping $base, not executable"
+    fi
+done
+
+statusBanner "Copying fifth round of files for kio plugins/image downloads"
+copyFilesToFrameworks
+
+statusBanner "Processing all of the files in the Frameworks dir"
+
+# Then do all of the files in the Frameworks Dir
+#
+FILES_TO_COPY=()
+for file in ${FRAMEWORKS_DIR}/*
+do
+    base=$(basename $file)
+    
+    if [ -x $file ]
+    then
+        statusBanner "Processing Frameworks file $base"
+        processTarget $file
+    else
+        echo ""
+        echo ""
+        echo "Skipping $base, not executable"
+    fi
+done
+
+statusBanner "Copying sixth round of files for Frameworks"
+copyFilesToFrameworks
+
+statusBanner "The following files are now in Frameworks:"
 ls -lF ${FRAMEWORKS_DIR}
 
