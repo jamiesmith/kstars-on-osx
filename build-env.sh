@@ -15,6 +15,7 @@ function statusBanner
 export INDI_ROOT=~/IndiRoot
 export INDI_DIR=${INDI_ROOT}/indi-stuff
 export KSTARS_EMERGE_DIR=${INDI_ROOT}/kstars-emerge
+export KSTARS_XCODE_DIR=${INDI_ROOT}/kstars-xcode
 export KSTARS_CMAKE_DIR=${INDI_ROOT}/kstars-cmake
 export GSC_DIR=${INDI_ROOT}/gsc
 
@@ -48,6 +49,7 @@ echo "INDI_ROOT          is [${INDI_ROOT}]"
 echo "INDI_DIR           is [${INDI_DIR}]"
 echo "KSTARS_EMERGE_DIR  is [${KSTARS_EMERGE_DIR}]"
 echo "KSTARS_CMAKE_DIR   is [${KSTARS_CMAKE_DIR}]"
+echo "KSTARS_XCODE_DIR   is [${KSTARS_XCODE_DIR}]"
 echo "GSC_DIR            is [${GSC_DIR}]"
 
 echo "Qt5_DIR            is [${Qt5_DIR}]"

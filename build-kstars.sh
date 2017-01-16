@@ -12,6 +12,7 @@ INDI_ONLY=""
 SKIP_BREW=""
 BUILD_INDI=""
 BUILD_KSTARS_CMAKE=""
+BUILD_XCODE=""
 BUILD_KSTARS_EMERGE=""
 BUILDING_KSTARS=""
 DRY_RUN_ONLY=""
@@ -21,7 +22,7 @@ FORCE_BREW_QT=""
 
 function processOptions
 {
-	while getopts "3acdeiqs" option
+	while getopts "3acdeiqsx" option
 	do
 	    case $option in
 	        3)
@@ -53,6 +54,11 @@ function processOptions
 	        s)
 	            SKIP_BREW="Yep"
 	            ;;
+	        x)
+	            BUILD_KSTARS_CMAKE="Yep"
+	            BUILD_XCODE="Yep"
+	            BUILDING_KSTARS="Yep"
+	            ;;    	            
 	        *)
 	            dieUsage "Unsupported option $option"
 	            ;;
@@ -66,6 +72,7 @@ function processOptions
 	echo "BUILD_3RDPARTY      = ${BUILD_3RDPARTY:-Nope}"
 	echo "BUILD_INDI          = ${BUILD_INDI:-Nope}"
 	echo "BUILD_KSTARS_CMAKE  = ${BUILD_KSTARS_CMAKE:-Nope}"
+	echo "BUILD_XCODE  		  = ${BUILD_XCODE:-Nope}"
 	echo "BUILD_KSTARS_EMERGE = ${BUILD_KSTARS_EMERGE:-Nope}"
 	echo "SKIP_BREW           = ${SKIP_BREW:-Nope}"
 }
@@ -80,19 +87,23 @@ cat <<EOF
 	    -3 Also build third party stuff
 		   (This only happens if you are building indi)
 	    -a Announce stuff as you go
-	    -c Build kstars via cmake (ONLY one of -c or -e can be used)
+	    -c Build kstars via cmake (ONLY one of -c , -x, or -e can be used)
 	    -d Dry run only (just show what you are going to do)
-	    -e Build kstars via emerge
+	    -e Build kstars via emerge (ONLY one of -c , -x, or -e can be used)
 	    -f Force build even if there are script updates
 	    -i Build libindi
 		-q Use the brew-installed qt
 	    -s Skip brew (only use this if you know you already have them)
+	    -x Build kstars via cmake with xcode (ONLY one of -c , -x, or -e can be used)
     
 	To build a complete emerge you would do:
 	    $0 -3aei
     
 	To build a complete cmake build you would do:
-	    $0 -3aci    
+	    $0 -3aci
+	    
+	To build a complete cmake build with an xcode project you would do:
+	    $0 -3axi
 EOF
 }
 
@@ -562,9 +573,15 @@ function buildKstars
     mkdir kstars-build
     cd kstars-build
 
-    cmake -DCMAKE_INSTALL_PREFIX=${KSTARS_CMAKE_DIR} ../kstars
-    make
-    make install
+	if [ -n "$BUILD_XCODE" ]
+	then
+    	cmake -DCMAKE_INSTALL_PREFIX=${KSTARS_CMAKE_DIR} -G Xcode ../kstars
+    	xcodebuild -project kstars.xcodeproj -alltargets -configuration Debug
+    else
+    	cmake -DCMAKE_INSTALL_PREFIX=${KSTARS_CMAKE_DIR} ../kstars
+    	make
+    	make install
+	fi
    
 }
 
@@ -613,11 +630,16 @@ function postProcessKstars
     echo mkdir -p ${KSTARS_APP}/Contents/Resources/data
 	mkdir -p ${KSTARS_APP}/Contents/Resources/data
 	
-    # Seems that emerge and cmake put these in different places
+    # Emerge and cmake now put them in the same directory, but if it is the Xcode version, it is a subdirectory.
     #
     if [ -d "${KSTARS_APP}/../../../share/kstars" ]
     then
         typeset src_dir="${KSTARS_APP}/../../../share/kstars"
+        echo "copying from $src_dir"
+        cp -rf $src_dir/* ${KSTARS_APP}/Contents/Resources/data/
+    elif [ -d "${KSTARS_APP}/../../../../kstars/kstars/data" ]
+    then
+    	typeset src_dir="${KSTARS_APP}/../../../../kstars/kstars/data"
         echo "copying from $src_dir"
         cp -rf $src_dir/* ${KSTARS_APP}/Contents/Resources/data/
     else
@@ -689,7 +711,10 @@ function postProcessKstars
 		statusBanner "Copying plugins"
     	mkdir ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
 		cp -rf ${KSTARS_EMERGE_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
-    	
+		
+		statusBanner "Copying icontheme"
+		cp -f ${KSTARS_EMERGE_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
+
 	elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 	then
 		statusBanner "Copying k i o slave."
@@ -769,6 +794,11 @@ else
     announce "Skipping brew dependencies"
 fi
 
+if [ -n "$BUILD_XCODE" ]
+then
+    export KSTARS_CMAKE_DIR=${KSTARS_XCODE_DIR}
+fi
+
 if [ -n "$BUILD_KSTARS_CMAKE" ] && [ -n "$BUILD_KSTARS_EMERGE" ]
 then
     dieUsage "Only one KSTARS build type allowed" 
@@ -813,6 +843,10 @@ if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
 	KSTARS_APP="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app"
     emergeKstars
+elif [ -n "${BUILD_XCODE}" ]
+then
+	KSTARS_APP="${KSTARS_XCODE_DIR}/kstars-build/kstars/Debug/kstars.app"
+    buildKstars
 elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
 	KSTARS_APP="${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app"
@@ -880,6 +914,11 @@ elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
 	announce "Copying K Stars Application To C Make Directory"
 	cp -Rf ${KSTARS_APP} ${KSTARS_CMAKE_DIR}/
+	if [ -n "${BUILD_XCODE}" ]
+	then
+		mkdir ${KSTARS_APP}/../../Release
+		cp -Rf ${KSTARS_APP} ${KSTARS_APP}/../../Release/KStars.app
+	fi
 fi
 
 # Finally, remove the trap
