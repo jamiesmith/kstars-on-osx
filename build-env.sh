@@ -15,6 +15,7 @@ function statusBanner
 export INDI_ROOT=~/IndiRoot
 export INDI_DIR=${INDI_ROOT}/indi-stuff
 export KSTARS_EMERGE_DIR=${INDI_ROOT}/kstars-emerge
+export KSTARS_XCODE_DIR=${INDI_ROOT}/kstars-xcode
 export KSTARS_CMAKE_DIR=${INDI_ROOT}/kstars-cmake
 export GSC_DIR=${INDI_ROOT}/gsc
 
@@ -42,11 +43,13 @@ export Qt5DBus_DIR=$Qt5_DIR
 export Qt5Test_DIR=$Qt5_DIR
 export Qt5Network_DIR=$Qt5_DIR
 export GSC_TARGET_DIR=${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/gsc
+export QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10
 
 echo "INDI_ROOT          is [${INDI_ROOT}]"
 echo "INDI_DIR           is [${INDI_DIR}]"
 echo "KSTARS_EMERGE_DIR  is [${KSTARS_EMERGE_DIR}]"
 echo "KSTARS_CMAKE_DIR   is [${KSTARS_CMAKE_DIR}]"
+echo "KSTARS_XCODE_DIR   is [${KSTARS_XCODE_DIR}]"
 echo "GSC_DIR            is [${GSC_DIR}]"
 
 echo "Qt5_DIR            is [${Qt5_DIR}]"
@@ -59,3 +62,4 @@ echo "Qt5Test_DIR        is [${Qt5Test_DIR}]"
 echo "Qt5Network_DIR     is [${Qt5Network_DIR}]"
 
 echo "GSC_TARGET_DIR     is [${GSC_TARGET_DIR}]"
+echo "OSX Deployment target [${QMAKE_MACOSX_DEPLOYMENT_TARGET}]"

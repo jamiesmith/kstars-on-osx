@@ -12,16 +12,17 @@ INDI_ONLY=""
 SKIP_BREW=""
 BUILD_INDI=""
 BUILD_KSTARS_CMAKE=""
+BUILD_XCODE=""
 BUILD_KSTARS_EMERGE=""
 BUILDING_KSTARS=""
 DRY_RUN_ONLY=""
 FORCE_RUN=""
-USING_KSTARS_DIR=""
+KSTARS_APP=""
 FORCE_BREW_QT=""
 
 function processOptions
 {
-	while getopts "3acdeiqs" option
+	while getopts "3acdeiqsx" option
 	do
 	    case $option in
 	        3)
@@ -53,6 +54,11 @@ function processOptions
 	        s)
 	            SKIP_BREW="Yep"
 	            ;;
+	        x)
+	            BUILD_KSTARS_CMAKE="Yep"
+	            BUILD_XCODE="Yep"
+	            BUILDING_KSTARS="Yep"
+	            ;;    	            
 	        *)
 	            dieUsage "Unsupported option $option"
 	            ;;
@@ -66,6 +72,7 @@ function processOptions
 	echo "BUILD_3RDPARTY      = ${BUILD_3RDPARTY:-Nope}"
 	echo "BUILD_INDI          = ${BUILD_INDI:-Nope}"
 	echo "BUILD_KSTARS_CMAKE  = ${BUILD_KSTARS_CMAKE:-Nope}"
+	echo "BUILD_XCODE  		  = ${BUILD_XCODE:-Nope}"
 	echo "BUILD_KSTARS_EMERGE = ${BUILD_KSTARS_EMERGE:-Nope}"
 	echo "SKIP_BREW           = ${SKIP_BREW:-Nope}"
 }
@@ -80,19 +87,23 @@ cat <<EOF
 	    -3 Also build third party stuff
 		   (This only happens if you are building indi)
 	    -a Announce stuff as you go
-	    -c Build kstars via cmake (ONLY one of -c or -e can be used)
+	    -c Build kstars via cmake (ONLY one of -c , -x, or -e can be used)
 	    -d Dry run only (just show what you are going to do)
-	    -e Build kstars via emerge
+	    -e Build kstars via emerge (ONLY one of -c , -x, or -e can be used)
 	    -f Force build even if there are script updates
 	    -i Build libindi
 		-q Use the brew-installed qt
 	    -s Skip brew (only use this if you know you already have them)
+	    -x Build kstars via cmake with xcode (ONLY one of -c , -x, or -e can be used)
     
 	To build a complete emerge you would do:
 	    $0 -3aei
     
 	To build a complete cmake build you would do:
-	    $0 -3aci    
+	    $0 -3aci
+	    
+	To build a complete cmake build with an xcode project you would do:
+	    $0 -3axi
 EOF
 }
 
@@ -286,6 +297,22 @@ function scriptDied
     announce "Something failed"
 }
 
+function checkForConnections
+{
+	git ls-remote git://anongit.kde.org/kstars.git &> /dev/null
+	git ls-remote https://github.com/indilib/indi.git &> /dev/null
+	git ls-remote https://github.com/KDE/emerge &> /dev/null
+	git ls-remote git://anongit.kde.org/craft.git &> /dev/null
+	statusBanner "All Git Respositories found"
+	if curl --output /dev/null --silent --head --fail "https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz";then
+		statusBanner "XPlanet Images found"
+	else
+		echo "XPlanet Image File Failure"
+	fi
+	
+}
+
+
 function checkForQT
 {
 	if [ -z "$Qt5_DIR" ]
@@ -341,6 +368,7 @@ function installPatchedKf5Stuff
     brewInstallIfNeeded haraldf/kf5/kf5-kxmlgui
     brewInstallIfNeeded haraldf/kf5/kf5-kdoctools
     brewInstallIfNeeded haraldf/kf5/kf5-knewstuff
+    brewInstallIfNeeded haraldf/kf5/kf5-kded
     
     cd - > /dev/null
 }
@@ -545,44 +573,16 @@ function buildKstars
     mkdir kstars-build
     cd kstars-build
 
-    cmake -DCMAKE_INSTALL_PREFIX=~/usr/local ../kstars
-    make
-    make install
-    
-    relroot_app=${KSTARS_CMAKE_DIR}/Applications/KDE/kstars.app
-    relroot_build=${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app
-
-	mkdir -p ${relroot_app}/Contents/Resources
-	mkdir -p ${relroot_app}/Contents/MacOS
-	
-    for path in Contents/Resources/KSTARS_APP_SRCS.icns \
-        Contents/MacOS/kstars \
-        Contents/Info.plist
-    do
-        if [ ! -f ${relroot_app}/${path} ]
-        then
-            echo ${relroot_app}/${path} is missing, fixing.
-			cp ${relroot_build}/${path}  ${relroot_app}/${path}
-        else
-            echo "${relroot_app}/${path} already there"
-        fi
-    done
-	
-	# I honestly cannot figure out why the kstars is losing its exec bit when I 
-	# copy it.
-	# 
-	echo "Putting back exec bit for ${relroot_app}/Contents/MacOS/kstars"
-	chmod +x ${relroot_app}/Contents/MacOS/kstars
-	
-    # This way we have to copy some stuff, too
-    # I honestly don't know if we should do this or not.
-    #
-    # ln -s ~/usr/local/share/kstars/* ~/Library/Application\ Support/kstars/
-    #
-    statusBanner "The indi drivers"
-    mkdir -p ${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/bin/indi*    ${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/share/indi/* ${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
+	if [ -n "$BUILD_XCODE" ]
+	then
+    	cmake -DCMAKE_INSTALL_PREFIX=${KSTARS_CMAKE_DIR} -G Xcode ../kstars
+    	xcodebuild -project kstars.xcodeproj -alltargets -configuration Debug
+    else
+    	cmake -DCMAKE_INSTALL_PREFIX=${KSTARS_CMAKE_DIR} ../kstars
+    	make
+    	make install
+	fi
+   
 }
 
 function checkUpToDate
@@ -624,45 +624,55 @@ function postProcessKstars
 {
     ##########################################
     statusBanner "Post-processing KStars Build"
-	echo "USING_KSTARS_DIR=${USING_KSTARS_DIR}"
+	echo "KSTARS_APP=${KSTARS_APP}"
     ##########################################
     statusBanner "The Data Directory"
-    echo mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
-	mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
+    echo mkdir -p ${KSTARS_APP}/Contents/Resources/data
+	mkdir -p ${KSTARS_APP}/Contents/Resources/data
 	
-    # Seems that emerge and cmake put these in different places
+    # Emerge and cmake now put them in the same directory, but if it is the Xcode version, it is a subdirectory.
     #
-    if [ -d "${USING_KSTARS_DIR}/share/kstars" ]
+    if [ -d "${KSTARS_APP}/../../../share/kstars" ]
     then
-        typeset src_dir="${USING_KSTARS_DIR}/share/kstars"
+        typeset src_dir="${KSTARS_APP}/../../../share/kstars"
         echo "copying from $src_dir"
-        cp -rf $src_dir/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
-    elif [ -d "$HOME/usr/local/share/kstars" ]
+        cp -rf $src_dir/* ${KSTARS_APP}/Contents/Resources/data/
+    elif [ -d "${KSTARS_APP}/../../../../kstars/kstars/data" ]
     then
-        typeset src_dir="$HOME/usr/local/share/kstars"
+    	typeset src_dir="${KSTARS_APP}/../../../../kstars/kstars/data"
         echo "copying from $src_dir"
-        cp -rf $src_dir/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
+        cp -rf $src_dir/* ${KSTARS_APP}/Contents/Resources/data/
     else
         announce "Cannot find k stars data"
     fi
 
     ##########################################
     statusBanner "The indi drivers"
-    mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/bin/indi*    ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-    cp -f /usr/local/share/indi/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+    mkdir -p ${KSTARS_APP}/Contents/MacOS/indi
+    cp -f /usr/local/bin/indi*    ${KSTARS_APP}/Contents/MacOS/indi/
+    cp -f /usr/local/share/indi/* ${KSTARS_APP}/Contents/MacOS/indi/
+
+	##########################################
+	statusBanner "The gsc executable"
+	sourceDir="$(brew --prefix gsc)"
+	cp -f ${sourceDir}/bin/gsc ${KSTARS_APP}/Contents/MacOS/indi/
+	#This is needed so we will be able to run the install_name_tool on it.
+	chmod +w ${KSTARS_APP}/Contents/MacOS/indi/gsc
 
     ##########################################
     statusBanner "The astrometry files"
-	if [ -n "${USING_KSTARS_DIR}" ]
+	if [ -n "${KSTARS_APP}" ]
 	then
 		sourceDir="$(brew --prefix astrometry-net)"
-		targetDir="${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry"
+		targetDir="${KSTARS_APP}/Contents/MacOS/astrometry"
 	    mkdir -p ${targetDir}
 	
 	    cp -Rf ${sourceDir}/bin ${targetDir}/
 	    cp -Rf ${sourceDir}/lib ${targetDir}/
 	    cp -f  ${sourceDir}/etc/astrometry.cfg ${targetDir}/bin/
+	    
+	    #This is needed so we will be able to run the install_name_tool on them.
+	    chmod +w ${targetDir}/bin/*
 	fi
     ##########################################
     statusBanner "Set up some xplanet pictures..."
@@ -683,34 +693,98 @@ function postProcessKstars
     else
         tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
         rm maps_alien-1.0.tar.gz
-        xplanet_dir=${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
+        xplanet_dir=${KSTARS_APP}/Contents/MacOS/xplanet/
 
         mkdir -p ${xplanet_dir}
         cp -rf $(brew --prefix xplanet)/bin ${xplanet_dir}
         cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
     fi
+    
+    
+    if [ -n "${BUILD_KSTARS_EMERGE}" ]
+	then
+		statusBanner "Copying k i o slave."
+		#I am not sure why this is needed, but it doesn't seem to be able to access KIOSlave otherwise.
+    	#Do we need kio_http_cache_cleaner??  or any others?
+    	cp -f ${KSTARS_EMERGE_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
+
+		statusBanner "Copying plugins"
+    	mkdir ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
+		cp -rf ${KSTARS_EMERGE_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+		
+		statusBanner "Copying icontheme"
+		cp -f ${KSTARS_EMERGE_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
+
+	elif [ -n "${BUILD_KSTARS_CMAKE}" ]
+	then
+		statusBanner "Copying k i o slave."
+    	#Do we need kio_http_cache_cleaner??  or any others?
+    	#This hack is needed because for some reason on my system klauncher cannot access kioslave even in the app directory.
+    	cp -f /usr/local/lib/libexec/kf5/kioslave /usr/local/Cellar/kf5-kinit/5.25.0/lib/libexec/kf5/kioslave
+    	
+		statusBanner "Copying plugins"
+    	mkdir ${KSTARS_APP}/Contents/PlugIns
+		cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/	
+	else
+    	announce "Plugins and K I O Slave ERROR"
+	fi
+    
+    
 
     ###########################################
 	# Uncomment this if the fix-libraries breaks
 	#     announce "Tarring up k stars"
-	# tarname=$(basename ${USING_KSTARS_DIR})
+	# tarname=$(basename ${KSTARS_APP})
 	#     cd $INDI_ROOT
 	#     rm -f ${tarname}.tgz
 	#     tar czf ${tarname}.tgz ${tarname}
 	#     ls -l ${tarname}.tgz
 }
 
+function set_bundle_display_options() {
+	osascript <<-EOF
+		tell application "Finder"
+			set f to POSIX file ("${1}" as string) as alias
+			tell folder f
+				open
+				tell container window
+					set toolbar visible to false
+					set statusbar visible to false
+					set current view to icon view
+					delay 1 -- sync
+					set the bounds to {20, 50, 300, 400}
+				end tell
+				delay 1 -- sync
+				set icon size of the icon view options of container window to 64
+				set arrangement of the icon view options of container window to not arranged
+				set position of item "Applications" to {100,150}
+				set position of item "KStars.app" to {340, 150}
+				set background picture of the icon view options of container window to file "background.jpg" of folder "Pictures"
+				set the bounds of the container window to {0, 0, 440, 270}
+				update without registering applications
+				delay 5 -- sync
+				close
+			end tell
+			delay 5 -- sync
+		end tell
+	EOF
+ }
+
+
+
 ##########################################
 # This is where the bulk of it starts!
 #
 
-# Before anything, check for QT:
+# Before anything, check for QT and to see if the remote servers are accessible
 #
 checkForQT
+checkForConnections
+
 
 processOptions $@
 
-checkUpToDate
+#checkUpToDate
 
 
 if [ -z "$SKIP_BREW" ]
@@ -718,6 +792,11 @@ then
     installBrewDependencies
 else
     announce "Skipping brew dependencies"
+fi
+
+if [ -n "$BUILD_XCODE" ]
+then
+    export KSTARS_CMAKE_DIR=${KSTARS_XCODE_DIR}
 fi
 
 if [ -n "$BUILD_KSTARS_CMAKE" ] && [ -n "$BUILD_KSTARS_EMERGE" ]
@@ -762,12 +841,15 @@ fi
 
 if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
-	USING_KSTARS_DIR="${KSTARS_EMERGE_DIR}"
+	KSTARS_APP="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app"
     emergeKstars
-	
+elif [ -n "${BUILD_XCODE}" ]
+then
+	KSTARS_APP="${KSTARS_XCODE_DIR}/kstars-build/kstars/Debug/kstars.app"
+    buildKstars
 elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
-	USING_KSTARS_DIR="${KSTARS_CMAKE_DIR}"
+	KSTARS_APP="${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app"
     buildKstars
 else
     announce "Not building k stars"
@@ -784,11 +866,59 @@ then
 
     announce "Fixing the dir names and such"
     ${DIR}/fix-libraries.sh
+    ${DIR}/fix-plugins.sh
+    
+    
     ###########################################
     announce "Building DMG"
     cd ${KSTARS_EMERGE_DIR}/Applications/KDE
-    macdeployqt kstars.app -dmg
-	ls -l kstars.dmg
+    macdeployqt kstars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave
+    
+   	#Setting up some short paths
+    UNCOMPRESSED_DMG=${KSTARS_EMERGE_DIR}/Applications/KDE/KStarsUncompressed.dmg
+    
+	#Create and attach DMG
+    hdiutil create -srcfolder ${KSTARS_APP} -size 190m -fs HFS+ -format UDRW -volname KStars ${UNCOMPRESSED_DMG}
+    hdiutil attach ${UNCOMPRESSED_DMG}
+    
+    # Obtain device information
+	DEVS=$(hdiutil attach ${UNCOMPRESSED_DMG} | cut -f 1)
+	DEV=$(echo $DEVS | cut -f 1 -d ' ')
+	VOLUME=$(mount |grep ${DEV} | cut -f 3 -d ' ')
+	
+	# copy in and set volume icon
+	cp ${DIR}/DMGIcon.icns ${VOLUME}/DMGIcon.icns
+	mv ${VOLUME}/DMGIcon.icns ${VOLUME}/.VolumeIcon.icns
+	SetFile -c icnC ${VOLUME}/.VolumeIcon.icns
+	SetFile -a C ${VOLUME}
+
+	# copy in background image
+	mkdir -p ${VOLUME}/Pictures
+	cp ${KSTARS_EMERGE_DIR}/share/kstars/kstars.png ${VOLUME}/Pictures/background.jpg
+	
+	# symlink Applications folder, arrange icons, set background image, set folder attributes, hide pictures folder
+	ln -s /Applications/ ${VOLUME}/Applications
+	set_bundle_display_options ${VOLUME}
+	mv ${VOLUME}/Pictures ${VOLUME}/.Pictures
+ 
+	# Unmount the disk image
+	hdiutil detach $DEV
+ 
+	# Convert the disk image to read-only
+	hdiutil convert ${UNCOMPRESSED_DMG} -format UDBZ -o ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.dmg
+	
+	# Remove the Read Write DMG
+	rm ${UNCOMPRESSED_DMG}
+	
+elif [ -n "${BUILD_KSTARS_CMAKE}" ]
+then
+	announce "Copying K Stars Application To C Make Directory"
+	cp -Rf ${KSTARS_APP} ${KSTARS_CMAKE_DIR}/
+	if [ -n "${BUILD_XCODE}" ]
+	then
+		mkdir ${KSTARS_APP}/../../Release
+		cp -Rf ${KSTARS_APP} ${KSTARS_APP}/../../Release/KStars.app
+	fi
 fi
 
 # Finally, remove the trap
