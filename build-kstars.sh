@@ -357,6 +357,7 @@ function installPatchedKf5Stuff
     brewInstallIfNeeded haraldf/kf5/kf5-kxmlgui
     brewInstallIfNeeded haraldf/kf5/kf5-kdoctools
     brewInstallIfNeeded haraldf/kf5/kf5-knewstuff
+    brewInstallIfNeeded haraldf/kf5/kf5-kded
     
     cd - > /dev/null
 }
@@ -681,22 +682,24 @@ function postProcessKstars
     if [ -n "${BUILD_KSTARS_EMERGE}" ]
 	then
 		statusBanner "Copying k i o slave."
+		#I am not sure why this is needed, but it doesn't seem to be able to access KIOSlave otherwise.
     	#Do we need kio_http_cache_cleaner??  or any others?
     	cp -f ${KSTARS_EMERGE_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
 
 		statusBanner "Copying plugins"
     	mkdir ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
-		cp -Rf ${KSTARS_EMERGE_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+		cp -rf ${KSTARS_EMERGE_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
     	
 	elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 	then
 		statusBanner "Copying k i o slave."
     	#Do we need kio_http_cache_cleaner??  or any others?
-    	cp -f /usr/local/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
+    	#This hack is needed because for some reason on my system klauncher cannot access kioslave even in the app directory.
+    	cp -f /usr/local/lib/libexec/kf5/kioslave /usr/local/Cellar/kf5-kinit/5.25.0/lib/libexec/kf5/kioslave
     	
 		statusBanner "Copying plugins"
     	mkdir ${KSTARS_APP}/Contents/PlugIns
-		cp -Rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+		cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/	
 	else
     	announce "Plugins and K I O Slave ERROR"
 	fi
@@ -810,7 +813,6 @@ if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
 	KSTARS_APP="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app"
     emergeKstars
-	
 elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
 	KSTARS_APP="${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app"
