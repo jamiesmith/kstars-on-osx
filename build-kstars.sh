@@ -16,7 +16,7 @@ BUILD_KSTARS_EMERGE=""
 BUILDING_KSTARS=""
 DRY_RUN_ONLY=""
 FORCE_RUN=""
-USING_KSTARS_DIR=""
+KSTARS_APP=""
 FORCE_BREW_QT=""
 
 function processOptions
@@ -286,6 +286,22 @@ function scriptDied
     announce "Something failed"
 }
 
+function checkForConnections
+{
+	git ls-remote git://anongit.kde.org/kstars.git &> /dev/null
+	git ls-remote https://github.com/indilib/indi.git &> /dev/null
+	git ls-remote https://github.com/KDE/emerge &> /dev/null
+	git ls-remote git://anongit.kde.org/craft.git &> /dev/null
+	statusBanner "All Git Respositories found"
+	if curl --output /dev/null --silent --head --fail "https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz";then
+		statusBanner "XPlanet Images found"
+	else
+		echo "XPlanet Image File Failure"
+	fi
+	
+}
+
+
 function checkForQT
 {
 	if [ -z "$Qt5_DIR" ]
@@ -545,44 +561,10 @@ function buildKstars
     mkdir kstars-build
     cd kstars-build
 
-    cmake -DCMAKE_INSTALL_PREFIX=~/usr/local ../kstars
+    cmake -DCMAKE_INSTALL_PREFIX=${KSTARS_CMAKE_DIR} ../kstars
     make
     make install
-    
-    relroot_app=${KSTARS_CMAKE_DIR}/Applications/KDE/kstars.app
-    relroot_build=${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app
-
-	mkdir -p ${relroot_app}/Contents/Resources
-	mkdir -p ${relroot_app}/Contents/MacOS
-	
-    for path in Contents/Resources/KSTARS_APP_SRCS.icns \
-        Contents/MacOS/kstars \
-        Contents/Info.plist
-    do
-        if [ ! -f ${relroot_app}/${path} ]
-        then
-            echo ${relroot_app}/${path} is missing, fixing.
-			cp ${relroot_build}/${path}  ${relroot_app}/${path}
-        else
-            echo "${relroot_app}/${path} already there"
-        fi
-    done
-	
-	# I honestly cannot figure out why the kstars is losing its exec bit when I 
-	# copy it.
-	# 
-	echo "Putting back exec bit for ${relroot_app}/Contents/MacOS/kstars"
-	chmod +x ${relroot_app}/Contents/MacOS/kstars
-	
-    # This way we have to copy some stuff, too
-    # I honestly don't know if we should do this or not.
-    #
-    # ln -s ~/usr/local/share/kstars/* ~/Library/Application\ Support/kstars/
-    #
-    statusBanner "The indi drivers"
-    mkdir -p ${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/bin/indi*    ${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/share/indi/* ${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app/Contents/MacOS/indi
+   
 }
 
 function checkUpToDate
@@ -624,47 +606,42 @@ function postProcessKstars
 {
     ##########################################
     statusBanner "Post-processing KStars Build"
-	echo "USING_KSTARS_DIR=${USING_KSTARS_DIR}"
+	echo "KSTARS_APP=${KSTARS_APP}"
     ##########################################
     statusBanner "The Data Directory"
-    echo mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
-	mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data
+    echo mkdir -p ${KSTARS_APP}/Contents/Resources/data
+	mkdir -p ${KSTARS_APP}/Contents/Resources/data
 	
     # Seems that emerge and cmake put these in different places
     #
-    if [ -d "${USING_KSTARS_DIR}/share/kstars" ]
+    if [ -d "${KSTARS_APP}/../../../share/kstars" ]
     then
-        typeset src_dir="${USING_KSTARS_DIR}/share/kstars"
+        typeset src_dir="${KSTARS_APP}/../../../share/kstars"
         echo "copying from $src_dir"
-        cp -rf $src_dir/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
-    elif [ -d "$HOME/usr/local/share/kstars" ]
-    then
-        typeset src_dir="$HOME/usr/local/share/kstars"
-        echo "copying from $src_dir"
-        cp -rf $src_dir/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/Resources/data/
+        cp -rf $src_dir/* ${KSTARS_APP}/Contents/Resources/data/
     else
         announce "Cannot find k stars data"
     fi
 
     ##########################################
     statusBanner "The indi drivers"
-    mkdir -p ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi
-    cp -f /usr/local/bin/indi*    ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
-    cp -f /usr/local/share/indi/* ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+    mkdir -p ${KSTARS_APP}/Contents/MacOS/indi
+    cp -f /usr/local/bin/indi*    ${KSTARS_APP}/Contents/MacOS/indi/
+    cp -f /usr/local/share/indi/* ${KSTARS_APP}/Contents/MacOS/indi/
 
 	##########################################
 	statusBanner "The gsc executable"
 	sourceDir="$(brew --prefix gsc)"
-	cp -f ${sourceDir}/bin/gsc ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/
+	cp -f ${sourceDir}/bin/gsc ${KSTARS_APP}/Contents/MacOS/indi/
 	#This is needed so we will be able to run the install_name_tool on it.
-	chmod +w ${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi/gsc
+	chmod +w ${KSTARS_APP}/Contents/MacOS/indi/gsc
 
     ##########################################
     statusBanner "The astrometry files"
-	if [ -n "${USING_KSTARS_DIR}" ]
+	if [ -n "${KSTARS_APP}" ]
 	then
 		sourceDir="$(brew --prefix astrometry-net)"
-		targetDir="${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry"
+		targetDir="${KSTARS_APP}/Contents/MacOS/astrometry"
 	    mkdir -p ${targetDir}
 	
 	    cp -Rf ${sourceDir}/bin ${targetDir}/
@@ -693,17 +670,43 @@ function postProcessKstars
     else
         tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
         rm maps_alien-1.0.tar.gz
-        xplanet_dir=${USING_KSTARS_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/
+        xplanet_dir=${KSTARS_APP}/Contents/MacOS/xplanet/
 
         mkdir -p ${xplanet_dir}
         cp -rf $(brew --prefix xplanet)/bin ${xplanet_dir}
         cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
     fi
+    
+    
+    if [ -n "${BUILD_KSTARS_EMERGE}" ]
+	then
+		statusBanner "Copying k i o slave."
+    	#Do we need kio_http_cache_cleaner??  or any others?
+    	cp -f ${KSTARS_EMERGE_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
+
+		statusBanner "Copying plugins"
+    	mkdir ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
+		cp -Rf ${KSTARS_EMERGE_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+    	
+	elif [ -n "${BUILD_KSTARS_CMAKE}" ]
+	then
+		statusBanner "Copying k i o slave."
+    	#Do we need kio_http_cache_cleaner??  or any others?
+    	cp -f /usr/local/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
+    	
+		statusBanner "Copying plugins"
+    	mkdir ${KSTARS_APP}/Contents/PlugIns
+		cp -Rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+	else
+    	announce "Plugins and K I O Slave ERROR"
+	fi
+    
+    
 
     ###########################################
 	# Uncomment this if the fix-libraries breaks
 	#     announce "Tarring up k stars"
-	# tarname=$(basename ${USING_KSTARS_DIR})
+	# tarname=$(basename ${KSTARS_APP})
 	#     cd $INDI_ROOT
 	#     rm -f ${tarname}.tgz
 	#     tar czf ${tarname}.tgz ${tarname}
@@ -745,13 +748,15 @@ function set_bundle_display_options() {
 # This is where the bulk of it starts!
 #
 
-# Before anything, check for QT:
+# Before anything, check for QT and to see if the remote servers are accessible
 #
 checkForQT
+checkForConnections
+
 
 processOptions $@
 
-checkUpToDate
+#checkUpToDate
 
 
 if [ -z "$SKIP_BREW" ]
@@ -803,12 +808,12 @@ fi
 
 if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
-	USING_KSTARS_DIR="${KSTARS_EMERGE_DIR}"
+	KSTARS_APP="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app"
     emergeKstars
 	
 elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
-	USING_KSTARS_DIR="${KSTARS_CMAKE_DIR}"
+	KSTARS_APP="${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app"
     buildKstars
 else
     announce "Not building k stars"
@@ -822,14 +827,6 @@ fi
 if [ -n "${BUILD_KSTARS_EMERGE}" ]
 then
     set +e
-    
-    announce "Copying k i o slave."
-    #Do we need kio_http_cache_cleaner??  or any others?
-    cp -f ${KSTARS_EMERGE_DIR}/lib/libexec/kf5/kioslave ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/MacOS/
-
-	announce "Copying plugins"
-    mkdir ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
-	cp -Rf ${KSTARS_EMERGE_DIR}/lib/plugins/* ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/
 
     announce "Fixing the dir names and such"
     ${DIR}/fix-libraries.sh
@@ -839,10 +836,9 @@ then
     ###########################################
     announce "Building DMG"
     cd ${KSTARS_EMERGE_DIR}/Applications/KDE
-    macdeployqt kstars.app -executable=${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/MacOS/kioslave
+    macdeployqt kstars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave
     
    	#Setting up some short paths
-    KSTARS_APP=${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app
     UNCOMPRESSED_DMG=${KSTARS_EMERGE_DIR}/Applications/KDE/KStarsUncompressed.dmg
     
 	#Create and attach DMG
@@ -877,8 +873,11 @@ then
 	
 	# Remove the Read Write DMG
 	rm ${UNCOMPRESSED_DMG}
-		
 	
+elif [ -n "${BUILD_KSTARS_CMAKE}" ]
+then
+	announce "Copying K Stars Application To C Make Directory"
+	cp -Rf ${KSTARS_APP} ${KSTARS_CMAKE_DIR}/
 fi
 
 # Finally, remove the trap
