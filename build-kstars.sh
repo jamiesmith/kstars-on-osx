@@ -154,14 +154,40 @@ function patchThirdPartyCmake
     echo '' >> ${CMAKE}
     echo '' >> ${CMAKE}
     echo '### AUTO_PATCHED' >> ${CMAKE}
-    echo 'message("Adding GPhoto Driver")' >> ${CMAKE}
+    echo 'message("Adding GPhoto")' >> ${CMAKE}
     echo 'if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")' >> ${CMAKE}
     echo 'option(WITH_GPHOTO "Install GPhoto Driver" On)' >> ${CMAKE}
+#   echo 'option(WITH_SBIG "Install GPhoto Driver" On)' >> ${CMAKE}
+ #  echo 'option(WITH_DSI "Install GPhoto Driver" On)' >> ${CMAKE}
+  # echo 'option(WITH_ASICAM "Install GPhoto Driver" On)' >> ${CMAKE}
     echo '' >> ${CMAKE}
+    
     echo 'if (WITH_GPHOTO)' >> ${CMAKE}
     echo 'add_subdirectory(indi-gphoto)' >> ${CMAKE}
     echo 'endif(WITH_GPHOTO)' >> ${CMAKE}
     echo '' >> ${CMAKE}
+    
+#    echo 'if (WITH_SBIG)' >> ${CMAKE}
+ #   echo 'find_package(SBIG)' >> ${CMAKE}
+  #  echo 'if (SBIG_FOUND)' >> ${CMAKE}    
+#    echo 'add_subdirectory(indi-sbig)' >> ${CMAKE}
+ #   echo 'else (SBIG_FOUND)' >> ${CMAKE}
+  #  echo 'add_subdirectory(libsbig)' >> ${CMAKE}
+#    echo 'SET(LIBRARIES_FOUND FALSE)' >> ${CMAKE}
+ #   echo 'endif (SBIG_FOUND)' >> ${CMAKE}
+  #  echo 'endif (WITH_SBIG)' >> ${CMAKE}
+   # echo '' >> ${CMAKE}
+    
+#     echo 'if (WITH_DSI)' >> ${CMAKE}
+ #   echo 'add_subdirectory(indi-dsi)' >> ${CMAKE}
+  #  echo 'endif(WITH_DSI)' >> ${CMAKE}
+   # echo '' >> ${CMAKE}
+    
+#     echo 'if (WITH_ASICAM)' >> ${CMAKE}
+ #   echo 'add_subdirectory(indi-asi)' >> ${CMAKE}
+  #  echo 'endif(WITH_ASICAM)' >> ${CMAKE}
+   # echo '' >> ${CMAKE}
+    
     echo 'endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")' >> ${CMAKE}
 	
     echo '' >> ${CMAKE}
@@ -402,9 +428,8 @@ function installBrewDependencies
     brewInstallIfNeeded astrometry-net
     brewInstallIfNeeded xplanet
     brewInstallIfNeeded gsl
-    # brewInstallIfNeeded python
-    # brewInstallIfNeeded wcslib
-    # pip install pyfits
+    brewInstallIfNeeded python
+    pip install pyfits
 
     brewInstallIfNeeded jamiesmith/astronomy/libnova
     brewInstallIfNeeded jamiesmith/astronomy/gsc
@@ -461,6 +486,7 @@ function buildLibIndi
     if [ -n "${BUILD_3RDPARTY}" ]
     then
         announce "Executing third Party Build as directed"
+  #      cp -Rf ${DIR}/SBIGUDrv.framework ${INDI_DIR}/build/libindi/SBIGUDrv.framework
         buildThirdParty
     else
         statusBanner "Skipping third Party Build as directed"
@@ -757,7 +783,9 @@ function set_bundle_display_options() {
 				delay 1 -- sync
 				set icon size of the icon view options of container window to 64
 				set arrangement of the icon view options of container window to not arranged
-				set position of item "Applications" to {100,150}
+				set position of item "QuickStart.pdf" to {100, 50}
+				set position of item "CopyrightInfoAndSourcecode.pdf" to {100, 150}
+				set position of item "Applications" to {340, 50}
 				set position of item "KStars.app" to {340, 150}
 				set background picture of the icon view options of container window to file "background.jpg" of folder "Pictures"
 				set the bounds of the container window to {0, 0, 440, 270}
@@ -868,17 +896,21 @@ then
     ${DIR}/fix-libraries.sh
     ${DIR}/fix-plugins.sh
     
+    announce "Copying Documentation"
+    cp ${DIR}/CopyrightInfoAndSourcecode.pdf ${KSTARS_EMERGE_DIR}/Applications/KDE/
+    cp ${DIR}/QuickStart.pdf ${KSTARS_EMERGE_DIR}/Applications/KDE/
+    rm -r ${KSTARS_EMERGE_DIR}/Applications/KDE/kglobalaccel5.app
     
     ###########################################
     announce "Building DMG"
     cd ${KSTARS_EMERGE_DIR}/Applications/KDE
-    macdeployqt kstars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave
+    macdeployqt KStars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave
     
    	#Setting up some short paths
     UNCOMPRESSED_DMG=${KSTARS_EMERGE_DIR}/Applications/KDE/KStarsUncompressed.dmg
     
 	#Create and attach DMG
-    hdiutil create -srcfolder ${KSTARS_APP} -size 190m -fs HFS+ -format UDRW -volname KStars ${UNCOMPRESSED_DMG}
+    hdiutil create -srcfolder ${KSTARS_APP}/../ -size 190m -fs HFS+ -format UDRW -volname KStars ${UNCOMPRESSED_DMG}
     hdiutil attach ${UNCOMPRESSED_DMG}
     
     # Obtain device information
@@ -913,7 +945,9 @@ then
 elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
 	announce "Copying K Stars Application To C Make Directory"
-	cp -Rf ${KSTARS_APP} ${KSTARS_CMAKE_DIR}/
+	mkdir ${KSTARS_CMAKE_DIR}/Applications
+	mkdir ${KSTARS_CMAKE_DIR}/Applications/KDE
+	cp -Rf ${KSTARS_APP} ${KSTARS_CMAKE_DIR}/Applications/KDE
 	if [ -n "${BUILD_XCODE}" ]
 	then
 		mkdir ${KSTARS_APP}/../../Release
