@@ -154,7 +154,7 @@ function patchThirdPartyCmake
     echo '' >> ${CMAKE}
     echo '' >> ${CMAKE}
     echo '### AUTO_PATCHED' >> ${CMAKE}
-    echo 'message("Adding GPhoto, SBIG, DSI, and ZWO")' >> ${CMAKE}
+    echo 'message("Adding GPhoto")' >> ${CMAKE}
     echo 'if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")' >> ${CMAKE}
     echo 'option(WITH_GPHOTO "Install GPhoto Driver" On)' >> ${CMAKE}
 #   echo 'option(WITH_SBIG "Install GPhoto Driver" On)' >> ${CMAKE}
@@ -486,7 +486,7 @@ function buildLibIndi
     if [ -n "${BUILD_3RDPARTY}" ]
     then
         announce "Executing third Party Build as directed"
-        cp -Rf ${DIR}/SBIGUDrv.framework ${INDI_DIR}/build/libindi/SBIGUDrv.framework
+  #      cp -Rf ${DIR}/SBIGUDrv.framework ${INDI_DIR}/build/libindi/SBIGUDrv.framework
         buildThirdParty
     else
         statusBanner "Skipping third Party Build as directed"
