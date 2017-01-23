@@ -389,6 +389,7 @@ function installPatchedKf5Stuff
     brewInstallIfNeeded haraldf/kf5/kf5-kcoreaddons
     brewInstallIfNeeded haraldf/kf5/kf5-kauth
     brewInstallIfNeeded haraldf/kf5/kf5-kcrash
+    brewInstallIfNeeded haraldf/kf5/kf5-knotifyconfig
     brewInstallIfNeeded haraldf/kf5/kf5-knotifications
     brewInstallIfNeeded haraldf/kf5/kf5-kplotting
     brewInstallIfNeeded haraldf/kf5/kf5-kxmlgui
