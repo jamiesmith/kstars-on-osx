@@ -387,6 +387,7 @@ function installPatchedKf5Stuff
     brew link --force gettext
     mkdir -p /usr/local/lib/libexec
     brewInstallIfNeeded haraldf/kf5/kf5-kcoreaddons
+    brew link --overwrite kf5-kcoreaddons
     brewInstallIfNeeded haraldf/kf5/kf5-kauth
     brewInstallIfNeeded haraldf/kf5/kf5-kcrash
     brewInstallIfNeeded haraldf/kf5/kf5-knotifyconfig
