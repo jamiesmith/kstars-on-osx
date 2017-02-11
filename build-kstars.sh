@@ -748,7 +748,7 @@ function postProcessKstars
 		statusBanner "Copying k i o slave."
     	#Do we need kio_http_cache_cleaner??  or any others?
     	#This hack is needed because for some reason on my system klauncher cannot access kioslave even in the app directory.
-    	cp -f /usr/local/lib/libexec/kf5/kioslave /usr/local/Cellar/kf5-kinit/5.25.0/lib/libexec/kf5/kioslave
+    	cp -f /usr/local/lib/libexec/kf5/kioslave /usr/local/opt/kf5-kinit/lib/libexec/kf5/kioslave
     	
 		statusBanner "Copying plugins"
     	mkdir ${KSTARS_APP}/Contents/PlugIns
