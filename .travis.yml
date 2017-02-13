@@ -1,0 +1,9 @@
+sudo: required
+language: generic
+os: osx
+osx_image: xcode8
+compiler: clang
+install:
+ - brew update
+ - brew install qt5
+ - ./build-kstars.sh -3ciq
