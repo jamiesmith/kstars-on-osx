@@ -343,46 +343,60 @@ function checkForQT
 {
 	if [ -z "$Qt5_DIR" ]
 	then
+		if [ -z "${FORCE_BREW_QT}" ]
+		then
 		dieUsage "Cannot proceed, qt not installed - see the readme."
+		fi
 	fi
 }
 
 function installPatchedKf5Stuff
 {
-    # Cleanup steps:
-    #     brew uninstall `brew list -1 | grep '^kf5-'`
-    #     rm -rf ~/Library/Caches/Homebrew/kf5-*
-    #     brew untap haraldf/kf5
-    #     ls /usr/local/Homebrew/Library/Taps
-    #     brew remove qt5
 
-	# I think that the qt5 stuff can just be the dir...
-	#
-    if [ -d ~/Qt/5.7/clang_64 ]
-    then
-    	export SUBSTITUTE=~/Qt/5.7/clang_64
-    elif [ -d ~/Qt5.7.0/5.7/clang_64 ]
-    then
-    	export SUBSTITUTE=~/Qt5.7.0/5.7/clang_64
-    else
-        echo "Cannot figure out where QT is."
-        exit 9
-    fi
+	if [ -z "${FORCE_BREW_QT}" ]
+	then
+		# Cleanup steps:
+		#     brew uninstall `brew list -1 | grep '^kf5-'`
+		#     rm -rf ~/Library/Caches/Homebrew/kf5-*
+		#     brew untap haraldf/kf5
+		#     ls /usr/local/Homebrew/Library/Taps
+		#     brew remove qt5
+
+		# I think that the qt5 stuff can just be the dir...
+		#
+		if [ -d ~/Qt/5.7/clang_64 ]
+		then
+			export SUBSTITUTE=~/Qt/5.7/clang_64
+		elif [ -d ~/Qt/5.8/clang_64 ]
+		then
+			export SUBSTITUTE=~/Qt/5.8/clang_64
+		elif [ -d ~/Qt5.7.0/5.7/clang_64 ]
+		then
+			export SUBSTITUTE=~/Qt5.7.0/5.7/clang_64
+		else
+			echo "Cannot figure out where QT is."
+			exit 9
+		fi
+	fi
 
     brew tap haraldf/kf5
 
     cd $(brew --repo haraldf/homebrew-kf5)
 
-    echo $SUBSTITUTE
-    count=$(cat *.rb | grep -c CMAKE_PREFIX_PATH)
-    if [ $count -le 1 ]
-    then
-        echo "Hacking kf5 Files"
-        sed -i '' "s@*args@\"-DCMAKE_PREFIX_PATH=${SUBSTITUTE}\", *args@g" *.rb
-        sed -i '' '/depends_on "qt5"/,/^/d' *.rb
-    else
-        echo "kf5 Files already hacked, er, patched, skipping"
-    fi
+
+	if [ -z "${FORCE_BREW_QT}" ]
+	then
+		echo $SUBSTITUTE
+		count=$(cat *.rb | grep -c CMAKE_PREFIX_PATH)
+		if [ $count -le 1 ]
+		then
+			echo "Hacking kf5 Files"
+			sed -i '' "s@*args@\"-DCMAKE_PREFIX_PATH=${SUBSTITUTE}\", *args@g" *.rb
+			sed -i '' '/depends_on "qt5"/,/^/d' *.rb
+		else
+			echo "kf5 Files already hacked, er, patched, skipping"
+		fi
+	fi
 
     brew link --force gettext
     mkdir -p /usr/local/lib/libexec
@@ -679,7 +693,16 @@ function postProcessKstars
     mkdir -p ${KSTARS_APP}/Contents/MacOS/indi
     cp -f /usr/local/bin/indi*    ${KSTARS_APP}/Contents/MacOS/indi/
     cp -f /usr/local/share/indi/* ${KSTARS_APP}/Contents/MacOS/indi/
-
+    ##########################################
+    statusBanner "All the other XML Files"
+	FILES="$(find ${INDI_DIR} -name '*.xml.cmake')"
+    for FILE in $FILES; do
+    	FILENAME=$(basename $FILE)
+    	NEWFILENAME="$(echo $FILENAME | sed 's/.cmake//')"
+    	echo $NEWFILENAME
+    	DESTINATION=${KSTARS_APP}/Contents/MacOS/indi/$NEWFILENAME
+    	cp -f $FILE $DESTINATION
+    done
 	##########################################
 	statusBanner "The gsc executable"
 	sourceDir="$(brew --prefix gsc)"

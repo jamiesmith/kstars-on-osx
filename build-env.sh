@@ -25,6 +25,9 @@ then
 	if [ -d ~/Qt/5.7/clang_64 ]
 	then
 		export Qt5_DIR=~/Qt/5.7/clang_64
+	elif [ -d ~/Qt/5.8/clang_64 ]
+	then
+		export Qt5_DIR=~/Qt/5.8/clang_64
 	elif [ -d ~/Qt5.7.0/5.7/clang_64 ]
 	then
 		export Qt5_DIR=~/Qt5.7.0/5.7/clang_64
