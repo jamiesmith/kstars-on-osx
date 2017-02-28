@@ -13,7 +13,7 @@ SKIP_BREW=""
 BUILD_INDI=""
 BUILD_KSTARS_CMAKE=""
 BUILD_XCODE=""
-BUILD_KSTARS_EMERGE=""
+BUILD_KSTARS_CRAFT=""
 BUILDING_KSTARS=""
 DRY_RUN_ONLY=""
 FORCE_RUN=""
@@ -39,7 +39,7 @@ function processOptions
 	            DRY_RUN_ONLY="Yep"
 	            ;;
 	        e)
-	            BUILD_KSTARS_EMERGE="Yep"
+	            BUILD_KSTARS_CRAFT="Yep"
 	            BUILDING_KSTARS="Yep"
 	            ;;
 	        f)
@@ -73,7 +73,7 @@ function processOptions
 	echo "BUILD_INDI          = ${BUILD_INDI:-Nope}"
 	echo "BUILD_KSTARS_CMAKE  = ${BUILD_KSTARS_CMAKE:-Nope}"
 	echo "BUILD_XCODE  		  = ${BUILD_XCODE:-Nope}"
-	echo "BUILD_KSTARS_EMERGE = ${BUILD_KSTARS_EMERGE:-Nope}"
+	echo "BUILD_KSTARS_CRAFT = ${BUILD_KSTARS_CRAFT:-Nope}"
 	echo "SKIP_BREW           = ${SKIP_BREW:-Nope}"
 }
 
@@ -89,14 +89,14 @@ cat <<EOF
 	    -a Announce stuff as you go
 	    -c Build kstars via cmake (ONLY one of -c , -x, or -e can be used)
 	    -d Dry run only (just show what you are going to do)
-	    -e Build kstars via emerge (ONLY one of -c , -x, or -e can be used)
+	    -e Build kstars via craft (ONLY one of -c , -x, or -e can be used)
 	    -f Force build even if there are script updates
 	    -i Build libindi
 		-q Use the brew-installed qt
 	    -s Skip brew (only use this if you know you already have them)
 	    -x Build kstars via cmake with xcode (ONLY one of -c , -x, or -e can be used)
     
-	To build a complete emerge you would do:
+	To build a complete craft you would do:
 	    $0 -3aei
     
 	To build a complete cmake build you would do:
@@ -137,173 +137,23 @@ function announce
     statusBanner "$*"
 }
 
-function patchThirdPartyCmake
-{
-    cd ${INDI_DIR}
-    CMAKE=${INDI_DIR}/indi/3rdparty/CMakeLists.txt
-
-    if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
-    then
-        echo $CMAKE Already Patched
-        return
-    fi
-
-    statusBanner "Patching $CMAKE"
-
-    echo '' >> ${CMAKE}
-    echo '' >> ${CMAKE}
-    echo '' >> ${CMAKE}
-    echo '### AUTO_PATCHED' >> ${CMAKE}
-    echo 'message("Adding GPhoto")' >> ${CMAKE}
-    echo 'if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")' >> ${CMAKE}
-    echo 'option(WITH_GPHOTO "Install GPhoto Driver" On)' >> ${CMAKE}
-#   echo 'option(WITH_SBIG "Install GPhoto Driver" On)' >> ${CMAKE}
- #  echo 'option(WITH_DSI "Install GPhoto Driver" On)' >> ${CMAKE}
-  # echo 'option(WITH_ASICAM "Install GPhoto Driver" On)' >> ${CMAKE}
-    echo '' >> ${CMAKE}
-    
-    echo 'if (WITH_GPHOTO)' >> ${CMAKE}
-    echo 'add_subdirectory(indi-gphoto)' >> ${CMAKE}
-    echo 'endif(WITH_GPHOTO)' >> ${CMAKE}
-    echo '' >> ${CMAKE}
-    
-#    echo 'if (WITH_SBIG)' >> ${CMAKE}
- #   echo 'find_package(SBIG)' >> ${CMAKE}
-  #  echo 'if (SBIG_FOUND)' >> ${CMAKE}    
-#    echo 'add_subdirectory(indi-sbig)' >> ${CMAKE}
- #   echo 'else (SBIG_FOUND)' >> ${CMAKE}
-  #  echo 'add_subdirectory(libsbig)' >> ${CMAKE}
-#    echo 'SET(LIBRARIES_FOUND FALSE)' >> ${CMAKE}
- #   echo 'endif (SBIG_FOUND)' >> ${CMAKE}
-  #  echo 'endif (WITH_SBIG)' >> ${CMAKE}
-   # echo '' >> ${CMAKE}
-    
-#     echo 'if (WITH_DSI)' >> ${CMAKE}
- #   echo 'add_subdirectory(indi-dsi)' >> ${CMAKE}
-  #  echo 'endif(WITH_DSI)' >> ${CMAKE}
-   # echo '' >> ${CMAKE}
-    
-#     echo 'if (WITH_ASICAM)' >> ${CMAKE}
- #   echo 'add_subdirectory(indi-asi)' >> ${CMAKE}
-  #  echo 'endif(WITH_ASICAM)' >> ${CMAKE}
-   # echo '' >> ${CMAKE}
-    
-    echo 'endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")' >> ${CMAKE}
-	
-    echo '' >> ${CMAKE}
-    echo '' >> ${CMAKE}
-}
-
-function patchEqmodCmake
-{
-    cd ${INDI_DIR}
-    CMAKE=${INDI_DIR}/indi/3rdparty/indi-eqmod/CMakeLists.txt
-
-    if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
-    then
-        echo $CMAKE Already Patched
-        return
-    fi
-
-    statusBanner "Patching $CMAKE"
-
-    echo '### AUTO_PATCHED' >> ${CMAKE}
-    echo 'find_package(GSL REQUIRED)' >> ${CMAKE}
-    echo '' >> ${CMAKE}
-    echo 'if (GSL_FOUND)' >> ${CMAKE}
-    echo 'include_directories(${GSL_INCLUDE_DIRS})' >> ${CMAKE}
-    echo 'endif (GSL_FOUND)' >> ${CMAKE}
-}
-
-function patchAlignmentCmake
-{
-    cd ${INDI_DIR}
-    CMAKE=${INDI_DIR}/indi/libindi/libs/indibase/alignment/CMakeLists.txt
-
-    if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
-    then
-        echo $CMAKE Already Patched
-        return
-    fi
-
-    statusBanner "Patching $CMAKE"
-    sed -i '' 's#target_link_libraries(AlignmentDriver ${GSL_LIBRARIES})#target_link_libraries(AlignmentDriver -L/usr/local/lib ${GSL_LIBRARIES})#' $CMAKE    
-    echo "" >> ${CMAKE}
-    echo "### AUTO_PATCHED" >> ${CMAKE}
-}
-
-function patchTopCmake
-{
-    cd ${INDI_DIR}
-    CMAKE=${INDI_DIR}/indi/libindi/CMakeLists.txt
-
-    if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
-    then
-        echo $CMAKE Already Patched
-        return
-    fi
-
-    statusBanner "Patching $CMAKE"
-    [ -f ${CMAKE}.orig ] || cp ${CMAKE} ${CMAKE}.orig
-    awk '1;/set \(indiclient_SRCS/{c=4}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/libs/lilxml.c"}' ${CMAKE} > ${CMAKE}.zzz
-    awk '1;/set \(indiclient_SRCS/{c=5}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/base64.c"}' ${CMAKE}.zzz > ${CMAKE}
-
-    awk '1;/set \(indiclientqt_SRCS/{c=4}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/libs/lilxml.c"}' ${CMAKE} > ${CMAKE}.zzz
-    awk '1;/set \(indiclientqt_SRCS/{c=5}c&&!--c{print "        \${CMAKE_CURRENT_SOURCE_DIR}/base64.c"}' ${CMAKE}.zzz > ${CMAKE}
-    
-    rm ${CMAKE}.zzz
-
-    echo "" >> ${CMAKE}
-    echo "### AUTO_PATCHED" >> ${CMAKE}
-}
-
-function patchMaxdomeiiCmake
-{
-    cd ${INDI_DIR}
-    CMAKE=${INDI_DIR}/indi/3rdparty/indi-maxdomeii/CMakeLists.txt
-
-    if [ $(grep -c AUTO_PATCHED ${CMAKE}) -gt 0 ]
-    then
-        echo $CMAKE Already Patched
-        return
-    fi
-    
-    statusBanner "Patching $CMAKE"
-    # First, nova needs to be all caps
-    #
-    sed -i '' 's|Nova REQUIRED|NOVA REQUIRED|' $CMAKE
-    
-    # second, need to also include ln_types.h
-    #
-    [ -f ${CMAKE}.orig ] || cp ${CMAKE} ${CMAKE}.orig
-    awk '1;/NOVA REQUIRED/{c=1}c&&!--c{print "### AUTO_PATCHED\nfind_path(LN_INCLUDE_DIR libnova/ln_types.h)"}' ${CMAKE} > ${CMAKE}.zzz
-    awk '1;/NOVA_INCLUDE_DIR/{c=1}c&&!--c{print "### AUTO_PATCHED\ninclude_directories( ${LN_INCLUDE_DIR})"}' ${CMAKE}.zzz > ${CMAKE}
-
-    rm ${CMAKE}.zzz
-
-    echo "" >> ${CMAKE}
-    echo "### AUTO_PATCHED" >> ${CMAKE}
-}
-
 function buildThirdParty
 {
-    patchThirdPartyCmake
-    patchEqmodCmake
-    patchMaxdomeiiCmake
-    
-    cd ${INDI_DIR}
+     ## Build 3rd party
     mkdir -p ${INDI_DIR}/build/3rdparty
-    cd ${INDI_DIR}/build/3rdparty
     rm -rf ${INDI_DIR}/build/3rdparty/*
-
-    statusBanner "Configure indi third-party"
+    cd ${INDI_DIR}/build/3rdparty
+    
+    ## Run cmake and make install twice
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty
-
-    statusBanner "make indi third-party"
+    statusBanner "make 3rd party drivers 1st round"
     make
-
-    statusBanner "make install indi third-party"
-    make install    
+    make install
+    
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty
+    statusBanner "make 3rd party drivers 2nd round"
+    make
+    make install
 }
 
 function brewInstallIfNeeded
@@ -327,7 +177,6 @@ function checkForConnections
 {
 	git ls-remote git://anongit.kde.org/kstars.git &> /dev/null
 	git ls-remote https://github.com/indilib/indi.git &> /dev/null
-	git ls-remote https://github.com/KDE/emerge &> /dev/null
 	git ls-remote git://anongit.kde.org/craft.git &> /dev/null
 	statusBanner "All Git Respositories found"
 	if curl --output /dev/null --silent --head --fail "https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz";then
@@ -341,7 +190,7 @@ function checkForConnections
 
 function checkForQT
 {
-	if [ -z "$Qt5_DIR" ]
+	if [ -z "$QT5_DIR" ]
 	then
 		if [ -z "${FORCE_BREW_QT}" ]
 		then
@@ -364,15 +213,9 @@ function installPatchedKf5Stuff
 
 		# I think that the qt5 stuff can just be the dir...
 		#
-		if [ -d ~/Qt/5.7/clang_64 ]
+		if [ -d ${QT5_DIR} ]
 		then
-			export SUBSTITUTE=~/Qt/5.7/clang_64
-		elif [ -d ~/Qt/5.8/clang_64 ]
-		then
-			export SUBSTITUTE=~/Qt/5.8/clang_64
-		elif [ -d ~/Qt5.7.0/5.7/clang_64 ]
-		then
-			export SUBSTITUTE=~/Qt5.7.0/5.7/clang_64
+			export SUBSTITUTE=${QT5_DIR}
 		else
 			echo "Cannot figure out where QT is."
 			exit 9
@@ -419,7 +262,6 @@ function installBrewDependencies
 {
     announce "Installing brew dependencies"
 
-
     brewInstallIfNeeded cmake
     brewInstallIfNeeded wget
     brewInstallIfNeeded coreutils
@@ -445,6 +287,7 @@ function installBrewDependencies
     brewInstallIfNeeded xplanet
     brewInstallIfNeeded gsl
     brewInstallIfNeeded python
+    brewInstallIfNeeded libftdi
     pip install pyfits
 
     brewInstallIfNeeded jamiesmith/astronomy/libnova
@@ -458,31 +301,27 @@ function installBrewDependencies
 	fi
 }
 
-function buildLibIndi
+function buildINDI
 {
 	mkdir -p ${INDI_DIR}
 	
     ##########################################
     # Indi
-    announce "building lib indi stuff"
+    announce "building libindi"
 
     cd ${INDI_DIR}/
 
     if [ ! -d indi ]
     then
-        statusBanner "Cloning and patching indilib"
+        statusBanner "Cloning indi library"
 
         git clone https://github.com/indilib/indi.git
         cd indi/libindi
     else
+        statusBanner "Updating indi"
         cd indi
         git pull
-        statusBanner "indilib already cloned and patched"    
-        cd ${INDI_DIR}/
     fi
-
-    patchTopCmake
-    patchAlignmentCmake
 
     mkdir -p ${INDI_DIR}/build/libindi
     rm -rf ${INDI_DIR}/build/libindi/*
@@ -502,105 +341,30 @@ function buildLibIndi
     if [ -n "${BUILD_3RDPARTY}" ]
     then
         announce "Executing third Party Build as directed"
-  #      cp -Rf ${DIR}/SBIGUDrv.framework ${INDI_DIR}/build/libindi/SBIGUDrv.framework
         buildThirdParty
     else
         statusBanner "Skipping third Party Build as directed"
     fi
 }
 
-function emergeKstars
+function craftKstars
 {
-	mkdir -p ${KSTARS_EMERGE_DIR}
-	
-    ### Let's try emerge.
-    announce "Running the emerge!"
-
-    if [ ! -f ~/.gitconfig ] || [ $(grep -c kde.org ~/.gitconfig) -eq 0 ]
-    then
-    cat << EOF >> ~/.gitconfig
-
-[url "git://anongit.kde.org/"]
-    insteadOf = kde:
-[url "ssh://git@git.kde.org/"]
-    pushInsteadOf = kde:
+    mkdir -p ${CRAFT_DIR}
+    cd ${CRAFT_DIR}/
     
-EOF
-    else
-        echo "looks like gitconfig is done"
-    fi
-
-    cd ${KSTARS_EMERGE_DIR}/
-	
-	version=craft
-
-	if [ "$version" == "emerge" ]
-	then
-
-		# working against the mirror until the branch is caught up.
-		#
-		git clone --branch unix3 https://github.com/KDE/emerge
-	    mkdir -p etc
-	    cp -f emerge/kdesettings.mac etc/kdesettings.ini
-
-	    . emerge/kdeenv.sh
-		
-		cmd=""
-
-		if [ $(which emerge) ]
-		then
-			echo "Found emerge"
-			cmd=$(which emerge)
-		else
-			echo "emerge not found"
-		fi
-				
-		if [ $(which craft) ]
-		then
-			echo "Found craft"
-			cmd=$(which craft)
-		else
-			echo "craft not found"
-		fi
-		
-		[ -z "$cmd" ] && dieError "Could not find an emerge or craft option"
-	
-	    time ${cmd} kstars
-	else
-	    # git clone --branch unix3 git://anongit.kde.org/craft.git
-	    git clone git://anongit.kde.org/craft.git
-
+    if [ ! -d craft ]
+    then
+        statusBanner "Cloning craft"
+		git clone git://anongit.kde.org/craft.git	
 	    mkdir -p etc
 	    cp -f craft/kdesettings.mac etc/kdesettings.ini
-	    . craft/kdeenv.sh
-		
-		cmd=""
+    fi
 
-		if [ $(which emerge) ]
-		then
-			echo "Found emerge"
-			cmd=$(which emerge)
-		else
-			echo "emerge not found"
-		fi
-				
-		if [ $(which craft) ]
-		then
-			echo "Found craft"
-			cmd=$(which craft)
-		else
-			echo "craft not found"
-		fi
-		
-		echo "In the script craftRoot is [$craftRoot]"
-		export craftRoot
-		export crafteRoot=$craftRoot
-		[ -z "$cmd" ] && dieError "Could not find an emerge or craft option"
+	. craft/kdeenv.sh
 	
-	    time ${cmd} kstars
-	fi
+	craft -vvv -i kstars
 	
-    announce "EMERGE COMPLETE"
+    announce "CRAFT COMPLETE"
 }
 
 function buildKstars
@@ -672,16 +436,21 @@ function postProcessKstars
     echo mkdir -p ${KSTARS_APP}/Contents/Resources/data
 	mkdir -p ${KSTARS_APP}/Contents/Resources/data
 	
-    # Emerge and cmake now put them in the same directory, but if it is the Xcode version, it is a subdirectory.
+    # Craft and cmake now put them in the same directory, but if it is the Xcode version, it is a subdirectory.
     #
-    if [ -d "${KSTARS_APP}/../../../share/kstars" ]
+    if [ -n "${BUILD_KSTARS_CMAKE}" ] && [ -d "${KSTARS_CMAKE_DIR}/share/kstars" ]
     then
-        typeset src_dir="${KSTARS_APP}/../../../share/kstars"
+        typeset src_dir="${KSTARS_CMAKE_DIR}/share/kstars"
         echo "copying from $src_dir"
         cp -rf $src_dir/* ${KSTARS_APP}/Contents/Resources/data/
-    elif [ -d "${KSTARS_APP}/../../../../kstars/kstars/data" ]
+    elif [ -n "${BUILD_KSTARS_CRAFT}" ] && [ -d "${CRAFT_DIR}/share/kstars" ]
     then
-    	typeset src_dir="${KSTARS_APP}/../../../../kstars/kstars/data"
+        typeset src_dir="${CRAFT_DIR}/share/kstars"
+        echo "copying from $src_dir"
+        cp -rf $src_dir/* ${KSTARS_APP}/Contents/Resources/data/
+    elif [ -n "$BUILD_XCODE" ] && [ -d "${KSTARS_XCODE_DIR}/kstars/kstars/data" ]
+    then
+    	typeset src_dir="${KSTARS_XCODE_DIR}/kstars/kstars/data"
         echo "copying from $src_dir"
         cp -rf $src_dir/* ${KSTARS_APP}/Contents/Resources/data/
     else
@@ -752,19 +521,19 @@ function postProcessKstars
     fi
     
     
-    if [ -n "${BUILD_KSTARS_EMERGE}" ]
+    if [ -n "${BUILD_KSTARS_CRAFT}" ]
 	then
 		statusBanner "Copying k i o slave."
 		#I am not sure why this is needed, but it doesn't seem to be able to access KIOSlave otherwise.
     	#Do we need kio_http_cache_cleaner??  or any others?
-    	cp -f ${KSTARS_EMERGE_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
+    	cp -f ${CRAFT_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
 
 		statusBanner "Copying plugins"
-    	mkdir ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
-		cp -rf ${KSTARS_EMERGE_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+    	mkdir -p ${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
+		cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
 		
 		statusBanner "Copying icontheme"
-		cp -f ${KSTARS_EMERGE_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
+		cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
 
 	elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 	then
@@ -852,7 +621,7 @@ then
     export KSTARS_CMAKE_DIR=${KSTARS_XCODE_DIR}
 fi
 
-if [ -n "$BUILD_KSTARS_CMAKE" ] && [ -n "$BUILD_KSTARS_EMERGE" ]
+if [ -n "$BUILD_KSTARS_CMAKE" ] && [ -n "$BUILD_KSTARS_CRAFT" ]
 then
     dieUsage "Only one KSTARS build type allowed" 
 fi
@@ -862,9 +631,9 @@ then
 	dieUsage "${INDI_DIR} already exists"
 fi
 
-if [ -n "${BUILD_KSTARS_EMERGE}" ] && [ -d "${KSTARS_EMERGE_DIR}" ]
+if [ -n "${BUILD_KSTARS_CRAFT}" ] && [ -d "${CRAFT_DIR}" ]
 then
-	dieUsage "${KSTARS_EMERGE_DIR} already exists"
+	dieUsage "${CRAFT_DIR} already exists"
 fi
 
 if [ -n "${BUILD_KSTARS_CMAKE}" ] && [ -d "${KSTARS_CMAKE_DIR}" ]
@@ -872,7 +641,7 @@ then
 	dieUsage "${KSTARS_CMAKE_DIR} already exists"
 fi
 
-if [ -z "$BUILD_KSTARS_CMAKE" ] && [ -z "$BUILD_KSTARS_EMERGE" ] && [ -z "$BUILD_INDI" ]
+if [ -z "$BUILD_KSTARS_CMAKE" ] && [ -z "$BUILD_KSTARS_CRAFT" ] && [ -z "$BUILD_INDI" ]
 then
     DRY_RUN_ONLY="Yep"
 fi
@@ -887,22 +656,22 @@ trap scriptDied EXIT
 
 if [ -n "${BUILD_INDI}" ]
 then
-    buildLibIndi    
+    buildINDI    
 else
     announce "Skipping INDI Build"
 fi
 
-if [ -n "${BUILD_KSTARS_EMERGE}" ]
+if [ -n "${BUILD_KSTARS_CRAFT}" ]
 then
-	KSTARS_APP="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app"
-    emergeKstars
+	KSTARS_APP="${CRAFT_DIR}/Applications/KDE/KStars.app"
+    craftKstars
 elif [ -n "${BUILD_XCODE}" ]
 then
-	KSTARS_APP="${KSTARS_XCODE_DIR}/kstars-build/kstars/Debug/kstars.app"
+	KSTARS_APP="${KSTARS_XCODE_DIR}/kstars-build/kstars/Debug/KStars.app"
     buildKstars
 elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
-	KSTARS_APP="${KSTARS_CMAKE_DIR}/kstars-build/kstars/kstars.app"
+	KSTARS_APP="${KSTARS_CMAKE_DIR}/kstars-build/kstars/KStars.app"
     buildKstars
 else
     announce "Not building k stars"
@@ -913,7 +682,7 @@ then
 	postProcessKstars
 fi
 
-if [ -n "${BUILD_KSTARS_EMERGE}" ]
+if [ -n "${BUILD_KSTARS_CRAFT}" ]
 then
     set +e
 
@@ -922,17 +691,17 @@ then
     ${DIR}/fix-plugins.sh
     
     announce "Copying Documentation"
-    cp ${DIR}/CopyrightInfoAndSourcecode.pdf ${KSTARS_EMERGE_DIR}/Applications/KDE/
-    cp ${DIR}/QuickStart.pdf ${KSTARS_EMERGE_DIR}/Applications/KDE/
-    rm -r ${KSTARS_EMERGE_DIR}/Applications/KDE/kglobalaccel5.app
+    cp ${DIR}/CopyrightInfoAndSourcecode.pdf ${CRAFT_DIR}/Applications/KDE/
+    cp ${DIR}/QuickStart.pdf ${CRAFT_DIR}/Applications/KDE/
+    rm -r ${CRAFT_DIR}/Applications/KDE/kglobalaccel5.app
     
     ###########################################
     announce "Building DMG"
-    cd ${KSTARS_EMERGE_DIR}/Applications/KDE
+    cd ${CRAFT_DIR}/Applications/KDE
     macdeployqt KStars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave
     
    	#Setting up some short paths
-    UNCOMPRESSED_DMG=${KSTARS_EMERGE_DIR}/Applications/KDE/KStarsUncompressed.dmg
+    UNCOMPRESSED_DMG=${CRAFT_DIR}/Applications/KDE/KStarsUncompressed.dmg
     
 	#Create and attach DMG
     hdiutil create -srcfolder ${KSTARS_APP}/../ -size 190m -fs HFS+ -format UDRW -volname KStars ${UNCOMPRESSED_DMG}
@@ -951,7 +720,7 @@ then
 
 	# copy in background image
 	mkdir -p ${VOLUME}/Pictures
-	cp ${KSTARS_EMERGE_DIR}/share/kstars/kstars.png ${VOLUME}/Pictures/background.jpg
+	cp ${CRAFT_DIR}/share/kstars/kstars.png ${VOLUME}/Pictures/background.jpg
 	
 	# symlink Applications folder, arrange icons, set background image, set folder attributes, hide pictures folder
 	ln -s /Applications/ ${VOLUME}/Applications
@@ -962,7 +731,7 @@ then
 	hdiutil detach $DEV
  
 	# Convert the disk image to read-only
-	hdiutil convert ${UNCOMPRESSED_DMG} -format UDBZ -o ${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.dmg
+	hdiutil convert ${UNCOMPRESSED_DMG} -format UDBZ -o ${CRAFT_DIR}/Applications/KDE/KStars.dmg
 	
 	# Remove the Read Write DMG
 	rm ${UNCOMPRESSED_DMG}

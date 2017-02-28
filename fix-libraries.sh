@@ -10,14 +10,14 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "${DIR}/build-env.sh" > /dev/null
 
 FILES_TO_COPY=()
-FRAMEWORKS_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/Frameworks"
-INDI_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/indi"
-XPLANET_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/xplanet/bin"
-ASTROMETRY_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/astrometry/bin"
-KIO_DIR="${KSTARS_EMERGE_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/kf5/kio"
+FRAMEWORKS_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/Frameworks"
+INDI_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/indi"
+XPLANET_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/xplanet/bin"
+ASTROMETRY_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/astrometry/bin"
+KIO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/kf5/kio"
 DRY_RUN_ONLY=""
 
-IGNORED_OTOOL_OUTPUT="/Qt|qt5|${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/|/usr/lib/|/System/"
+IGNORED_OTOOL_OUTPUT="/Qt|qt5|${CRAFT_DIR}/Applications/KDE/KStars.app/|/usr/lib/|/System/"
 mkdir -p "${FRAMEWORKS_DIR}"
 
 function dieUsage
@@ -52,7 +52,7 @@ function processTarget
 	entries=$(otool -L $target | sed '1d' | awk '{print $1}' | egrep -v "$IGNORED_OTOOL_OUTPUT")
     echo "Processing $target"
     
-    relativeRoot="${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents"
+    relativeRoot="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents"
     
     pathDiff=${target#${relativeRoot}*}
 
@@ -166,18 +166,17 @@ do
 done
 shift $((${OPTIND} - 1))
 
-cd ${KSTARS_EMERGE_DIR}
+cd ${CRAFT_DIR}
 
 statusBanner "Processing kstars executable"
-processTarget "${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kstars"
+processTarget "${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/kstars"
 
 statusBanner "Processing kioslave executable"
-processTarget "${KSTARS_EMERGE_DIR}/Applications/KDE/kstars.app/Contents/MacOS/kioslave"
+processTarget "${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/kioslave"
 
 # Also cheat, and add libindidriver.1.dylib to the list
 #
 addFileToCopy "libindidriver.1.dylib"
-addFileToCopy "libindi.1.dylib"
 
 statusBanner "Copying first round of files"
 copyFilesToFrameworks
