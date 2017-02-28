@@ -688,7 +688,6 @@ then
 
     announce "Fixing the dir names and such"
     ${DIR}/fix-libraries.sh
-    ${DIR}/fix-plugins.sh
     
     announce "Copying Documentation"
     cp ${DIR}/CopyrightInfoAndSourcecode.pdf ${CRAFT_DIR}/Applications/KDE/
