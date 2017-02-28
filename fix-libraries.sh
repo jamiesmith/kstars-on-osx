@@ -256,8 +256,6 @@ done
 statusBanner "Copying fourth round of files for astrometry"
 copyFilesToFrameworks
 
-#For some reason, this is not working,the path is all wrong and I had to put in a separate script.
-
 statusBanner "Processing all of the files in the plugins/kf5/kio dir"
 
 # Then do all of the files in the kio Dir
