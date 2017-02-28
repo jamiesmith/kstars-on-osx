@@ -39,6 +39,7 @@ export QT5NETWORK_DIR=$QT5_DIR
 
 export GSC_TARGET_DIR=${CRAFT_DIR}/Applications/KDE/kstars.app/Contents/MacOS/gsc
 export QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10
+export MACOSX_DEPLOYMENT_TARGET=10.10
 
 echo "INDI_ROOT          is [${INDI_ROOT}]"
 echo "INDI_DIR           is [${INDI_DIR}]"
