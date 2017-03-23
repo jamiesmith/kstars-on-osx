@@ -731,10 +731,14 @@ then
 	hdiutil detach $DEV
  
 	# Convert the disk image to read-only
-	hdiutil convert ${UNCOMPRESSED_DMG} -format UDBZ -o ${CRAFT_DIR}/Applications/KDE/KStars.dmg
+	hdiutil convert ${UNCOMPRESSED_DMG} -format UDBZ -o ${CRAFT_DIR}/Applications/KDE/kstars-latest.dmg
 	
 	# Remove the Read Write DMG
 	rm ${UNCOMPRESSED_DMG}
+	
+	# Generate Checksums
+	md5 ${CRAFT_DIR}/Applications/KDE/kstars-latest.dmg > ${CRAFT_DIR}/Applications/KDE/kstars-latest.md5
+	shasum -a 256 ${CRAFT_DIR}/Applications/KDE/kstars-latest.dmg > ${CRAFT_DIR}/Applications/KDE/kstars-latest.sha256
 	
 elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
