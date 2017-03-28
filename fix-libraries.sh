@@ -288,15 +288,9 @@ for file in ${FRAMEWORKS_DIR}/*
 do
     base=$(basename $file)
     
-    if [ -x $file ]
-    then
-        statusBanner "Processing Frameworks file $base"
-        processTarget $file
-    else
-        echo ""
-        echo ""
-        echo "Skipping $base, not executable"
-    fi
+	statusBanner "Processing Frameworks file $base"
+    processTarget $file
+    
 done
 
 statusBanner "Copying sixth round of files for Frameworks"
