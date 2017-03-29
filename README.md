@@ -1,6 +1,7 @@
 ## Instructions for Installing KStars, Dependencies, and related software on OS X with options for creating an App Bundle, an XCode Project, or a QT Creator Project
 
 This script is built on:
+
 	-the initial work that seanhoughton did to get KStars working on OS X initially
 	
 	-the work that rlancaste did to get KStars modified to work well on OS X
@@ -10,8 +11,8 @@ This script is built on:
 	-the work that jamiesmith did to automate the entire process in a simple and easy to use script
 	
 	-and the later work of rlancaste and knro to further fix problems and streamline the process.
-	
-Most of the epic journey is logged on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=564#11793
+
+	-Note, Most of the epic journey is logged on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=564#11793
 
 
 Prerequisites for running the script include:
@@ -66,11 +67,11 @@ Note that the -3 option builds the 3rd party drivers, the -a option announces ke
 
 After the script finishes, whichever method you chose, you should have built a kstars app that can actually be used.
 
-If you chose the app and dmg option, you can now distribute the app and/or dmg to other people freely.  The dmg has associated md5 and sha256 files for download verification.
+	-If you chose the app and dmg option, you can now distribute the app and/or dmg to other people freely.  The dmg has associated md5 and sha256 files for download verification.
 
-If you chose the XCode project, you should now be able to double click the created xcode project and launch xcode to do your editing.
+	-If you chose the XCode project, you should now be able to double click the created xcode project and launch xcode to do your editing.
 
-If you chose the QT Creator option, you should follow the EditingKStarsInQTCreatorOnOSX.pdf document to get all set up to do your editing.
+	-If you chose the QT Creator option, you should follow the EditingKStarsInQTCreatorOnOSX.pdf document to get all set up to do your editing.
 
 (For the last 2 options, of course you must have either XCode or QT Creator installed on your system.
 
