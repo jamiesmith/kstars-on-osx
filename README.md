@@ -36,7 +36,7 @@ it starts copying stuff.  I used the offline file, but you can use either.
 The install selections I chose:
    ![qt install options](/images/qt-install-options.png "qt install options")
 
-### Downloading the files from this repo and running the build script.  
+### Downloading the files from this repo 
 
 ```console
 	mkdir -p ~/Projects
@@ -50,8 +50,16 @@ The install selections I chose:
 	# (if you changed something then you will have to work that out)
 	cd ~/Projects/kstars-on-osx
 	git pull
-	
-	# then run the install script!
+```
+
+### Editing the build-env.sh file to reflect your version of QT
+
+Edit this line:  export QT5_DIR=~/Qt/5.8/clang_64
+To reflect the path to your QT_5 installation.
+
+### Running the Script
+```console
+	# Change to the script directory
 	cd ~/Projects/kstars-on-osx
 	# If you want to build a full kstars app and dmg, then do:
 	./build-kstars.sh -3aei
