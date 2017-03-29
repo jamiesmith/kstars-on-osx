@@ -2,10 +2,15 @@
 
 This script is built on:
 	-the initial work that seanhoughton did to get KStars working on OS X initially
+	
 	-the work that rlancaste did to get KStars modified to work well on OS X
+	
 	-the work that Gonzothegreat did to create a deployable app bundle and dmg
+	
 	-the work that jamiesmith did to automate the entire process in a simple and easy to use script
+	
 	-and the later work of rlancaste and knro to further fix problems and streamline the process.
+	
 Most of the epic journey is logged on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=564#11793
 
 
@@ -16,14 +21,14 @@ Prerequisites for running the script include:
 [Apple Developer Site](developer.apple.com/download/) or from the 
 [app store](https://itunes.apple.com/us/app/xcode/id497799835)
 
-### Install Homebrew
+### Installing Homebrew
 
 `/usr/bin/ruby -e "$(curl -fsSL raw.githubusercontent.com/Homebrew/install/master/install)"`
 
-### QT
+### Installing QT
 
 Either install QT via a download from: [QT.io](www.qt.io/download-open-source/) or via homebrew.
-Both methods should work, but the homebrew method used to take HOURS.  If you do the homebrew method, 
+Both methods should work, but the homebrew method could take HOURS.  If you do the homebrew method, 
 then be sure to install qt with dbus.  Note that the install from qt sometimes takes
 a long time too, and the installer appears to become unresponsive before
 it starts copying stuff.  I used the offline file, but you can use either.  
@@ -32,7 +37,7 @@ The install selections I chose:
 
 ### Download the scripts from this repo
 
-Downloading and run the build script.  
+Downloading and running the build script.  
 
 ```console
 	mkdir -p ~/Projects
@@ -57,10 +62,16 @@ Downloading and run the build script.
 	./build-kstars.sh -3aci
 ```
 
+Note that the -3 option builds the 3rd party drivers, the -a option announces key installation steps audibly, and the -i option builds indi with kstars.
+
 After the script finishes, whichever method you chose, you should have built a kstars app that can actually be used.
+
 If you chose the app and dmg option, you can now distribute the app and/or dmg to other people freely.  The dmg has associated md5 and sha256 files for download verification.
+
 If you chose the XCode project, you should now be able to double click the created xcode project and launch xcode to do your editing.
+
 If you chose the QT Creator option, you should follow the EditingKStarsInQTCreatorOnOSX.pdf document to get all set up to do your editing.
+
 (For the last 2 options, of course you must have either XCode or QT Creator installed on your system.
 
 Now you should be all set up!!!
