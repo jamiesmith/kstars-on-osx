@@ -23,7 +23,7 @@ export GSC_DIR=${INDI_ROOT}/gsc
 if [ -z "${FORCE_BREW_QT}" ]
 then
 	#NOTE: The user of the Script needs to edit this path to match the system.
-	export QT5_DIR=~/Qt/5.7/clang_64
+	export QT5_DIR=~/Qt/5.8/clang_64
 else
 	export Qt5_DIR=$(brew --prefix qt5)
 fi	

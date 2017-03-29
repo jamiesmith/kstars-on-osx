@@ -1,11 +1,15 @@
-## Instructions for Installing KStars, Dependencies, and related software on OS X with Emerge with the intent of creating an App bundle
+## Instructions for Installing KStars, Dependencies, and related software on OS X with options for creating an App Bundle, an XCode Project, or a QT Creator Project
 
-This has a couple of my enhancements (mostly lazy commands) added to the nice work that rlancaste & Gonzothegreat have done
-on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=564#11793
+This script is built on:
+	-the initial work that seanhoughton did to get KStars working on OS X initially
+	-the work that rlancaste did to get KStars modified to work well on OS X
+	-the work that Gonzothegreat did to create a deployable app bundle and dmg
+	-the work that jamiesmith did to automate the entire process in a simple and easy to use script
+	-and the later work of rlancaste and knro to further fix problems and streamline the process.
+Most of the epic journey is logged on the indilib forums http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=564#11793
 
-Note that there is an effort to automate this - see the `build-kstars.sh`.
 
-Prerequisites for the whole process are:
+Prerequisites for running the script include:
 
 ### Installing Xcode and accept the license agreements
 
@@ -18,15 +22,15 @@ Prerequisites for the whole process are:
 
 ### QT
 
-[QT.io](www.qt.io/download-open-source/).  Either install this in `~/Qt/`,
-`~/Qt5.7.0` (both in your home dir), or install it via brew - this is 
-NOT automated because it takes hours.  Note that the install from qt takes
-quite a long time, and the installer appears to become unresponsive before
+Either install QT via a download from: [QT.io](www.qt.io/download-open-source/) or via homebrew.
+Both methods should work, but the homebrew method used to take HOURS.  If you do the homebrew method, 
+then be sure to install qt with dbus.  Note that the install from qt sometimes takes
+a long time too, and the installer appears to become unresponsive before
 it starts copying stuff.  I used the offline file, but you can use either.  
 The install selections I chose:
    ![qt install options](/images/qt-install-options.png "qt install options")
 
-### Download the scripts (this stuff)
+### Download the scripts from this repo
 
 Downloading and run the build script.  
 
@@ -43,15 +47,29 @@ Downloading and run the build script.
 	cd ~/Projects/kstars-on-osx
 	git pull
 	
-	# then run it!
-	#
+	# then run the install script!
 	cd ~/Projects/kstars-on-osx
+	# If you want to build a full kstars app and dmg, then do:
 	./build-kstars.sh -3aei
+	# If you want to build an XCode Project you can work on, instead do:
+	./build-kstars.sh -3axi
+	# If you want to build a QT Creator Project you can work on, instead do:
+	./build-kstars.sh -3aci
 ```
 
-# Manual Steps
+After the script finishes, whichever method you chose, you should have built a kstars app that can actually be used.
+If you chose the app and dmg option, you can now distribute the app and/or dmg to other people freely.  The dmg has associated md5 and sha256 files for download verification.
+If you chose the XCode project, you should now be able to double click the created xcode project and launch xcode to do your editing.
+If you chose the QT Creator option, you should follow the EditingKStarsInQTCreatorOnOSX.pdf document to get all set up to do your editing.
+(For the last 2 options, of course you must have either XCode or QT Creator installed on your system.
 
-Hopefully these stay up-to-date.
+Now you should be all set up!!!
+
+
+
+
+# Manual Steps for reference purposes -- note currently outdated, needs updating.
+
 
 1. Make sure you have home-brew installed [brew.sh](http://brew.sh)
 2. Make sure that you have core depndencies git, make, and cmake installed.
@@ -334,12 +352,6 @@ curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1
 tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
 ```
 
-
-## Still to do:
-
-[GSC Data](http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=600#11840)
-
-(DONE) [XPlanet images](http://indilib.org/forum/ekos/525-ekos-on-mac-os-x.html?start=600#11847)
 
 
 
