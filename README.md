@@ -36,9 +36,7 @@ it starts copying stuff.  I used the offline file, but you can use either.
 The install selections I chose:
    ![qt install options](/images/qt-install-options.png "qt install options")
 
-### Download the scripts from this repo
-
-Downloading and running the build script.  
+### Downloading the files from this repo and running the build script.  
 
 ```console
 	mkdir -p ~/Projects
@@ -73,7 +71,7 @@ After the script finishes, whichever method you chose, you should have built a k
 
 	-If you chose the QT Creator option, you should follow the EditingKStarsInQTCreatorOnOSX.pdf document to get all set up to do your editing.
 
-(For the last 2 options, of course you must have either XCode or QT Creator installed on your system.
+(For the last 2 options, of course you must have either XCode or QT Creator installed on your system respectively.
 
 Now you should be all set up!!!
 
