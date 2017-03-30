@@ -33,8 +33,12 @@ Both methods should work, but the homebrew method could take HOURS.  If you do t
 then be sure to install qt with dbus.  Note that the install from qt sometimes takes
 a long time too, and the installer appears to become unresponsive before
 it starts copying stuff.  I used the offline file, but you can use either.  
+
+Note: For now, you should use a version of QT 5.7, for some reason 5.8 is not building a dependency of kstars called phonon due to an issue with a missing framework.
+
 The install selections I chose:
    ![qt install options](/images/qt-install-options.png "qt install options")
+
 
 ### Downloading the files from this repo 
 
@@ -54,7 +58,7 @@ The install selections I chose:
 
 ### Editing the build-env.sh file to reflect your version of QT
 
-Edit this line:  export QT5_DIR=~/Qt/5.8/clang_64
+Edit this line:  export QT5_DIR=~/Qt/5.7/clang_64
 To reflect the path to your QT_5 installation.
 
 ### Running the Script
