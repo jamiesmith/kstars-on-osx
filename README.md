@@ -87,6 +87,7 @@ After the script finishes, whichever method you chose, you should have built a k
 
 Now you should be all set up!!!
 
+One note on distribution:  Due to our usage of homebrew in building the dependencies of KStars, the app/dmg that is build with this script will only work on installations of OS X equal to or greater than your version.  Anotherwords, you cannot build an app bundle on Sierra and expect it to work perfectly on Yosemite.  This is because homebrew ignores the deployment target flag in its installs.  We may address this in the future.
 
 
 
