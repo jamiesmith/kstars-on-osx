@@ -698,7 +698,7 @@ then
     ###########################################
     announce "Building DMG"
     cd ${CRAFT_DIR}/Applications/KDE
-    macdeployqt KStars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave
+    macdeployqt KStars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave -qmldir=${KSTARS_APP}/Contents/Resources/data/tools/whatsinteresting/qml/
     
    	#Setting up some short paths
     UNCOMPRESSED_DMG=${CRAFT_DIR}/Applications/KDE/KStarsUncompressed.dmg
