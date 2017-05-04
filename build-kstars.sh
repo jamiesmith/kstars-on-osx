@@ -553,6 +553,9 @@ function postProcessKstars
     	#This hack is needed because for some reason on my system klauncher cannot access kioslave even in the app directory.
     	cp -f /usr/local/lib/libexec/kf5/kioslave /usr/local/opt/kf5-kinit/lib/libexec/kf5/kioslave
     	
+    	statusBanner "Copying plugins"
+    	cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+    	
 	else
     	announce "Plugins and K I O Slave ERROR"
 	fi
