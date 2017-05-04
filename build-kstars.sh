@@ -530,7 +530,9 @@ function postProcessKstars
     	cp -f ${CRAFT_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
 
 		statusBanner "Copying plugins"
-    	mkdir -p ${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
+    	mkdir -p ${KSTARS_APP}/Contents/PlugIns
+    	mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
+    	mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2
 		cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
 		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/0.12.0/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
 		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/2.5.12/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
@@ -549,7 +551,9 @@ function postProcessKstars
     	cp -f /usr/local/lib/libexec/kf5/kioslave /usr/local/opt/kf5-kinit/lib/libexec/kf5/kioslave
     	
 		statusBanner "Copying plugins"
-    	mkdir ${KSTARS_APP}/Contents/PlugIns
+    	mkdir -p ${KSTARS_APP}/Contents/PlugIns
+    	mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
+    	mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2
 		cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
 		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/0.12.0/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
 		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/2.5.12/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
