@@ -14,6 +14,7 @@ FRAMEWORKS_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/Frameworks"
 INDI_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/indi"
 XPLANET_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/xplanet/bin"
 ASTROMETRY_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/astrometry/bin"
+GPHOTO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/libgphoto2_port/0.12.0"
 KIO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/kf5/kio"
 DRY_RUN_ONLY=""
 
@@ -264,19 +265,30 @@ FILES_TO_COPY=()
 for file in ${KIO_DIR}/*
 do
     base=$(basename $file)
-    
-    if [ -x $file ]
-    then
-        statusBanner "Processing kio file $base"
-        processTarget $file
-    else
-        echo ""
-        echo ""
-        echo "Skipping $base, not executable"
-    fi
+
+    statusBanner "Processing kio file $base"
+    processTarget $file
+
 done
 
 statusBanner "Copying fifth round of files for kio plugins/image downloads"
+copyFilesToFrameworks
+
+statusBanner "Processing all of the files in the plugins/libgphoto2_port dir"
+
+# Then do all of the files in the libgphoto2_port Dir
+#
+FILES_TO_COPY=()
+for file in ${GPHOTO_DIR}/*
+do
+    base=$(basename $file)
+    
+    statusBanner "Processing gphoto file $base"
+    processTarget $file
+    
+done
+
+statusBanner "Copying sixth round of files for gphoto plugins"
 copyFilesToFrameworks
 
 statusBanner "Processing all of the files in the Frameworks dir"
