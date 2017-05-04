@@ -521,6 +521,14 @@ function postProcessKstars
         cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
     fi
     
+    statusBanner "Copying GPhoto Plugins"
+	GPHOTO_VERSION=$(pkg-config --modversion libgphoto2)
+	PORT_VERSION=$(pkg-config --modversion libgphoto2_port)
+    mkdir -p ${KSTARS_APP}/Contents/PlugIns
+    mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
+    mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2
+	cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/${PORT_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
+	cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/${GPHOTO_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
     
     if [ -n "${BUILD_KSTARS_CRAFT}" ]
 	then
@@ -529,13 +537,8 @@ function postProcessKstars
     	#Do we need kio_http_cache_cleaner??  or any others?
     	cp -f ${CRAFT_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
 
-		statusBanner "Copying plugins"
-    	mkdir -p ${KSTARS_APP}/Contents/PlugIns
-    	mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
-    	mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2
+		statusBanner "Copying plugins and preparing them for otool"
 		cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
-		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/0.12.0/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
-		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/2.5.12/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
 		#This will allow otool to be run on them
 		chmod -R +w ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
 		chmod -R +w ${KSTARS_APP}/Contents/PlugIns/libgphoto2
@@ -550,13 +553,6 @@ function postProcessKstars
     	#This hack is needed because for some reason on my system klauncher cannot access kioslave even in the app directory.
     	cp -f /usr/local/lib/libexec/kf5/kioslave /usr/local/opt/kf5-kinit/lib/libexec/kf5/kioslave
     	
-		statusBanner "Copying plugins"
-    	mkdir -p ${KSTARS_APP}/Contents/PlugIns
-    	mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
-    	mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2
-		cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
-		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/0.12.0/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
-		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/2.5.12/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
 	else
     	announce "Plugins and K I O Slave ERROR"
 	fi
