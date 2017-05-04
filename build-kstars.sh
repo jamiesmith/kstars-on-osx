@@ -532,9 +532,9 @@ function postProcessKstars
 		statusBanner "Copying plugins"
     	mkdir -p ${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
 		cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
-		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port ${KSTARS_APP}/Contents/PlugIns/
+		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/0.12.0/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
 		#This will allow otool to be run on them
-		chmod -R +w ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/0.12.0/
+		chmod -R +w ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
 		
 		statusBanner "Copying icontheme"
 		cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc

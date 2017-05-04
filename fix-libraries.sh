@@ -14,7 +14,7 @@ FRAMEWORKS_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/Frameworks"
 INDI_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/indi"
 XPLANET_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/xplanet/bin"
 ASTROMETRY_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/astrometry/bin"
-GPHOTO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/libgphoto2_port/0.12.0"
+GPHOTO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/libgphoto2_port"
 KIO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/kf5/kio"
 DRY_RUN_ONLY=""
 
