@@ -14,7 +14,8 @@ FRAMEWORKS_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/Frameworks"
 INDI_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/indi"
 XPLANET_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/xplanet/bin"
 ASTROMETRY_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/astrometry/bin"
-GPHOTO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/libgphoto2_port"
+GPHOTO_IOLIBS_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/libgphoto2_port"
+GPHOTO_CAMLIBS_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/libgphoto2"
 KIO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/kf5/kio"
 DRY_RUN_ONLY=""
 
@@ -274,21 +275,38 @@ done
 statusBanner "Copying fifth round of files for kio plugins/image downloads"
 copyFilesToFrameworks
 
-statusBanner "Processing all of the files in the plugins/libgphoto2_port dir"
+statusBanner "Processing all of the files in the GPhoto IOLIBS plugins dir"
 
-# Then do all of the files in the libgphoto2_port Dir
+# Then do all of the files in the plugins/libgphoto2_port Dir
 #
 FILES_TO_COPY=()
-for file in ${GPHOTO_DIR}/*
+for file in ${GPHOTO_IOLIBS_DIR}/*
 do
     base=$(basename $file)
     
-    statusBanner "Processing gphoto file $base"
+    statusBanner "Processing gphoto IOLIB Plugin file $base"
     processTarget $file
     
 done
 
-statusBanner "Copying sixth round of files for gphoto plugins"
+statusBanner "Copying sixth round of files for GPhoto IOLIBS plugins dir"
+copyFilesToFrameworks
+
+statusBanner "Processing all of the files in the GPhoto CAMLIBS plugins dir"
+
+# Then do all of the files in the plugins/libgphoto2 Dir
+#
+FILES_TO_COPY=()
+for file in ${GPHOTO_CAMLIBS_DIR}/*
+do
+    base=$(basename $file)
+    
+    statusBanner "Processing gphoto CAMLIB Plugin file $base"
+    processTarget $file
+    
+done
+
+statusBanner "Copying seventh round of files for GPhoto CAMLIBS plugins dir"
 copyFilesToFrameworks
 
 statusBanner "Processing all of the files in the Frameworks dir"
@@ -305,7 +323,7 @@ do
     
 done
 
-statusBanner "Copying sixth round of files for Frameworks"
+statusBanner "Copying eighth round of files for Frameworks"
 copyFilesToFrameworks
 
 statusBanner "The following files are now in Frameworks:"

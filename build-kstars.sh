@@ -533,8 +533,10 @@ function postProcessKstars
     	mkdir -p ${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns
 		cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
 		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/0.12.0/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
+		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/2.5.12/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
 		#This will allow otool to be run on them
 		chmod -R +w ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
+		chmod -R +w ${KSTARS_APP}/Contents/PlugIns/libgphoto2
 		
 		statusBanner "Copying icontheme"
 		cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
@@ -548,7 +550,9 @@ function postProcessKstars
     	
 		statusBanner "Copying plugins"
     	mkdir ${KSTARS_APP}/Contents/PlugIns
-		cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/	
+		cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/0.12.0/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
+		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/2.5.12/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
 	else
     	announce "Plugins and K I O Slave ERROR"
 	fi
