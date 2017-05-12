@@ -529,6 +529,10 @@ function postProcessKstars
     mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2
 	cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/${PORT_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
 	cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/${GPHOTO_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
+	
+	statusBanner "Copying qhy firmware"
+	cp -rf /usr/local/lib/qhy ${KSTARS_APP}/Contents/PlugIns/
+	
     
     if [ -n "${BUILD_KSTARS_CRAFT}" ]
 	then
