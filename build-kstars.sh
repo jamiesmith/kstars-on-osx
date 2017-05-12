@@ -140,9 +140,17 @@ function announce
 function buildThirdParty
 {
      ## Build 3rd party
+    mkdir -p ${INDI_DIR}/build/qhy
+    cd ${INDI_DIR}/build/qhy
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqhy
+    make
+    make install
+     
     mkdir -p ${INDI_DIR}/build/3rdparty
     rm -rf ${INDI_DIR}/build/3rdparty/*
     cd ${INDI_DIR}/build/3rdparty
+    
+    
     
     ## Run cmake and make install twice
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty
