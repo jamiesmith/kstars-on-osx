@@ -548,6 +548,9 @@ function postProcessKstars
 		#I am not sure why this is needed, but it doesn't seem to be able to access KIOSlave otherwise.
     	#Do we need kio_http_cache_cleaner??  or any others?
     	cp -f ${CRAFT_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
+    	
+    	statusBanner "Copying dbus-daemon."
+    	cp -rf $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
 
 		statusBanner "Copying plugins and preparing them for otool"
 		cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
@@ -720,7 +723,7 @@ then
     ###########################################
     announce "Building DMG"
     cd ${CRAFT_DIR}/Applications/KDE
-    macdeployqt KStars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave -qmldir=${KSTARS_APP}/Contents/Resources/data/tools/whatsinteresting/qml/
+    macdeployqt KStars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave -executable=${KSTARS_APP}/Contents/MacOS/dbus-daemon -qmldir=${KSTARS_APP}/Contents/Resources/data/tools/whatsinteresting/qml/
     
    	#Setting up some short paths
     UNCOMPRESSED_DMG=${CRAFT_DIR}/Applications/KDE/KStarsUncompressed.dmg

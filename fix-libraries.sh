@@ -176,6 +176,9 @@ processTarget "${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/kstars"
 statusBanner "Processing kioslave executable"
 processTarget "${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/kioslave"
 
+statusBanner "Processing dbus-daemon"
+processTarget "${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/dbus-daemon"
+
 # Also cheat, and add libindidriver.1.dylib to the list
 #
 addFileToCopy "libindidriver.1.dylib"
