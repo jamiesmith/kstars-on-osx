@@ -550,7 +550,10 @@ function postProcessKstars
     	cp -f ${CRAFT_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
     	
     	statusBanner "Copying dbus-daemon."
-    	cp -rf $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
+    	cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
+    	chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-daemon
+    	mkdir ${KSTARS_APP}/Contents/PlugIns/dbus
+    	cp $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/
 
 		statusBanner "Copying plugins and preparing them for otool"
 		cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
