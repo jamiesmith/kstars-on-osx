@@ -526,6 +526,7 @@ function postProcessKstars
 
         mkdir -p ${xplanet_dir}
         cp -rf $(brew --prefix xplanet)/bin ${xplanet_dir}
+        chmod +w ${xplanet_dir}/bin/xplanet
         cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
     fi
     
