@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>org.freedesktop.dbus-kstars</string>
+
+	<key>ProgramArguments</key>
+    <array>
+        <string>/Applications/kstars.app/Contents/MacOS/dbus-daemon</string>
+        <string>--nofork</string>
+        <string>--config-file=/Applications/kstars.app/Contents/PlugIns/dbus/kstars.conf</string>
+    </array>
+
+	<key>Sockets</key>
+	<dict>
+		<key>unix_domain_listener</key>
+		<dict>
+			<key>SecureSocketWithKey</key>
+			<string>DBUS_LAUNCHD_SESSION_BUS_SOCKET</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

@@ -549,11 +549,14 @@ function postProcessKstars
     	#Do we need kio_http_cache_cleaner??  or any others?
     	cp -f ${CRAFT_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
     	
-    	statusBanner "Copying dbus-daemon."
+    	statusBanner "Copying dbus programs and files."
     	cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
     	chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-daemon
+    	cp -f $(brew --prefix dbus)/bin/dbus-send ${KSTARS_APP}/Contents/MacOS/
+    	chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-send
     	mkdir ${KSTARS_APP}/Contents/PlugIns/dbus
-    	cp $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/
+    	cp $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/kstars.conf
+    	cp ${DIR}/org.freedesktop.dbus-kstars.plist ${KSTARS_APP}/Contents/PlugIns/dbus/
 
 		statusBanner "Copying plugins and preparing them for otool"
 		cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
