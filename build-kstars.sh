@@ -364,7 +364,14 @@ function craftKstars
     if [ ! -d craft ]
     then
         statusBanner "Cloning craft"
-		git clone git://anongit.kde.org/craft.git	
+		git clone git://anongit.kde.org/craft.git
+		
+		# The following 3 lines are usually not needed, but if craft has a problem
+		# then you can uncomment these 3 lines to go back to a version of craft that works for building KStars.app
+		cd craft
+		git reset --hard de8e9a79fde9bede703da3756fe641ffefc659f7
+		cd ..	
+		
 	    mkdir -p etc
 	    cp -f craft/kdesettings.mac etc/kdesettings.ini
     fi
@@ -542,6 +549,15 @@ function postProcessKstars
 	statusBanner "Copying qhy firmware"
 	cp -rf /usr/local/lib/qhy ${KSTARS_APP}/Contents/PlugIns/
 	
+	statusBanner "Copying dbus programs and files."
+	cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
+    chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-daemon
+    cp -f $(brew --prefix dbus)/bin/dbus-send ${KSTARS_APP}/Contents/MacOS/
+    chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-send
+    mkdir ${KSTARS_APP}/Contents/PlugIns/dbus
+    cp $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/kstars.conf
+    cp ${DIR}/org.freedesktop.dbus-kstars.plist ${KSTARS_APP}/Contents/PlugIns/dbus/
+	
     
     if [ -n "${BUILD_KSTARS_CRAFT}" ]
 	then
@@ -549,15 +565,6 @@ function postProcessKstars
 		#I am not sure why this is needed, but it doesn't seem to be able to access KIOSlave otherwise.
     	#Do we need kio_http_cache_cleaner??  or any others?
     	cp -f ${CRAFT_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
-    	
-    	statusBanner "Copying dbus programs and files."
-    	cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
-    	chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-daemon
-    	cp -f $(brew --prefix dbus)/bin/dbus-send ${KSTARS_APP}/Contents/MacOS/
-    	chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-send
-    	mkdir ${KSTARS_APP}/Contents/PlugIns/dbus
-    	cp $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/kstars.conf
-    	cp ${DIR}/org.freedesktop.dbus-kstars.plist ${KSTARS_APP}/Contents/PlugIns/dbus/
 
 		statusBanner "Copying plugins and preparing them for otool"
 		cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
