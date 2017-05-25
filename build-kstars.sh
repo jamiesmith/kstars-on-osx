@@ -183,16 +183,15 @@ function scriptDied
 
 function checkForConnections
 {
-	git ls-remote git://anongit.kde.org/kstars.git &> /dev/null
-	git ls-remote https://github.com/indilib/indi.git &> /dev/null
-	git ls-remote git://anongit.kde.org/craft.git &> /dev/null
-	statusBanner "All Git Respositories found"
-	if curl --output /dev/null --silent --head --fail "https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz";then
-		statusBanner "XPlanet Images found"
-	else
-		echo "XPlanet Image File Failure"
-	fi
-	
+    git ls-remote ${KSTARS_REPO} &> /dev/null
+    git ls-remote ${LIBINDI_REPO} &> /dev/null
+    git ls-remote ${CRAFT_REPO} &> /dev/null
+    statusBanner "All Git Respositories found"
+    if curl --output /dev/null --silent --head --fail "https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz";then
+        statusBanner "XPlanet Images found"
+    else
+        echo "XPlanet Image File Failure"
+    fi
 }
 
 
@@ -324,7 +323,7 @@ function buildINDI
     then
         statusBanner "Cloning indi library"
 
-        git clone https://github.com/indilib/indi.git
+        git clone ${LIBINDI_REPO}
         cd indi/libindi
     else
         statusBanner "Updating indi"
@@ -364,7 +363,7 @@ function craftKstars
     if [ ! -d craft ]
     then
         statusBanner "Cloning craft"
-		git clone git://anongit.kde.org/craft.git
+                git clone ${CRAFT_REPO}
 		
 		# The following 3 lines are usually not needed, but if craft has a problem
 		# then you can uncomment these 3 lines to go back to a version of craft that works for building KStars.app
@@ -390,7 +389,7 @@ function buildKstars
     announce "Building k stars via c make"
     cd ${KSTARS_CMAKE_DIR}/
 
-    git clone git://anongit.kde.org/kstars.git
+    git clone ${KSTARS_REPO}
 
     mkdir kstars-build
     cd kstars-build
