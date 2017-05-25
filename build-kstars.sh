@@ -147,7 +147,6 @@ function buildThirdParty
     make install
      
     mkdir -p ${INDI_DIR}/build/3rdparty
-    rm -rf ${INDI_DIR}/build/3rdparty/*
     cd ${INDI_DIR}/build/3rdparty
     
     
@@ -329,10 +328,10 @@ function buildINDI
         statusBanner "Updating indi"
         cd indi
         git pull
+        cd ..
     fi
 
     mkdir -p ${INDI_DIR}/build/libindi
-    rm -rf ${INDI_DIR}/build/libindi/*
     cd ${INDI_DIR}/build/libindi
 
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/libindi
@@ -370,10 +369,15 @@ function craftKstars
 		cd craft
 		git reset --hard de8e9a79fde9bede703da3756fe641ffefc659f7
 		cd ..	
-		
-	    mkdir -p etc
-	    cp -f craft/kdesettings.mac etc/kdesettings.ini
+    else
+        statusBanner "Updating craft"
+        cd craft
+        git pull
+        cd ..
     fi
+
+    mkdir -p etc
+    cp -f craft/kdesettings.mac etc/kdesettings.ini
 
 	. craft/kdeenv.sh
 	
@@ -389,9 +393,19 @@ function buildKstars
     announce "Building k stars via c make"
     cd ${KSTARS_CMAKE_DIR}/
 
-    git clone ${KSTARS_REPO}
+    if [ ! -d kstars ]
+    then
+        statusBanner "Cloning kstars"
 
-    mkdir kstars-build
+        git clone ${KSTARS_REPO}
+    else
+        statusBanner "Updating kstars"
+        cd kstars
+        git pull
+        cd ..
+    fi
+
+    mkdir -p kstars-build
     cd kstars-build
 
 	if [ -n "$BUILD_XCODE" ]
@@ -539,9 +553,8 @@ function postProcessKstars
     statusBanner "Copying GPhoto Plugins"
 	GPHOTO_VERSION=$(pkg-config --modversion libgphoto2)
 	PORT_VERSION=$(pkg-config --modversion libgphoto2_port)
-    mkdir -p ${KSTARS_APP}/Contents/PlugIns
-    mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
-    mkdir ${KSTARS_APP}/Contents/PlugIns/libgphoto2
+    mkdir -p ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
+    mkdir -p ${KSTARS_APP}/Contents/PlugIns/libgphoto2
 	cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/${PORT_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
 	cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/${GPHOTO_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
 	
@@ -553,7 +566,7 @@ function postProcessKstars
     chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-daemon
     cp -f $(brew --prefix dbus)/bin/dbus-send ${KSTARS_APP}/Contents/MacOS/
     chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-send
-    mkdir ${KSTARS_APP}/Contents/PlugIns/dbus
+    mkdir -p ${KSTARS_APP}/Contents/PlugIns/dbus
     cp $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/kstars.conf
     cp ${DIR}/org.freedesktop.dbus-kstars.plist ${KSTARS_APP}/Contents/PlugIns/dbus/
 	
@@ -665,21 +678,6 @@ then
     dieUsage "Only one KSTARS build type allowed" 
 fi
 
-if [ -n "${BUILD_INDI}" ] && [ -d "${INDI_DIR}" ]
-then
-	dieUsage "${INDI_DIR} already exists"
-fi
-
-if [ -n "${BUILD_KSTARS_CRAFT}" ] && [ -d "${CRAFT_DIR}" ]
-then
-	dieUsage "${CRAFT_DIR} already exists"
-fi
-
-if [ -n "${BUILD_KSTARS_CMAKE}" ] && [ -d "${KSTARS_CMAKE_DIR}" ]
-then
-	dieUsage "${KSTARS_CMAKE_DIR} already exists"
-fi
-
 if [ -z "$BUILD_KSTARS_CMAKE" ] && [ -z "$BUILD_KSTARS_CRAFT" ] && [ -z "$BUILD_INDI" ]
 then
     DRY_RUN_ONLY="Yep"
@@ -781,12 +779,11 @@ then
 elif [ -n "${BUILD_KSTARS_CMAKE}" ]
 then
 	announce "Copying K Stars Application To C Make Directory"
-	mkdir ${KSTARS_CMAKE_DIR}/Applications
-	mkdir ${KSTARS_CMAKE_DIR}/Applications/KDE
+        mkdir -p ${KSTARS_CMAKE_DIR}/Applications/KDE
 	cp -Rf ${KSTARS_APP} ${KSTARS_CMAKE_DIR}/Applications/KDE
 	if [ -n "${BUILD_XCODE}" ]
 	then
-		mkdir ${KSTARS_APP}/../../Release
+                mkdir -p ${KSTARS_APP}/../../Release
 		cp -Rf ${KSTARS_APP} ${KSTARS_APP}/../../Release/KStars.app
 	fi
 fi
