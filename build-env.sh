@@ -41,6 +41,11 @@ export GSC_TARGET_DIR=${CRAFT_DIR}/Applications/KDE/kstars.app/Contents/MacOS/gs
 export QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10
 export MACOSX_DEPLOYMENT_TARGET=10.10
 
+# The repos are listed here just in case you want to build from a fork
+export KSTARS_REPO=git://anongit.kde.org/kstars.git
+export LIBINDI_REPO=https://github.com/indilib/indi.git
+export CRAFT_REPO=git://anongit.kde.org/craft.git
+
 echo "INDI_ROOT          is [${INDI_ROOT}]"
 echo "INDI_DIR           is [${INDI_DIR}]"
 echo "CRAFT_DIR  	     is [${CRAFT_DIR}]"
