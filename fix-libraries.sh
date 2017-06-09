@@ -20,6 +20,9 @@ KIO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/kf5/kio"
 DRY_RUN_ONLY=""
 
 IGNORED_OTOOL_OUTPUT="/Qt|qt5|${CRAFT_DIR}/Applications/KDE/KStars.app/|/usr/lib/|/System/"
+
+statusBanner "Replacing the Frameworks Directory"
+rm - r "${FRAMEWORKS_DIR}"
 mkdir -p "${FRAMEWORKS_DIR}"
 
 function dieUsage
@@ -133,7 +136,7 @@ function copyFilesToFrameworks
         if [ ! -f "${FRAMEWORKS_DIR}/${base}" ]
         then
         	echo "HAVE TO COPY [$base] from [${filename}] to Frameworks"
-            [ -z "${DRY_RUN_ONLY}" ] && cp -L "${filename}" "${FRAMEWORKS_DIR}"
+            [ -z "${DRY_RUN_ONLY}" ] && cp -fL "${filename}" "${FRAMEWORKS_DIR}"
             
             # Seem to need this for the macqtdeploy
             #

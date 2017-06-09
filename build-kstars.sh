@@ -567,8 +567,8 @@ function postProcessKstars
     cp -f $(brew --prefix dbus)/bin/dbus-send ${KSTARS_APP}/Contents/MacOS/
     chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-send
     mkdir -p ${KSTARS_APP}/Contents/PlugIns/dbus
-    cp $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/kstars.conf
-    cp ${DIR}/org.freedesktop.dbus-kstars.plist ${KSTARS_APP}/Contents/PlugIns/dbus/
+    cp -f $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/kstars.conf
+    cp -f ${DIR}/org.freedesktop.dbus-kstars.plist ${KSTARS_APP}/Contents/PlugIns/dbus/
 	
     
     if [ -n "${BUILD_KSTARS_CRAFT}" ]
@@ -727,9 +727,12 @@ then
     ${DIR}/fix-libraries.sh
     
     announce "Copying Documentation"
-    cp ${DIR}/CopyrightInfoAndSourcecode.pdf ${CRAFT_DIR}/Applications/KDE/
-    cp ${DIR}/QuickStart.pdf ${CRAFT_DIR}/Applications/KDE/
+    cp -f ${DIR}/CopyrightInfoAndSourcecode.pdf ${CRAFT_DIR}/Applications/KDE/
+    cp -f ${DIR}/QuickStart.pdf ${CRAFT_DIR}/Applications/KDE/
+    
+    annnounce "Removing any previous DMG and unnecessary files"
     rm -r ${CRAFT_DIR}/Applications/KDE/kglobalaccel5.app
+    rm ${CRAFT_DIR}/Applications/KDE/kstars-latest.dmg
     
     ###########################################
     announce "Building DMG"
@@ -749,19 +752,19 @@ then
 	VOLUME=$(mount |grep ${DEV} | cut -f 3 -d ' ')
 	
 	# copy in and set volume icon
-	cp ${DIR}/DMGIcon.icns ${VOLUME}/DMGIcon.icns
-	mv ${VOLUME}/DMGIcon.icns ${VOLUME}/.VolumeIcon.icns
+	cp -f ${DIR}/DMGIcon.icns ${VOLUME}/DMGIcon.icns
+	mv -f ${VOLUME}/DMGIcon.icns ${VOLUME}/.VolumeIcon.icns
 	SetFile -c icnC ${VOLUME}/.VolumeIcon.icns
 	SetFile -a C ${VOLUME}
 
 	# copy in background image
 	mkdir -p ${VOLUME}/Pictures
-	cp ${CRAFT_DIR}/share/kstars/kstars.png ${VOLUME}/Pictures/background.jpg
+	cp -f ${CRAFT_DIR}/share/kstars/kstars.png ${VOLUME}/Pictures/background.jpg
 	
 	# symlink Applications folder, arrange icons, set background image, set folder attributes, hide pictures folder
 	ln -s /Applications/ ${VOLUME}/Applications
 	set_bundle_display_options ${VOLUME}
-	mv ${VOLUME}/Pictures ${VOLUME}/.Pictures
+	mv -f ${VOLUME}/Pictures ${VOLUME}/.Pictures
  
 	# Unmount the disk image
 	hdiutil detach $DEV
