@@ -23,7 +23,7 @@ export GSC_DIR=${INDI_ROOT}/gsc
 if [ -z "${FORCE_BREW_QT}" ]
 then
 	#NOTE: The user of the Script needs to edit this path to match the system.
-	export QT5_DIR=~/Qt/5.7/clang_64
+	export QT5_DIR=~/Qt/5.9.1/clang_64
 else
 	export Qt5_DIR=$(brew --prefix qt5)
 fi	
@@ -38,8 +38,8 @@ export QT5TEST_DIR=$QT5_DIR
 export QT5NETWORK_DIR=$QT5_DIR
 
 export GSC_TARGET_DIR=${CRAFT_DIR}/Applications/KDE/kstars.app/Contents/MacOS/gsc
-export QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10
-export MACOSX_DEPLOYMENT_TARGET=10.10
+export QMAKE_MACOSX_DEPLOYMENT_TARGET=10.11
+export MACOSX_DEPLOYMENT_TARGET=10.11
 
 # The repos are listed here just in case you want to build from a fork
 export KSTARS_REPO=git://anongit.kde.org/kstars.git

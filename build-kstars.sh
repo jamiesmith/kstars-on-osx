@@ -140,11 +140,17 @@ function announce
 function buildThirdParty
 {
      ## Build 3rd party
-    mkdir -p ${INDI_DIR}/build/qhy
-    cd ${INDI_DIR}/build/qhy
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqhy
+    mkdir -p ${INDI_DIR}/build/qsi
+    cd ${INDI_DIR}/build/qsi
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqsi
     make
     make install
+     
+   # mkdir -p ${INDI_DIR}/build/qhy
+   # cd ${INDI_DIR}/build/qhy
+   # cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqhy
+   # make
+   # make install
      
     mkdir -p ${INDI_DIR}/build/3rdparty
     cd ${INDI_DIR}/build/3rdparty
@@ -251,7 +257,6 @@ function installPatchedKf5Stuff
     mkdir -p /usr/local/lib/libexec
     brewInstallIfNeeded haraldf/kf5/kf5-kcoreaddons
     brew link --overwrite kf5-kcoreaddons
-    brewInstallIfNeeded haraldf/kf5/kf5-kauth
     brewInstallIfNeeded haraldf/kf5/kf5-kcrash
     brewInstallIfNeeded haraldf/kf5/kf5-knotifyconfig
     brewInstallIfNeeded haraldf/kf5/kf5-knotifications
@@ -295,7 +300,9 @@ function installBrewDependencies
     brewInstallIfNeeded python
     brewInstallIfNeeded libftdi
     brewInstallIfNeeded gpsd
-    pip install pyfits
+    #pip install pyfits
+    
+    brewInstallIfNeeded dbus
 
     brewInstallIfNeeded jamiesmith/astronomy/libnova
     brewInstallIfNeeded jamiesmith/astronomy/gsc
@@ -558,8 +565,8 @@ function postProcessKstars
 	cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/${PORT_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
 	cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/${GPHOTO_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
 	
-	statusBanner "Copying qhy firmware"
-	cp -rf /usr/local/lib/qhy ${KSTARS_APP}/Contents/PlugIns/
+	#statusBanner "Copying qhy firmware"
+	#cp -rf /usr/local/lib/qhy ${KSTARS_APP}/Contents/PlugIns/
 	
 	statusBanner "Copying dbus programs and files."
 	cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
