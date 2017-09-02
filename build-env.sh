@@ -13,12 +13,12 @@ function statusBanner
 }
 
 
-export INDI_ROOT=~/IndiRoot
-export INDI_DIR=${INDI_ROOT}/indi-stuff
-export CRAFT_DIR=${INDI_ROOT}/kstars-craft
-export KSTARS_XCODE_DIR=${INDI_ROOT}/kstars-xcode
-export KSTARS_CMAKE_DIR=${INDI_ROOT}/kstars-cmake
-export GSC_DIR=${INDI_ROOT}/gsc
+export ASTRO_ROOT=~/AstroRoot
+export INDI_DIR=${ASTRO_ROOT}/indi-stuff
+export CRAFT_DIR=${ASTRO_ROOT}/kstars-craft
+export KSTARS_XCODE_DIR=${ASTRO_ROOT}/kstars-xcode
+export KSTARS_CMAKE_DIR=${ASTRO_ROOT}/kstars-cmake
+export GSC_DIR=${ASTRO_ROOT}/gsc
 
 if [ -z "${FORCE_BREW_QT}" ]
 then
@@ -46,7 +46,7 @@ export KSTARS_REPO=git://anongit.kde.org/kstars.git
 export LIBINDI_REPO=https://github.com/indilib/indi.git
 export CRAFT_REPO=git://anongit.kde.org/craft.git
 
-echo "INDI_ROOT          is [${INDI_ROOT}]"
+echo "ASTRO_ROOT          is [${ASTRO_ROOT}]"
 echo "INDI_DIR           is [${INDI_DIR}]"
 echo "CRAFT_DIR  	     is [${CRAFT_DIR}]"
 

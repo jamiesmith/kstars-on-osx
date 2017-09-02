@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# This is an attempt to automate the stuff- YMMV.  Do not be surprised if you
-# run in to a gsl error.
-
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "${DIR}/build-env.sh"
 
-BUILD_3RDPARTY=""
 ANNOUNCE=""
 INDI_ONLY=""
 SKIP_BREW=""
@@ -22,12 +18,9 @@ FORCE_BREW_QT=""
 
 function processOptions
 {
-	while getopts "3acdeiqsx" option
+	while getopts "acdeiqsx" option
 	do
 	    case $option in
-	        3)
-	            BUILD_3RDPARTY="Yep"
-	            ;;
 	        a)
 	            ANNOUNCE="Yep"
 	            ;;
@@ -69,7 +62,6 @@ function processOptions
 	echo ""
 	echo "ANNOUNCE            = ${ANNOUNCE:-Nope}"
 	echo "BUILDING_KSTARS     = ${BUILDING_KSTARS:-Nope}"
-	echo "BUILD_3RDPARTY      = ${BUILD_3RDPARTY:-Nope}"
 	echo "BUILD_INDI          = ${BUILD_INDI:-Nope}"
 	echo "BUILD_KSTARS_CMAKE  = ${BUILD_KSTARS_CMAKE:-Nope}"
 	echo "BUILD_XCODE  		  = ${BUILD_XCODE:-Nope}"
@@ -79,13 +71,9 @@ function processOptions
 
 function usage
 {
-    # I really wish that getopt supported the long args.
-    #
 
 cat <<EOF
 	options:
-	    -3 Also build third party stuff
-		   (This only happens if you are building indi)
 	    -a Announce stuff as you go
 	    -c Build kstars via cmake (ONLY one of -c , -x, or -e can be used)
 	    -d Dry run only (just show what you are going to do)
@@ -97,13 +85,13 @@ cat <<EOF
 	    -x Build kstars via cmake with xcode (ONLY one of -c , -x, or -e can be used)
     
 	To build a complete craft you would do:
-	    $0 -3aei
+	    $0 -aei
     
 	To build a complete cmake build you would do:
-	    $0 -3aci
+	    $0 -aci
 	    
 	To build a complete cmake build with an xcode project you would do:
-	    $0 -3axi
+	    $0 -axi
 EOF
 }
 
@@ -230,6 +218,8 @@ function installPatchedKf5Stuff
 			export SUBSTITUTE=${QT5_DIR}
 		else
 			echo "Cannot figure out where QT is."
+	
+	
 			exit 9
 		fi
 	fi
@@ -251,16 +241,27 @@ function installPatchedKf5Stuff
 		else
 			echo "kf5 Files already hacked, er, patched, skipping"
 		fi
+	else
+	    brewInstallIfNeeded qt
 	fi
 
     brew link --force gettext
     mkdir -p /usr/local/lib/libexec
+    
+    announce "Homebrew currently has a problem building KWallet and KDocTools."
+    announce "Attempting the workaround for k-doctools.  If this does not work, try the command: cpanm URI"
+    	brewInstallIfNeeded cpanminus
+    	cpanm URI
+    announce "Attempting the workaround for kf5-wallet.  If this doesn't work and kf5-wallet fails to install, install it manually and link it"
+    	brew install --no-sandbox kf5-kwallet
+    
     brewInstallIfNeeded haraldf/kf5/kf5-kcoreaddons
     brew link --overwrite kf5-kcoreaddons
     brewInstallIfNeeded haraldf/kf5/kf5-kcrash
     brewInstallIfNeeded haraldf/kf5/kf5-knotifyconfig
     brewInstallIfNeeded haraldf/kf5/kf5-knotifications
     brewInstallIfNeeded haraldf/kf5/kf5-kplotting
+
     brewInstallIfNeeded haraldf/kf5/kf5-kxmlgui
     brewInstallIfNeeded haraldf/kf5/kf5-kdoctools
     brewInstallIfNeeded haraldf/kf5/kf5-knewstuff
@@ -300,7 +301,6 @@ function installBrewDependencies
     brewInstallIfNeeded python
     brewInstallIfNeeded libftdi
     brewInstallIfNeeded gpsd
-    #pip install pyfits
     
     brewInstallIfNeeded dbus
 
@@ -352,13 +352,8 @@ function buildINDI
     statusBanner "make install indi"
     make install
 
-    if [ -n "${BUILD_3RDPARTY}" ]
-    then
-        announce "Executing third Party Build as directed"
-        buildThirdParty
-    else
-        statusBanner "Skipping third Party Build as directed"
-    fi
+    announce "Building Third Party Drivers"
+    buildThirdParty
 }
 
 function craftKstars
@@ -369,7 +364,8 @@ function craftKstars
     if [ ! -d craft ]
     then
         statusBanner "Cloning craft"
-                git clone ${CRAFT_REPO}
+        #wget https://raw.githubusercontent.com/KDE/craft/master/setup/CraftBootstrap.py -O setup.py && python3.6 setup.py --prefix ${CRAFT_DIR}
+        git clone ${CRAFT_REPO}
 		
 		# The following 3 lines are usually not needed, but if craft has a problem
 		# then you can uncomment these 3 lines to go back to a version of craft that works for building KStars.app
@@ -385,8 +381,11 @@ function craftKstars
 
     mkdir -p etc
     cp -f craft/kdesettings.mac etc/kdesettings.ini
-
-	. craft/kdeenv.sh
+    
+    #cd ${CRAFT_DIR}/craft
+    
+    source craft/kdeenv.sh
+	#source ${CRAFT_DIR}/craftenv.sh
 	
 	craft -vvv -i kstars
 	
@@ -535,7 +534,7 @@ function postProcessKstars
 
     # this sometimes fails, let's not abort the script if it does
     #
-    cd ${INDI_ROOT}
+    cd ${ASTRO_ROOT}
     rm -f maps_alien-1.0.tar.gz
 
     set +e
@@ -614,7 +613,7 @@ function postProcessKstars
 	# Uncomment this if the fix-libraries breaks
 	#     announce "Tarring up k stars"
 	# tarname=$(basename ${KSTARS_APP})
-	#     cd $INDI_ROOT
+	#     cd $ASTRO_ROOT
 	#     rm -f ${tarname}.tgz
 	#     tar czf ${tarname}.tgz ${tarname}
 	#     ls -l ${tarname}.tgz
@@ -730,7 +729,8 @@ if [ -n "${BUILD_KSTARS_CRAFT}" ]
 then
     set +e
 
-    announce "Fixing the dir names and such"
+	#The Fix Libraries Script Copies library files into the app and runs otool on them.
+    announce "Running Fix Libraries Script"
     ${DIR}/fix-libraries.sh
     
     announce "Copying Documentation"
