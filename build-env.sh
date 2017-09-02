@@ -12,6 +12,12 @@ function statusBanner
     echo ""
 }
 
+function announce
+{
+    [ -n "$ANNOUNCE" ] && say -v Daniel "$*"
+    statusBanner "$*"
+}
+
 
 export ASTRO_ROOT=~/AstroRoot
 export INDI_DIR=${ASTRO_ROOT}/indi-stuff

@@ -7,19 +7,19 @@
 #
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source "${DIR}/build-env.sh" > /dev/null
+#source "${DIR}/build-env.sh" > /dev/null
 
 FILES_TO_COPY=()
-FRAMEWORKS_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/Frameworks"
-INDI_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/indi"
-XPLANET_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/xplanet/bin"
-ASTROMETRY_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/astrometry/bin"
-GPHOTO_IOLIBS_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/libgphoto2_port"
-GPHOTO_CAMLIBS_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/libgphoto2"
-KIO_DIR="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/PlugIns/kf5/kio"
+FRAMEWORKS_DIR="${KSTARS_APP}/Contents/Frameworks"
+INDI_DIR="${KSTARS_APP}/Contents/MacOS/indi"
+XPLANET_DIR="${KSTARS_APP}/MacOS/xplanet/bin"
+ASTROMETRY_DIR="${KSTARS_APP}/Contents/MacOS/astrometry/bin"
+GPHOTO_IOLIBS_DIR="${KSTARS_APP}/Contents/PlugIns/libgphoto2_port"
+GPHOTO_CAMLIBS_DIR="${KSTARS_APP}/Contents/PlugIns/libgphoto2"
+KIO_DIR="${KSTARS_APP}/Contents/PlugIns/kf5/kio"
 DRY_RUN_ONLY=""
 
-IGNORED_OTOOL_OUTPUT="/Qt|qt5|${CRAFT_DIR}/Applications/KDE/KStars.app/|/usr/lib/|/System/"
+IGNORED_OTOOL_OUTPUT="/Qt|qt5|${KSTARS_APP}/|/usr/lib/|/System/"
 
 statusBanner "Replacing the Frameworks Directory"
 rm - r "${FRAMEWORKS_DIR}"
@@ -57,7 +57,7 @@ function processTarget
 	entries=$(otool -L $target | sed '1d' | awk '{print $1}' | egrep -v "$IGNORED_OTOOL_OUTPUT")
     echo "Processing $target"
     
-    relativeRoot="${CRAFT_DIR}/Applications/KDE/KStars.app/Contents"
+    relativeRoot="${KSTARS_APP}/Contents"
     
     pathDiff=${target#${relativeRoot}*}
 
@@ -174,14 +174,14 @@ shift $((${OPTIND} - 1))
 cd ${CRAFT_DIR}
 
 statusBanner "Processing kstars executable"
-processTarget "${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/kstars"
+processTarget "${KSTARS_APP}/Contents/MacOS/kstars"
 
 statusBanner "Processing kioslave executable"
-processTarget "${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/kioslave"
+processTarget "${KSTARS_APP}/Contents/MacOS/kioslave"
 
 statusBanner "Processing dbus programs"
-processTarget "${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/dbus-daemon"
-processTarget "${CRAFT_DIR}/Applications/KDE/KStars.app/Contents/MacOS/dbus-send"
+processTarget "${KSTARS_APP}/Contents/MacOS/dbus-daemon"
+processTarget "${KSTARS_APP}/Contents/MacOS/dbus-send"
 
 # Also cheat, and add libindidriver.1.dylib to the list
 #
