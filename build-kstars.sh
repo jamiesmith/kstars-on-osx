@@ -461,6 +461,9 @@ function postProcessKstars
     statusBanner "Post-processing KStars Build"
 	echo "KSTARS_APP=${KSTARS_APP}"
     ##########################################
+    statusBanner "Editing info.plist"
+	plutil -replace CFBundleName -string KStars ${KSTARS_APP}/Contents/info.plist
+	##########################################
     statusBanner "The Data Directory"
     echo mkdir -p ${KSTARS_APP}/Contents/Resources/data
 	mkdir -p ${KSTARS_APP}/Contents/Resources/data
@@ -600,17 +603,6 @@ function postProcessKstars
 	else
     	announce "Plugins and K I O Slave ERROR"
 	fi
-    
-    
-
-    ###########################################
-	# Uncomment this if the fix-libraries breaks
-	#     announce "Tarring up k stars"
-	# tarname=$(basename ${KSTARS_APP})
-	#     cd $ASTRO_ROOT
-	#     rm -f ${tarname}.tgz
-	#     tar czf ${tarname}.tgz ${tarname}
-	#     ls -l ${tarname}.tgz
 }
 
 
