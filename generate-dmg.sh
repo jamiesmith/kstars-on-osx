@@ -7,7 +7,20 @@
 # 4) Generate checksums
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-#source "${DIR}/build-env.sh" > /dev/null
+if [ -z "${ASTRO_ROOT}" ]
+then
+	source ${DIR}/build-env.sh
+	#Note, this will need to be changed to make it work with anything other than craft
+	KSTARS_APP="${CRAFT_DIR}/Applications/KDE/KStars.app"
+fi
+
+if [ -z "${DIR}" ] || [ -z "${CRAFT_DIR}" ]
+then
+	echo "directory error! aborting DMG"
+	exit 9
+fi
+
+
 
 function set_bundle_display_options() {
 	osascript <<-EOF
@@ -50,7 +63,7 @@ function set_bundle_display_options() {
     cp -f ${DIR}/CopyrightInfoAndSourcecode.pdf ${CRAFT_DIR}/Applications/KDE/
     cp -f ${DIR}/QuickStart.pdf ${CRAFT_DIR}/Applications/KDE/
     
-    annnounce "Removing any previous DMG, checksums, and unnecessary files"
+    announce "Removing any previous DMG, checksums, and unnecessary files"
     rm -r ${CRAFT_DIR}/Applications/KDE/kglobalaccel5.app
     rm ${CRAFT_DIR}/Applications/KDE/kstars-latest.dmg
     rm ${CRAFT_DIR}/Applications/KDE/kstars-latest.md5

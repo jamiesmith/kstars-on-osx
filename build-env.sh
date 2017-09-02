@@ -18,7 +18,7 @@ function announce
     statusBanner "$*"
 }
 
-
+export DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 export ASTRO_ROOT=~/AstroRoot
 export INDI_DIR=${ASTRO_ROOT}/indi-stuff
 export CRAFT_DIR=${ASTRO_ROOT}/kstars-craft
@@ -52,6 +52,7 @@ export KSTARS_REPO=git://anongit.kde.org/kstars.git
 export LIBINDI_REPO=https://github.com/indilib/indi.git
 export CRAFT_REPO=git://anongit.kde.org/craft.git
 
+echo "DIR          		 is [${DIR}]"
 echo "ASTRO_ROOT          is [${ASTRO_ROOT}]"
 echo "INDI_DIR           is [${INDI_DIR}]"
 echo "CRAFT_DIR  	     is [${CRAFT_DIR}]"

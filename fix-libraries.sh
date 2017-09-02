@@ -7,7 +7,18 @@
 #
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-#source "${DIR}/build-env.sh" > /dev/null
+if [ -z "${ASTRO_ROOT}" ]
+then
+	source ${DIR}/build-env.sh
+	#Note, this will need to be changed to make it work with anything other than craft
+	KSTARS_APP="${CRAFT_DIR}/Applications/KDE/KStars.app"
+fi
+
+if [ -z "${DIR}" ] || [ -z "${CRAFT_DIR}" ] || [ -z "${KSTARS_APP}" ]
+then
+	echo "directory error! aborting Libraries script!"
+	exit 9
+fi
 
 FILES_TO_COPY=()
 FRAMEWORKS_DIR="${KSTARS_APP}/Contents/Frameworks"
