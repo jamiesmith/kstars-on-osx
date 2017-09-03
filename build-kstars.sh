@@ -274,7 +274,7 @@ EOF
 	function installBrewDependencies
 	{
 		announce "updating homebrew"
-		brew upgrade
+		#brew upgrade
 
 		announce "Installing brew dependencies"
 
