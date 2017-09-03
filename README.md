@@ -34,8 +34,6 @@ then be sure to install qt with dbus.  Note that the install from qt sometimes t
 a long time too, and the installer appears to become unresponsive before
 it starts copying stuff.  I used the offline file, but you can use either.  
 
-Note: For now, you should use a version of QT 5.7, for some reason 5.8 is not building a dependency of kstars called phonon due to an issue with a missing framework.
-
 The install selections I chose:
    ![qt install options](/images/qt-install-options.png "qt install options")
 
@@ -58,22 +56,22 @@ The install selections I chose:
 
 ### Editing the build-env.sh file to reflect your version of QT
 
-Edit this line:  export QT5_DIR=~/Qt/5.7/clang_64
+Edit this line:  export QT5_DIR=~/Qt/5.9.1/clang_64
 To reflect the path to your QT_5 installation.
 
 ### Running the Script
 ```console
 	# Change to the script directory
 	cd ~/Projects/kstars-on-osx
-	# If you want to build a full kstars app and dmg, then do:
-	./build-kstars.sh -3aei
+	# If you want to build KStars to use the program using craft, then do:
+	./build-kstars.sh -aeid
 	# If you want to build an XCode Project you can work on, instead do:
-	./build-kstars.sh -3axi
+	./build-kstars.sh -axid
 	# If you want to build a QT Creator Project you can work on, instead do:
-	./build-kstars.sh -3aci
+	./build-kstars.sh -acid
 ```
 
-Note that the -3 option builds the 3rd party drivers, the -a option announces key installation steps audibly, and the -i option builds indi with kstars.
+Note that the -a option announces key installation steps audibly, the -i option builds indi with kstars, and the -d option also builds a dmg.
 
 After the script finishes, whichever method you chose, you should have built a kstars app that can actually be used.
 
