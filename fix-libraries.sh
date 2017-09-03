@@ -93,6 +93,16 @@ exit 9
 			pathToFrameworks="${pathToFrameworks}Frameworks/"
 		fi
 		
+		if [[ $pathToFrameworks == "" ]]
+		then
+			newname="@loader_path/$(basename $target)"		
+			echo "    This is a Framework, change its own id $target -> $newname" 
+			
+			install_name_tool -id \
+			$newname \
+			$target 
+		fi
+		
 		for entry in $entries
 		do
 			baseEntry=$(basename $entry)
@@ -100,7 +110,7 @@ exit 9
 
 			newname="@loader_path/${pathToFrameworks}${baseEntry}"
 		
-			echo "    change $entry -> $newname" 
+			echo "    change reference $entry -> $newname" 
 
 			install_name_tool -change \
 			$entry \
