@@ -150,11 +150,16 @@ EOF
 #This checks to see if QT is installed before starting.
 	function checkForQT
 	{
-		if [ -z "$QT5_DIR" ]
+		if [ -z "${FORCE_BREW_QT}" ]
 		then
-			if [ -z "${FORCE_BREW_QT}" ]
+			if [ -n "$QT5_DIR" ] 
 			then
-			dieUsage "Cannot proceed, qt not installed - see the readme."
+				if [ ! -d "$QT5_DIR" ]
+				then
+					dieUsage "Please check your build-env.sh for the QT5 variable.  QT5 cannot be found.  Either QT is not installed or the wrong directory is selected.  You can also use the homebrew QT.  Please see the readme file."
+				fi
+			else
+				dieUsage "Please check your build-env.sh for the QT5 variable.  It is blank.  You need to either specify it or use the homebrew QT.  Please see the readme file."
 			fi
 		fi
 	}
