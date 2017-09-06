@@ -408,29 +408,33 @@ EOF
 		if [ ! -d craft ]
 		then
 			statusBanner "Cloning craft"
-			#wget https://raw.githubusercontent.com/KDE/craft/master/setup/CraftBootstrap.py -O setup.py && python3.6 setup.py --prefix ${CRAFT_DIR}
-			git clone ${CRAFT_REPO}
-		
-			# The following 3 lines are usually not needed, but if craft has a problem
-			# then you can uncomment these 3 lines to go back to a version of craft that works for building KStars.app
-			cd craft
-			git reset --hard de8e9a79fde9bede703da3756fe641ffefc659f7
-			cd ..	
+			wget https://raw.githubusercontent.com/KDE/craft/master/setup/CraftBootstrap.py -O setup.py && python3.6 setup.py --prefix ${CRAFT_DIR}
+
+			#This is the old way of doing it.  This method works, so you can go back if there is a problem
+			#git clone ${CRAFT_REPO}	
+			#cd craft
+			#git reset --hard de8e9a79fde9bede703da3756fe641ffefc659f7
+			#cd ..	
 		else
-			statusBanner "Updating craft"
+			statusBanner "Updating Craft"
 			cd craft
 			git pull
 			cd ..
 		fi
 
-		mkdir -p etc
-		cp -f craft/kdesettings.mac etc/kdesettings.ini
-	
-		#cd ${CRAFT_DIR}/craft
-	
-		source craft/kdeenv.sh
-		#source ${CRAFT_DIR}/craftenv.sh
-	
+		#These are related to the old way stated above.
+		#mkdir -p etc
+		#cp -f craft/kdesettings.mac etc/kdesettings.ini
+		#source craft/kdeenv.sh
+		
+		statusBanner "Copying Craft Settings"
+		cp ${DIR}/CraftSettings.ini ${CRAFT_DIR}/etc/
+		cd ${CRAFT_DIR}/craft
+		source craftenv.sh
+		
+		statusBanner "Crafting icons"
+		craft breeze-icons
+		statusBanner "Crafting KStars"
 		craft -vvv -i kstars
 	
 		announce "CRAFT COMPLETE"
@@ -602,8 +606,8 @@ EOF
 			statusBanner "Copying plugins"
 			cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
 		
-			statusBanner "Copying icontheme"
-			cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
+			#statusBanner "Copying icontheme"
+			#cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
 
 		elif [ "$KSTARS_BUILD_TYPE" == "CMAKE" ] || [ "$KSTARS_BUILD_TYPE" == "XCODE" ]
 		then
