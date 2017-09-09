@@ -493,33 +493,41 @@ EOF
 		##########################################
 		statusBanner "Editing info.plist"
 		plutil -replace CFBundleName -string KStars ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleVersion -string 2.8 ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleLongVersionString -string 2.8 ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleShortVersionString -string 2.8 ${KSTARS_APP}/Contents/info.plist
+		plutil -replace NSHumanReadableCopyright -string "© 2001 - 2017, The KStars Team, Freely Released under GNU GPL V2" ${KSTARS_APP}/Contents/info.plist
 		##########################################
 		statusBanner "The Data Directory and Translations Directory"
-		echo mkdir -p ${KSTARS_APP}/Contents/Resources/data
-		mkdir -p ${KSTARS_APP}/Contents/Resources/data
-		echo mkdir -p ${KSTARS_APP}/Contents/Resources/locale
-		mkdir -p ${KSTARS_APP}/Contents/Resources/locale
+		appDataFolder=${KSTARS_APP}/Contents/Resources/data
+		appTranslationsFolder=${KSTARS_APP}/Contents/Resources/locale
+		
+		echo mkdir -p $appDataFolder
+		mkdir -p $appDataFolder
+		echo mkdir -p $appTranslationsFolder
+		mkdir -p $appTranslationsFolder
 	
 		# Craft and cmake now put them in the same directory, but if it is the Xcode version, it is a subdirectory.
 		#
 		if [ "$KSTARS_BUILD_TYPE" == "CMAKE" ] && [ -d "${KSTARS_CMAKE_DIR}/share/kstars" ]
 		then
 			typeset src_dir="${KSTARS_CMAKE_DIR}/share/"
-			echo "copying from $src_dir"
-			cp -rf $src_dir/kstars/* ${KSTARS_APP}/Contents/Resources/data/
-			cp -rf $src_dir/locale/* ${KSTARS_APP}/Contents/Resources/locale/
+			echo "copying from $src_dir and homebrew share"
+			cp -rf $src_dir/kstars/* $appDataFolder/
+			cp -rf /usr/local/share/locale/* $appTranslationsFolder/
+			cp -rf $src_dir/locale/* $appTranslationsFolder/
 		elif [ "$KSTARS_BUILD_TYPE" == "CRAFT" ] && [ -d "${CRAFT_DIR}/share/kstars" ]
 		then
 			typeset src_dir="${CRAFT_DIR}/share/"
 			echo "copying from $src_dir"
-			cp -rf $src_dir/kstars/* ${KSTARS_APP}/Contents/Resources/data/
-			cp -rf $src_dir/locale/* ${KSTARS_APP}/Contents/Resources/locale/
+			cp -rf $src_dir/kstars/* $appDataFolder/
+			cp -rf $src_dir/locale/* $appTranslationsFolder/
 		elif [ "$KSTARS_BUILD_TYPE" == "XCODE" ] && [ -d "${KSTARS_XCODE_DIR}/kstars/kstars/data" ]
 		then
-			typeset src_dir="${KSTARS_XCODE_DIR}/kstars/kstars/data"
-			echo "copying from $src_dir"
-			cp -rf $src_dir/* ${KSTARS_APP}/Contents/Resources/data/
-			cp -rf ${KSTARS_XCODE_DIR}/kstars-build/locale/* ${KSTARS_APP}/Contents/Resources/locale/
+			echo "copying from XCode folders and homebrew share"
+			cp -rf ${KSTARS_XCODE_DIR}/kstars/kstars/data/* $appDataFolder/
+			cp -rf /usr/local/share/locale/* $appTranslationsFolder/
+			cp -rf ${KSTARS_XCODE_DIR}/kstars-build/locale/* $appTranslationsFolder/
 		else
 			announce "Cannot find k stars data"
 		fi
