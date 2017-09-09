@@ -743,7 +743,9 @@ EOF
 #For the xcode build, this will copy the code to the release folder in addition to the debug folder.
 	if [ "$KSTARS_BUILD_TYPE" == "XCODE" ]
 	then
+		statusBanner "Copying to XCode Release Folder"
 		mkdir -p ${KSTARS_APP}/../../Release
+		rm -rf ${KSTARS_APP}/../../Release/KStars.app
 		cp -Rf ${KSTARS_APP} ${KSTARS_APP}/../../Release/KStars.app
 	fi
 
