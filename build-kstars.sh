@@ -252,9 +252,6 @@ EOF
 		mkdir -p /usr/local/lib/libexec
 	
 		announce "Homebrew currently has a problem building KWallet and KDocTools."
-		announce "Attempting the workaround for k-doctools.  If this does not work, try the command: cpanm URI"
-			brewInstallIfNeeded cpanminus
-			cpanm URI
 		announce "Attempting the workaround for kf5-wallet.  If this doesn't work and kf5-wallet fails to install, install it manually and link it"
 			brew install --no-sandbox kf5-kwallet
 	
@@ -320,6 +317,11 @@ EOF
 
 		brewInstallIfNeeded jamiesmith/astronomy/libnova
 		brewInstallIfNeeded jamiesmith/astronomy/gsc
+		
+		announce "There is currently a problem building KDocTools."
+		announce "Attempting the workaround for k-doctools.  If this does not work, try the command: cpanm URI"
+			brewInstallIfNeeded cpanminus
+			cpanm URI
 	
 		# Only do this if we are doing a cmake build
 		#
