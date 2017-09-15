@@ -524,6 +524,8 @@ EOF
 			echo "copying from $src_dir"
 			cp -rf $src_dir/kstars/* $appDataFolder/
 			cp -rf $src_dir/locale/* $appTranslationsFolder/
+			statusBanner "NOTE: For now Craft cannot build translations for Kstars.  Trying to copy from the CMAKE build instead."
+			cp -rf ${KSTARS_CMAKE_DIR}/share/locale/* $appTranslationsFolder/  #This is needed until we can get craft to build the kstars translations.
 		elif [ "$KSTARS_BUILD_TYPE" == "XCODE" ] && [ -d "${KSTARS_XCODE_DIR}/kstars/kstars/data" ]
 		then
 			echo "copying from XCode folders and homebrew share"
