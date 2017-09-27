@@ -576,29 +576,13 @@ EOF
 		##########################################
 		statusBanner "Set up some xplanet pictures..."
 
-		# this sometimes fails, let's not abort the script if it does
-		#
-		cd ${ASTRO_ROOT}
-		rm -f maps_alien-1.0.tar.gz
+		tar -xzf ${DIR}/maps_alien-1.0.tar -C "$(brew --prefix xplanet)" --strip-components=2
+		xplanet_dir=${KSTARS_APP}/Contents/MacOS/xplanet/
 
-		set +e
-		curl -LO https://sourceforge.net/projects/flatplanet/files/maps/1.0/maps_alien-1.0.tar.gz
-		dl_res=$?
-		set -e
-
-		if [ $dl_res -ne 0 ]
-		then
-			announce "Xplanet map download failed, skipping copies"
-		else
-			tar -xzf maps_alien-1.0.tar.gz -C "$(brew --prefix xplanet)" --strip-components=2
-			rm maps_alien-1.0.tar.gz
-			xplanet_dir=${KSTARS_APP}/Contents/MacOS/xplanet/
-
-			mkdir -p ${xplanet_dir}
-			cp -rf $(brew --prefix xplanet)/bin ${xplanet_dir}
-			chmod +w ${xplanet_dir}/bin/xplanet
-			cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
-		fi
+		mkdir -p ${xplanet_dir}
+		cp -rf $(brew --prefix xplanet)/bin ${xplanet_dir}
+		chmod +w ${xplanet_dir}/bin/xplanet
+		cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
 	
 		statusBanner "Copying GPhoto Plugins"
 		GPHOTO_VERSION=$(pkg-config --modversion libgphoto2)
