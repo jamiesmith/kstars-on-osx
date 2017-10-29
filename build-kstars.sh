@@ -618,7 +618,7 @@ EOF
 			statusBanner "Copying phonon backend, vlc plugins, and sounds."
 			cp -rf ${CRAFT_DIR}/lib/qt5/plugins/* ${KSTARS_APP}/Contents/PlugIns/
 			cp -rf ${CRAFT_DIR}/share/sounds ${KSTARS_APP}/Contents/Resources/
-			mkdir ${KSTARS_APP}/Contents/PlugIns/vlc
+			mkdir -p ${KSTARS_APP}/Contents/PlugIns/vlc
 			cp -rf /usr/local/lib/vlc/plugins/access ${KSTARS_APP}/Contents/PlugIns/vlc/
 			cp -rf /usr/local/lib/vlc/plugins/audio_output ${KSTARS_APP}/Contents/PlugIns/vlc/
 			cp -rf /usr/local/lib/vlc/plugins/codec ${KSTARS_APP}/Contents/PlugIns/vlc/
@@ -717,14 +717,17 @@ EOF
 	if [ "$KSTARS_BUILD_TYPE" == "CRAFT" ]
 	then
 		KSTARS_APP="${CRAFT_DIR}/Applications/KDE/KStars.app"
+		rm -rf ${KSTARS_APP}
 		craftKstars
 	elif [ "$KSTARS_BUILD_TYPE" == "XCODE" ]
 	then
 		KSTARS_APP="${KSTARS_XCODE_DIR}/kstars-build/kstars/Debug/KStars.app"
+		rm -rf ${KSTARS_APP}
 		buildKstars
 	elif [ "$KSTARS_BUILD_TYPE" == "CMAKE" ]
 	then
 		KSTARS_APP="${KSTARS_CMAKE_DIR}/kstars-build/kstars/KStars.app"
+		rm -rf ${KSTARS_APP}
 		buildKstars
 	else
 		announce "Not building k stars"
