@@ -593,7 +593,7 @@ EOF
 		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/${GPHOTO_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
 	
 		#statusBanner "Copying qhy firmware"
-		#cp -rf /usr/local/lib/qhy ${KSTARS_APP}/Contents/PlugIns/
+		#cp -rf /usr/local/lib/qhy ${KSTARS_APP}/Contents/PlugIns/	
 	
 		statusBanner "Copying dbus programs and files."
 		cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
@@ -614,6 +614,11 @@ EOF
 
 			statusBanner "Copying plugins"
 			cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			
+			statusBanner "Copying phonon backend and sounds."
+			cp -rf ${CRAFT_DIR}/lib/qt5/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			mkdir -p ${KSTARS_APP}/Contents/Resources/sounds/
+			cp -rf ${CRAFT_DIR}/share/sounds/* ${KSTARS_APP}/Contents/Resources/sounds/
 		
 			#statusBanner "Copying icontheme"
 			#cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc

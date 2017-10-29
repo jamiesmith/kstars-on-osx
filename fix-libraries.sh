@@ -245,6 +245,9 @@ statusBanner "Processing dbus programs"
 processTarget "${KSTARS_APP}/Contents/MacOS/dbus-daemon"
 processTarget "${KSTARS_APP}/Contents/MacOS/dbus-send"
 
+statusBanner "Processing Phonon backend"
+processTarget "${KSTARS_APP}/Contents/Plugins/phonon4qt5_backend/phonon_vlc.so"
+
 # Also cheat, and add libindidriver.1.dylib to the list
 #
 addFileToCopy "libindidriver.1.dylib"
