@@ -159,6 +159,26 @@ exit 9
 		done
 	}
 	
+	function processDirectory
+	{
+		directoryName=$1
+		directory=$2
+		statusBanner "Processing all of the $directoryName files in $directory"
+		FILES_TO_COPY=()
+		for file in ${directory}/*
+		do
+    		base=$(basename $file)
+
+        	statusBanner "Processing $directoryName file $base"
+        	processTarget $file
+		done
+
+		statusBanner "Copying required files for $directoryName into frameworks"
+		copyFilesToFrameworks
+	}
+	
+	
+	
 #########################################################################
 #This is where the main part of the script starts!!
 #
@@ -214,19 +234,11 @@ fi
 
 announce "Running Fix Libraries Script"
 
-#This sets the locations of various folders in the app that will need to be scanned
-#All programs in these folders will need to make sure their frameworks are in the app bundle.
 	FILES_TO_COPY=()
 	FRAMEWORKS_DIR="${KSTARS_APP}/Contents/Frameworks"
-	INDI_DIR="${KSTARS_APP}/Contents/MacOS/indi"
-	XPLANET_DIR="${KSTARS_APP}/MacOS/xplanet/bin"
-	ASTROMETRY_DIR="${KSTARS_APP}/Contents/MacOS/astrometry/bin"
-	GPHOTO_IOLIBS_DIR="${KSTARS_APP}/Contents/PlugIns/libgphoto2_port"
-	GPHOTO_CAMLIBS_DIR="${KSTARS_APP}/Contents/PlugIns/libgphoto2"
-	KIO_DIR="${KSTARS_APP}/Contents/PlugIns/kf5/kio"
 
 #Files in these locations do not need to be copied into the Frameworks folder.
-	IGNORED_OTOOL_OUTPUT="/Qt|qt5|${KSTARS_APP}/|/usr/lib/|/System/"
+	IGNORED_OTOOL_OUTPUT="/Qt|${KSTARS_APP}/|/usr/lib/|/System/"
 
 #This deletes and replaces the former Frameworks folder so you can start fresh.  This is needed if it ran before.
 	statusBanner "Replacing the Frameworks Directory"
@@ -259,144 +271,21 @@ statusBanner "Processing libindidriver library"
 
 # need to process libindidriver.1.dylib
 #
-processTarget ${FRAMEWORKS_DIR}/libindidriver.1.dylib
+processTarget "${FRAMEWORKS_DIR}/libindidriver.1.dylib"
+processDirectory indi "${KSTARS_APP}/Contents/MacOS/indi"
+processDirectory xplanet "${KSTARS_APP}/MacOS/xplanet/bin"
+processDirectory astrometry "${KSTARS_APP}/Contents/MacOS/astrometry/bin"
+processDirectory kio "${KSTARS_APP}/Contents/PlugIns/kf5/kio"
 
-statusBanner "Processing all of the files in the indi dir"
+processDirectory GPHOTO_IOLIBS "${KSTARS_APP}/Contents/PlugIns/libgphoto2_port"
+processDirectory GPHOTO_CAMLIBS "${KSTARS_APP}/Contents/PlugIns/libgphoto2"
 
-# Then do all of the files in the indi Dir
-#
-FILES_TO_COPY=()
-for file in ${INDI_DIR}/*
-do
-    base=$(basename $file)
-    
-    if [ -x $file ]
-    then
-        statusBanner "Processing indi file $base"
-        processTarget $file
-    else
-        echo ""
-        echo ""
-        echo "Skipping $base, not executable"
-    fi
-done
+processDirectory VLC_ACCESS "${KSTARS_APP}/Contents/PlugIns/vlc/access"
+processDirectory VLC_AUDIO_OUTPUT "${KSTARS_APP}/Contents/PlugIns/vlc/audio_output"
+processDirectory VLC_CODEC "${KSTARS_APP}/Contents/PlugIns/vlc/codec"
 
-statusBanner "Copying second round of files for indi"
-copyFilesToFrameworks
+processDirectory Frameworks "${FRAMEWORKS_DIR}"
 
-statusBanner "Processing all of the files in the xplanet dir"
-
-# Then do all of the files in the xplanet Dir
-#
-FILES_TO_COPY=()
-for file in ${XPLANET_DIR}/*
-do
-    base=$(basename $file)
-    
-    if [ -x $file ]
-    then
-        statusBanner "Processing xplanet file $base"
-        processTarget $file
-    else
-        echo ""
-        echo ""
-        echo "Skipping $base, not executable"
-    fi
-done
-
-statusBanner "Copying third round of files for xplanet"
-copyFilesToFrameworks
-
-statusBanner "Processing all of the files in the astrometry dir"
-
-# Then do all of the files in the astrometry Dir
-#
-FILES_TO_COPY=()
-for file in ${ASTROMETRY_DIR}/*
-do
-    base=$(basename $file)
-    
-    if [ -x $file ]
-    then
-        statusBanner "Processing astrometry file $base"
-        processTarget $file
-    else
-        echo ""
-        echo ""
-        echo "Skipping $base, not executable"
-    fi
-done
-
-statusBanner "Copying fourth round of files for astrometry"
-copyFilesToFrameworks
-
-statusBanner "Processing all of the files in the plugins/kf5/kio dir"
-
-# Then do all of the files in the kio Dir
-#
-FILES_TO_COPY=()
-for file in ${KIO_DIR}/*
-do
-    base=$(basename $file)
-
-    statusBanner "Processing kio file $base"
-    processTarget $file
-
-done
-
-statusBanner "Copying fifth round of files for kio plugins/image downloads"
-copyFilesToFrameworks
-
-statusBanner "Processing all of the files in the GPhoto IOLIBS plugins dir"
-
-# Then do all of the files in the plugins/libgphoto2_port Dir
-#
-FILES_TO_COPY=()
-for file in ${GPHOTO_IOLIBS_DIR}/*
-do
-    base=$(basename $file)
-    
-    statusBanner "Processing gphoto IOLIB Plugin file $base"
-    processTarget $file
-    
-done
-
-statusBanner "Copying sixth round of files for GPhoto IOLIBS plugins dir"
-copyFilesToFrameworks
-
-statusBanner "Processing all of the files in the GPhoto CAMLIBS plugins dir"
-
-# Then do all of the files in the plugins/libgphoto2 Dir
-#
-FILES_TO_COPY=()
-for file in ${GPHOTO_CAMLIBS_DIR}/*
-do
-    base=$(basename $file)
-    
-    statusBanner "Processing gphoto CAMLIB Plugin file $base"
-    processTarget $file
-    
-done
-
-statusBanner "Copying seventh round of files for GPhoto CAMLIBS plugins dir"
-copyFilesToFrameworks
-
-statusBanner "Processing all of the files in the Frameworks dir"
-
-# Then do all of the files in the Frameworks Dir
-#
-FILES_TO_COPY=()
-for file in ${FRAMEWORKS_DIR}/*
-do
-    base=$(basename $file)
-    
-	statusBanner "Processing Frameworks file $base"
-    processTarget $file
-    
-done
-
-statusBanner "Copying eighth round of files for Frameworks"
-copyFilesToFrameworks
 
 statusBanner "The following files are now in Frameworks:"
 ls -lF ${FRAMEWORKS_DIR}
