@@ -619,7 +619,7 @@ EOF
 			cp -rf ${CRAFT_DIR}/lib/qt5/plugins/* ${KSTARS_APP}/Contents/PlugIns/
 			cp -rf ${CRAFT_DIR}/share/sounds ${KSTARS_APP}/Contents/Resources/
 			mkdir ${KSTARS_APP}/Contents/PlugIns/vlc
-			p -rf /usr/local/lib/vlc/plugins/access ${KSTARS_APP}/Contents/PlugIns/vlc/
+			cp -rf /usr/local/lib/vlc/plugins/access ${KSTARS_APP}/Contents/PlugIns/vlc/
 			cp -rf /usr/local/lib/vlc/plugins/audio_output ${KSTARS_APP}/Contents/PlugIns/vlc/
 			cp -rf /usr/local/lib/vlc/plugins/codec ${KSTARS_APP}/Contents/PlugIns/vlc/
 		
