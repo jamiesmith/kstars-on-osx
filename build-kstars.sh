@@ -411,6 +411,11 @@ EOF
 	{
 		mkdir -p ${CRAFT_DIR}
 		cd ${CRAFT_DIR}/
+		
+		if [ ! -d oxygen ]
+		then
+			git clone https://github.com/KDE/oxygen.git
+		fi
 	
 		if [ ! -d craft ]
 		then
@@ -441,10 +446,10 @@ EOF
 		
 		statusBanner "Crafting icons"
 		craft breeze-icons
-		statusBanner "Crafting sounds"
-		craft oxygen-sounds
 		statusBanner "Crafting KStars"
 		craft -vvv -i kstars
+		
+		cp -f  ${CRAFT_DIR}/oxygen/sounds/*.ogg ${CRAFT_DIR}/share/sounds/
 	
 		announce "CRAFT COMPLETE"
 	}
