@@ -441,6 +441,8 @@ EOF
 		
 		statusBanner "Crafting icons"
 		craft breeze-icons
+		statusBanner "Crafting sounds"
+		craft oxygen-sounds
 		statusBanner "Crafting KStars"
 		craft -vvv -i kstars
 	
@@ -614,6 +616,9 @@ EOF
 
 			statusBanner "Copying plugins"
 			cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			
+			statusBanner "Copying Notifications."
+			cp -rf ${CRAFT_DIR}/share/knotifications5 ${KSTARS_APP}/Contents/Resources/
 			
 			statusBanner "Copying phonon backend, vlc plugins, and sounds."
 			cp -rf ${CRAFT_DIR}/lib/qt5/plugins/* ${KSTARS_APP}/Contents/PlugIns/
