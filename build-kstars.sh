@@ -648,10 +648,10 @@ EOF
 			cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
 			
 			statusBanner "Copying Notifications."
-			cp -rf ${CMAKE_DIR}/share/knotifications5 ${KSTARS_APP}/Contents/Resources/
+			cp -rf ${KSTARS_CMAKE_DIR}/share/knotifications5 ${KSTARS_APP}/Contents/Resources/
 			
 			statusBanner "Copying Sounds."
-			cp -rf ${CMAKE_DIR}/share/sounds ${KSTARS_APP}/Contents/Resources/
+			cp -rf ${KSTARS_CMAKE_DIR}/share/sounds ${KSTARS_APP}/Contents/Resources/
 		
 		else
 			announce "Plugins and K I O Slave ERROR"
