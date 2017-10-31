@@ -612,7 +612,10 @@ EOF
 		mkdir -p ${KSTARS_APP}/Contents/PlugIns/dbus
 		cp -f $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/kstars.conf
 		cp -f ${DIR}/org.freedesktop.dbus-kstars.plist ${KSTARS_APP}/Contents/PlugIns/dbus/
-	
+		
+		statusBanner "Copying phonon backend and vlc plugins"
+		tar -xzf ${DIR}/backend.zip ${KSTARS_APP}/Contents/PlugIns/
+		tar -xzf ${DIR}/vlc.zip ${KSTARS_APP}/Contents/PlugIns/
 	
 		if [ "$KSTARS_BUILD_TYPE" == "CRAFT" ]
 		then
@@ -627,13 +630,8 @@ EOF
 			statusBanner "Copying Notifications."
 			cp -rf ${CRAFT_DIR}/share/knotifications5 ${KSTARS_APP}/Contents/Resources/
 			
-			statusBanner "Copying phonon backend, vlc plugins, and sounds."
-			cp -rf ${CRAFT_DIR}/lib/qt5/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			statusBanner "Copying Sounds."
 			cp -rf ${CRAFT_DIR}/share/sounds ${KSTARS_APP}/Contents/Resources/
-			mkdir -p ${KSTARS_APP}/Contents/PlugIns/vlc
-			cp -rf /usr/local/lib/vlc/plugins/access ${KSTARS_APP}/Contents/PlugIns/vlc/
-			cp -rf /usr/local/lib/vlc/plugins/audio_output ${KSTARS_APP}/Contents/PlugIns/vlc/
-			cp -rf /usr/local/lib/vlc/plugins/codec ${KSTARS_APP}/Contents/PlugIns/vlc/
 		
 			#statusBanner "Copying icontheme"
 			#cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
@@ -648,6 +646,12 @@ EOF
 		
 			statusBanner "Copying plugins"
 			cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			
+			statusBanner "Copying Notifications."
+			cp -rf ${CMAKE_DIR}/share/knotifications5 ${KSTARS_APP}/Contents/Resources/
+			
+			statusBanner "Copying Sounds."
+			cp -rf ${CMAKE_DIR}/share/sounds ${KSTARS_APP}/Contents/Resources/
 		
 		else
 			announce "Plugins and K I O Slave ERROR"
