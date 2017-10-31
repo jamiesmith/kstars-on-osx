@@ -614,8 +614,8 @@ EOF
 		cp -f ${DIR}/org.freedesktop.dbus-kstars.plist ${KSTARS_APP}/Contents/PlugIns/dbus/
 		
 		statusBanner "Copying phonon backend and vlc plugins"
-		tar -xzf ${DIR}/backend.zip ${KSTARS_APP}/Contents/PlugIns/
-		tar -xzf ${DIR}/vlc.zip ${KSTARS_APP}/Contents/PlugIns/
+		tar -xzf ${DIR}/backend.zip -C ${KSTARS_APP}/Contents/PlugIns/
+		tar -xzf ${DIR}/vlc.zip -C ${KSTARS_APP}/Contents/PlugIns/
 	
 		if [ "$KSTARS_BUILD_TYPE" == "CRAFT" ]
 		then
