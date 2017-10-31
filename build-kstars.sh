@@ -647,6 +647,9 @@ EOF
 			statusBanner "Copying plugins"
 			cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
 			
+			statusBanner "Copying Frameworks for VLC/Phonon."
+			tar -xzf ${DIR}/FrameworksForVLC.zip -C ${KSTARS_APP}/Contents/
+			
 			statusBanner "Copying Notifications."
 			cp -rf ${KSTARS_CMAKE_DIR}/share/knotifications5 ${KSTARS_APP}/Contents/Resources/
 			
