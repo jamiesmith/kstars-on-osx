@@ -318,6 +318,8 @@ EOF
 		brewInstallIfNeeded jamiesmith/astronomy/libnova
 		brewInstallIfNeeded jamiesmith/astronomy/gsc
 		
+		gem install logger-colors
+		
 		announce "There is currently a problem building KDocTools."
 		announce "Attempting the workaround for k-doctools.  If this does not work, try the command: cpanm URI"
 			brewInstallIfNeeded cpanminus
