@@ -483,7 +483,7 @@ EOF
 		then
 			cmake -DCMAKE_INSTALL_PREFIX=${KSTARS_XCODE_DIR} -G Xcode ../kstars
 			xcodebuild -target fetch-translations build
-			xcodebuild -project kstars.xcodeproj -target kstars -configuration Debug
+			xcodebuild -project kstars.xcodeproj -alltargets -configuration Debug
 			xcodebuild install
 		else
 			cmake -DCMAKE_INSTALL_PREFIX=${KSTARS_CMAKE_DIR} ../kstars
