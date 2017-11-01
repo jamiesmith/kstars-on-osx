@@ -251,11 +251,6 @@ EOF
 		brew link --force gettext
 		mkdir -p /usr/local/lib/libexec
 	
-		#announce "Homebrew currently has a problem building KWallet and KDocTools."
-		#announce "Attempting the workaround for kf5-wallet.  If this doesn't work and kf5-wallet fails to install, install it manually and link it"
-		#	brew install --no-sandbox kf5-kwallet
-		
-		
 		brewInstallIfNeeded KDE-mac/kde/kf5-kwallet
 		brewInstallIfNeeded KDE-mac/kde/kf5-kcoreaddons
 		brew link --overwrite kf5-kcoreaddons
@@ -325,7 +320,7 @@ EOF
 		
 		gem install logger-colors
 		
-		announce "Attempting to install cpan and URI for kdoctools.  If this does not work, stop the script and try the command: cpanm URI.  Then restart the script"
+		announce "Attempting to install cpan and URI for kdoctools."
 			brewInstallIfNeeded cpanminus
 			cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
 			/usr/local/bin/cpanm URI
