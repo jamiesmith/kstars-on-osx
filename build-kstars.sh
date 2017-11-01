@@ -210,7 +210,7 @@ EOF
 			# Cleanup steps:
 			#     brew uninstall `brew list -1 | grep '^kf5-'`
 			#     rm -rf ~/Library/Caches/Homebrew/kf5-*
-			#     brew untap haraldf/kf5
+			#     brew untap KDE-mac/kde
 			#     ls /usr/local/Homebrew/Library/Taps
 			#     brew remove qt5
 
@@ -227,9 +227,9 @@ EOF
 			fi
 		fi
 
-		brew tap haraldf/kf5
+		brew tap KDE-mac/kde
 
-		cd $(brew --repo haraldf/homebrew-kf5)
+		cd $(brew --repo KDE-mac/kde)
 
 
 		if [ -z "${FORCE_BREW_QT}" ]
@@ -240,7 +240,7 @@ EOF
 			then
 				echo "Hacking kf5 Files"
 				sed -i '' "s@*args@\"-DCMAKE_PREFIX_PATH=${SUBSTITUTE}\", *args@g" *.rb
-				sed -i '' '/depends_on "qt5"/,/^/d' *.rb
+				sed -i '' '/depends_on "qt"/,/^/d' *.rb
 			else
 				echo "kf5 Files already hacked, er, patched, skipping"
 			fi
@@ -251,21 +251,23 @@ EOF
 		brew link --force gettext
 		mkdir -p /usr/local/lib/libexec
 	
-		announce "Homebrew currently has a problem building KWallet and KDocTools."
-		announce "Attempting the workaround for kf5-wallet.  If this doesn't work and kf5-wallet fails to install, install it manually and link it"
-			brew install --no-sandbox kf5-kwallet
-	
-		brewInstallIfNeeded haraldf/kf5/kf5-kcoreaddons
+		#announce "Homebrew currently has a problem building KWallet and KDocTools."
+		#announce "Attempting the workaround for kf5-wallet.  If this doesn't work and kf5-wallet fails to install, install it manually and link it"
+		#	brew install --no-sandbox kf5-kwallet
+		
+		
+		brewInstallIfNeeded KDE-mac/kde/kf5-kwallet
+		brewInstallIfNeeded KDE-mac/kde/kf5-kcoreaddons
 		brew link --overwrite kf5-kcoreaddons
-		brewInstallIfNeeded haraldf/kf5/kf5-kcrash
-		brewInstallIfNeeded haraldf/kf5/kf5-knotifyconfig
-		brewInstallIfNeeded haraldf/kf5/kf5-knotifications
-		brewInstallIfNeeded haraldf/kf5/kf5-kplotting
+		brewInstallIfNeeded KDE-mac/kde/kf5-kcrash
+		brewInstallIfNeeded KDE-mac/kde/kf5-knotifyconfig
+		brewInstallIfNeeded KDE-mac/kde/kf5-knotifications
+		brewInstallIfNeeded KDE-mac/kde/kf5-kplotting
 
-		brewInstallIfNeeded haraldf/kf5/kf5-kxmlgui
-		brewInstallIfNeeded haraldf/kf5/kf5-kdoctools
-		brewInstallIfNeeded haraldf/kf5/kf5-knewstuff
-		brewInstallIfNeeded haraldf/kf5/kf5-kded
+		brewInstallIfNeeded KDE-mac/kde/kf5-kxmlgui
+		brewInstallIfNeeded KDE-mac/kde/kf5-kdoctools
+		brewInstallIfNeeded KDE-mac/kde/kf5-knewstuff
+		brewInstallIfNeeded KDE-mac/kde/kf5-kded
 	
 		cd - > /dev/null
 	}
@@ -277,6 +279,9 @@ EOF
 	{
 		announce "updating homebrew"
 		#brew upgrade
+		
+		announce "Installing xcode command line tools"
+		xcode-select --install
 
 		announce "Installing brew dependencies"
 
@@ -312,7 +317,7 @@ EOF
 		
 		#These are needed for Translations
 		brewInstallIfNeeded gpg
-		ln -s /usr/local/bin/gpg /usr/local/bin/gpg2
+		ln -sf /usr/local/bin/gpg /usr/local/bin/gpg2
 		brewInstallIfNeeded ruby
 
 		brewInstallIfNeeded jamiesmith/astronomy/libnova
@@ -320,10 +325,10 @@ EOF
 		
 		gem install logger-colors
 		
-		announce "There is currently a problem building KDocTools."
-		announce "Attempting the workaround for k-doctools.  If this does not work, try the command: cpanm URI"
+		announce "Attempting to install cpan and URI for kdoctools.  If this does not work, stop the script and try the command: cpanm URI.  Then restart the script"
 			brewInstallIfNeeded cpanminus
-			cpanm URI
+			cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
+			/usr/local/bin/cpanm URI
 	
 		# Only do this if we are doing a cmake build
 		#
