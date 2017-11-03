@@ -273,7 +273,7 @@ EOF
 	function installBrewDependencies
 	{
 		announce "updating homebrew"
-		#brew upgrade
+		brew upgrade
 		
 		announce "Installing xcode command line tools"
 		xcode-select --install
@@ -305,6 +305,7 @@ EOF
 		brewInstallIfNeeded xplanet
 		brewInstallIfNeeded gsl
 		brewInstallIfNeeded python
+		/usr/local/bin/pip2 install pyfits
 		brewInstallIfNeeded libftdi
 		brewInstallIfNeeded gpsd
 	
@@ -581,6 +582,17 @@ EOF
 		
 			#This is needed so we will be able to run the install_name_tool on them.
 			chmod +w ${targetDir}/bin/*
+			
+			mkdir -p ${KSTARS_APP}/Contents/MacOS/netpbm
+			cp -Rf $(brew --prefix netpbm)/bin ${KSTARS_APP}/Contents/MacOS/netpbm/
+			chmod +w ${KSTARS_APP}/Contents/MacOS/netpbm/bin/*
+			
+			mkdir -p ${KSTARS_APP}/Contents/MacOS/python/bin
+			cp -f $(brew --prefix python)/bin/python2 ${KSTARS_APP}/Contents/MacOS/python/bin/python
+			mkdir -p ${KSTARS_APP}/Contents/MacOS/python/bin/site-packages
+			cp -RLf /usr/local/lib/python2.7/site-packages/numpy ${KSTARS_APP}/Contents/MacOS/python/bin/site-packages/
+			cp -RLf /usr/local/lib/python2.7/site-packages/pyfits ${KSTARS_APP}/Contents/MacOS/python/bin/site-packages/
+			chmod -R +w ${KSTARS_APP}/Contents/MacOS/python
 		fi
 		##########################################
 		statusBanner "Set up some xplanet pictures..."

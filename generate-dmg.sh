@@ -136,7 +136,7 @@ macdeployqt KStars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave -execut
 	UNCOMPRESSED_DMG=${DMG_DIR}/KStarsUncompressed.dmg
 
 #Create and attach DMG
-	hdiutil create -srcfolder ${DMG_DIR} -size 300m -fs HFS+ -format UDRW -volname KStars ${UNCOMPRESSED_DMG}
+	hdiutil create -srcfolder ${DMG_DIR} -size 350m -fs HFS+ -format UDRW -volname KStars ${UNCOMPRESSED_DMG}
 	hdiutil attach ${UNCOMPRESSED_DMG}
 
 # Obtain device information
