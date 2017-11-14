@@ -321,6 +321,10 @@ EOF
 		
 		gem install logger-colors
 		
+		# These needed to be added because KDocTools now fails to install if they aren't installed ahead of time.
+		brew install docbook
+		brew install docbook-xsl
+		
 		announce "Attempting to install cpan and URI for kdoctools."
 			brewInstallIfNeeded cpanminus
 			cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
