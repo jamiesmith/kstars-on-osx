@@ -1,7 +1,6 @@
 #!/bin/bash
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source "${DIR}/build-env.sh"
 
 ANNOUNCE=""
 INDI_ONLY=""
@@ -661,7 +660,15 @@ EOF
 			cp -f /usr/local/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
 		
 			statusBanner "Copying plugins"
-			cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			if [ -e "/usr/local/lib/qt5/plugins/" ]
+			then
+				cp -rf /usr/local/lib/qt5/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			fi
+			
+			if [ -e "/usr/local/lib/plugins/" ]
+			then
+				cp -rf /usr/local/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			fi
 			
 			statusBanner "Copying Frameworks for VLC/Phonon."
 			tar -xzf ${DIR}/FrameworksForVLC.zip -C ${KSTARS_APP}/Contents/
@@ -688,15 +695,18 @@ EOF
 # This is where the main part of the script starts!
 #
 
-# Before anything, check for QT and to see if the remote servers are accessible
-	checkForQT
-	checkForConnections
-
 #Process the command line options to determine what to do.
 	processOptions $@
 	
 #Check to see that this script is up to date.  If you want it to run anyway, use the -f option.
 	checkUpToDate
+	
+# Prepare to run the script by setting all of the environment variables	
+	source "${DIR}/build-env.sh"
+	
+# Before starting, check for QT and to see if the remote servers are accessible
+	checkForQT
+	checkForConnections
 	
 #Check first that the user has entered build options, if not, print the list of options and quit.
 	if [ -z "$KSTARS_BUILD_TYPE" ] && [ -z "$BUILD_INDI" ]
