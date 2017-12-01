@@ -254,6 +254,11 @@ EOF
 		brewInstallIfNeeded KDE-mac/kde/kf5-kcoreaddons
 		brew link --overwrite kf5-kcoreaddons
 		brewInstallIfNeeded KDE-mac/kde/kf5-kcrash
+		
+		# These two lines had to be added due to an issue with kf5 sonnet.
+		brew unlink hunspell
+		brew install aspell
+		
 		brewInstallIfNeeded KDE-mac/kde/kf5-knotifyconfig
 		brewInstallIfNeeded KDE-mac/kde/kf5-knotifications
 		brewInstallIfNeeded KDE-mac/kde/kf5-kplotting
@@ -447,8 +452,8 @@ EOF
 		
 		statusBanner "Copying Craft Settings"
 		cp ${DIR}/CraftSettings.ini ${CRAFT_DIR}/etc/
-		cd ${CRAFT_DIR}/craft
-		source craftenv.sh
+		cd ${CRAFT_DIR}
+		source craft/craftenv.sh
 		
 		statusBanner "Crafting icons"
 		craft breeze-icons
