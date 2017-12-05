@@ -74,7 +74,7 @@ exit 9
 					set icon size of the icon view options of container window to 64
 					set arrangement of the icon view options of container window to not arranged
 					set position of item "QuickStart.pdf" to {100, 50}
-					set position of item "CopyrightInfoAndSourcecode.pdf" to {100, 150}
+					set position of item "CopyrightInfo and SourceCode.pdf" to {100, 150}
 					set position of item "Applications" to {340, 50}
 					set position of item "KStars.app" to {340, 150}
 					set background picture of the icon view options of container window to file "background.jpg" of folder "Pictures"
@@ -152,7 +152,8 @@ macdeployqt KStars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave -execut
 
 # copy in background image
 	mkdir -p ${VOLUME}/Pictures
-	cp -f ${KSTARS_APP}/Contents/Resources/data/kstars.png ${VOLUME}/Pictures/background.jpg
+	#cp -f ${KSTARS_APP}/Contents/Resources/data/kstars.png ${VOLUME}/Pictures/background.jpg
+	cp -f ${DIR}/dmg_background.png ${VOLUME}/Pictures/background.jpg
 
 # symlink Applications folder, arrange icons, set background image, set folder attributes, hide pictures folder
 	ln -s /Applications/ ${VOLUME}/Applications
