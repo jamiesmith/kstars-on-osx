@@ -117,7 +117,7 @@ set +e
 
 #This copies the documentation that will be placed into the dmg.
 	announce "Copying Documentation"
-	cp -f ${DIR}/CopyrightInfoAndSourcecode.pdf ${DMG_DIR}
+	cp -f ${DIR}/"CopyrightInfo and SourceCode.pdf" ${DMG_DIR}
 	cp -f ${DIR}/QuickStart.pdf ${DMG_DIR}
 
 #This deletes any previous dmg stuff so a new one can be made.
