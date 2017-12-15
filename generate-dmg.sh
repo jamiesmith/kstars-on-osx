@@ -73,10 +73,10 @@ exit 9
 					delay 1 -- sync
 					set icon size of the icon view options of container window to 64
 					set arrangement of the icon view options of container window to not arranged
-					set position of item "QuickStart.pdf" to {100, 40}
-					set position of item "CopyrightInfo and SourceCode.pdf" to {100, 140}
-					set position of item "Applications" to {340, 40}
-					set position of item "KStars.app" to {340, 140}
+					set position of item "QuickStart.pdf" to {100, 45}
+					set position of item "CopyrightInfo and SourceCode.pdf" to {100, 145}
+					set position of item "Applications" to {340, 45}
+					set position of item "KStars.app" to {340, 145}
 					set background picture of the icon view options of container window to file "background.jpg" of folder "Pictures"
 					set the bounds of the container window to {0, 0, 440, 270}
 					update without registering applications
