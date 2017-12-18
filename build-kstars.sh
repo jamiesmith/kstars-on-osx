@@ -81,6 +81,8 @@ EOF
 					;;
 				c)
 					KSTARS_BUILD_TYPE="CMAKE"
+					FORCE_BREW_QT="Yep"
+					echo "Due to a current error in building Phonon with non brew qt using cmake, we have to use the brew qt for cmake"
 					;;
 				d)
 					GENERATE_DMG="Yep"
@@ -102,6 +104,8 @@ EOF
 					;;
 				x)
 					KSTARS_BUILD_TYPE="XCODE"
+					FORCE_BREW_QT="Yep"
+					echo "Due to a current error in building Phonon with non brew qt using xcode, we have to use the brew qt for xcode"
 					;;    	            
 				*)
 					dieUsage "Unsupported option $option"
@@ -220,19 +224,14 @@ EOF
 				export SUBSTITUTE=${QT5_DIR}
 			else
 				echo "Cannot figure out where QT is."
-	
-	
 				exit 9
 			fi
 		fi
 
-		brew tap KDE-mac/kde
-
-		cd $(brew --repo KDE-mac/kde)
-
-
 		if [ -z "${FORCE_BREW_QT}" ]
 		then
+			brew tap KDE-mac/kde
+			cd $(brew --repo KDE-mac/kde)
 			echo $SUBSTITUTE
 			count=$(cat *.rb | grep -c CMAKE_PREFIX_PATH)
 			if [ $count -le 1 ]
@@ -244,6 +243,8 @@ EOF
 				echo "kf5 Files already hacked, er, patched, skipping"
 			fi
 		else
+			brew untap KDE-mac/kde
+			brew tap KDE-mac/kde
 			brewInstallIfNeeded qt
 		fi
 
@@ -256,7 +257,6 @@ EOF
 		brewInstallIfNeeded KDE-mac/kde/kf5-kcrash
 		
 		# These two lines had to be added due to an issue with kf5 sonnet.
-		brew unlink hunspell
 		brew install aspell
 		
 		brewInstallIfNeeded KDE-mac/kde/kf5-knotifyconfig
@@ -331,8 +331,10 @@ EOF
 		
 		announce "Attempting to install cpan and URI for kdoctools."
 			brewInstallIfNeeded cpanminus
-			cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
+			PERL_MM_OPT="INSTALL_BASE=$HOME/perl5" cpan local::lib
+			echo 'eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"' >> ~/.bash_profile
 			/usr/local/bin/cpanm URI
+			ln -sf "$(brew --prefix)/share/kf5" "$HOME/Library/Application Support"
 	
 		# Only do this if we are doing a cmake build
 		#
@@ -352,11 +354,11 @@ EOF
 		make
 		make install
 	 
-	   # mkdir -p ${INDI_DIR}/build/qhy
-	   # cd ${INDI_DIR}/build/qhy
-	   # cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqhy
-	   # make
-	   # make install
+	    mkdir -p ${INDI_DIR}/build/qhy
+	    cd ${INDI_DIR}/build/qhy
+	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqhy
+	    make
+	    make install
 	 
 		mkdir -p ${INDI_DIR}/build/3rdparty
 		cd ${INDI_DIR}/build/3rdparty
