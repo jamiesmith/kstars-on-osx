@@ -204,49 +204,15 @@ EOF
 	}
 
 #This installs the kde programs if it is doing the XCode or Cmake version of the build
-#It gets the files from homebrew.  It can patch them to use the system QT or just use brewed QT.
-	function installPatchedKf5Stuff
+#It gets the files from the homebrew KDE-mac repo.  It uses the homebrew version of QT.
+	function installHomebrewKf5Stuff
 	{
+	
+		# I deleted the homebrew hacks to use the non-brew qt since there were some issues with that.
 
-		if [ -z "${FORCE_BREW_QT}" ]
-		then
-			# Cleanup steps:
-			#     brew uninstall `brew list -1 | grep '^kf5-'`
-			#     rm -rf ~/Library/Caches/Homebrew/kf5-*
-			#     brew untap KDE-mac/kde
-			#     ls /usr/local/Homebrew/Library/Taps
-			#     brew remove qt5
-
-			# I think that the qt5 stuff can just be the dir...
-			#
-			if [ -d ${QT5_DIR} ]
-			then
-				export SUBSTITUTE=${QT5_DIR}
-			else
-				echo "Cannot figure out where QT is."
-				exit 9
-			fi
-		fi
-
-		if [ -z "${FORCE_BREW_QT}" ]
-		then
-			brew tap KDE-mac/kde
-			cd $(brew --repo KDE-mac/kde)
-			echo $SUBSTITUTE
-			count=$(cat *.rb | grep -c CMAKE_PREFIX_PATH)
-			if [ $count -le 1 ]
-			then
-				echo "Hacking kf5 Files"
-				sed -i '' "s@*args@\"-DCMAKE_PREFIX_PATH=${SUBSTITUTE}\", *args@g" *.rb
-				sed -i '' '/depends_on "qt"/,/^/d' *.rb
-			else
-				echo "kf5 Files already hacked, er, patched, skipping"
-			fi
-		else
-			brew untap KDE-mac/kde
-			brew tap KDE-mac/kde
-			brewInstallIfNeeded qt
-		fi
+		brew untap KDE-mac/kde
+		brew tap KDE-mac/kde
+		brewInstallIfNeeded qt
 
 		brew link --force gettext
 		mkdir -p /usr/local/lib/libexec
@@ -256,7 +222,7 @@ EOF
 		brew link --overwrite kf5-kcoreaddons
 		brewInstallIfNeeded KDE-mac/kde/kf5-kcrash
 		
-		# These two lines had to be added due to an issue with kf5 sonnet.
+		# This had to be added due to an issue with kf5 sonnet.
 		brew install aspell
 		
 		brewInstallIfNeeded KDE-mac/kde/kf5-knotifyconfig
@@ -330,17 +296,15 @@ EOF
 		brew install docbook-xsl
 		
 		announce "Attempting to install cpan and URI for kdoctools."
-			brewInstallIfNeeded cpanminus
-			PERL_MM_OPT="INSTALL_BASE=$HOME/perl5" cpan local::lib
-			echo 'eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"' >> ~/.bash_profile
-			/usr/local/bin/cpanm URI
-			ln -sf "$(brew --prefix)/share/kf5" "$HOME/Library/Application Support"
+		brewInstallIfNeeded cpanminus
+		cpanm URI
+		announce "IF Kdoctools fails to install, exit the script, run cpanm URI, and then restart the script"
 	
 		# Only do this if we are doing a cmake build
 		#
 		if [ "$KSTARS_BUILD_TYPE" == "CMAKE" ] || [ "$KSTARS_BUILD_TYPE" == "XCODE" ]
 		then
-			installPatchedKf5Stuff
+			installHomebrewKf5Stuff
 		fi
 	}
 
