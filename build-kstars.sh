@@ -311,6 +311,23 @@ EOF
 #This builds the INDI 3rd Party Drivers
 	function buildThirdParty
 	{
+	
+		#fxload os x for DSI
+		cd ${INDI_DIR}
+		if [ ! -d nexys2-osx ]
+		then
+			statusBanner "Cloning FX2 DSI Firmware loader"
+			git clone https://github.com/nall/nexys2-osx.git
+		else
+			statusBanner "Updating FX2 DSI Firmware loader"
+			cd nexys2-osx
+			git pull
+		fi
+		
+		cd ${INDI_DIR}/nexys2-osx/fxload/
+		xcodebuild -project fxload-osx.xcodeproj -sdk macosx -alltargets -configuration Release
+		cp -f build/Release/fxload-osx /usr/local/bin/fxload-osx
+		
 		 ## Build 3rd party
 		mkdir -p ${INDI_DIR}/build/qsi
 		cd ${INDI_DIR}/build/qsi
@@ -592,6 +609,9 @@ EOF
 		
 		statusBanner "Copying apogee firmware"
 		cp -rf /usr/local/etc/Apogee ${KSTARS_APP}/Contents/PlugIns/
+		
+		statusBanner "Copying DSI firmware loader"
+		cp -f /usr/local/bin/fxload-osx ${KSTARS_APP}/Contents/MacOS/
 	
 		statusBanner "Copying dbus programs and files."
 		cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
