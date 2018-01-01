@@ -610,8 +610,9 @@ EOF
 		statusBanner "Copying apogee firmware"
 		cp -rf /usr/local/etc/Apogee ${KSTARS_APP}/Contents/PlugIns/
 		
-		statusBanner "Copying DSI firmware loader"
+		statusBanner "Copying DSI firmware loader and firmware file"
 		cp -f /usr/local/bin/fxload-osx ${KSTARS_APP}/Contents/MacOS/
+		cp -rf /usr/local/lib/firmware/ ${KSTARS_APP}/Contents/PlugIns/
 	
 		statusBanner "Copying dbus programs and files."
 		cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
