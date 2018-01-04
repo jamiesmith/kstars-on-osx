@@ -703,6 +703,12 @@ EOF
 	then
 		announce "and then building a DMG"
 	fi
+	
+#Warn about the fact that it is using the homebrew qt even though that was not explicitly requested.
+	if [ -z "${FORCE_BREW_QT}" ]  && [ "$QT5_DIR" == "$(brew --prefix qt)" ]
+		then
+			announce "Currently the path to the QT being used in this build is the homebrew version.  If you want to build with the system QT please update the variable in build-env.sh"
+	fi
 
 #This will install KStars dependencies from Homebrew.  If you know they are installed, you can skip it.
 	if [ -z "$SKIP_BREW" ]
