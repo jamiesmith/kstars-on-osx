@@ -285,6 +285,10 @@ EOF
 		brewInstallIfNeeded gpg
 		ln -sf /usr/local/bin/gpg /usr/local/bin/gpg2
 		brewInstallIfNeeded ruby
+		
+		#For some reason the new ruby 2.5 is not accepted by fetch-translations
+		brewInstallIfNeeded ruby@2.3
+		export PATH=/usr/local/opt/ruby@2.3/bin:$PATH
 
 		brewInstallIfNeeded jamiesmith/astronomy/libnova
 		brewInstallIfNeeded jamiesmith/astronomy/gsc
