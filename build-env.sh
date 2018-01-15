@@ -29,8 +29,9 @@ export GSC_DIR=${ASTRO_ROOT}/gsc
 if [ -z "${FORCE_BREW_QT}" ]
 then
 	#NOTE: The user of the Script can edit this path to match the system qt if desired.
-	#export QT5_DIR=~/Qt/5.9.2/clang_64
-	export QT5_DIR=$(brew --prefix qt)
+	#Please do not use any version less than 5.10.0, there was a serious Window bug that QT fixed in that version.
+	export QT5_DIR=~/Qt/5.10.0/clang_64
+	#export QT5_DIR=$(brew --prefix qt)
 else
 	export QT5_DIR=$(brew --prefix qt)
 fi	

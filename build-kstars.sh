@@ -484,7 +484,7 @@ EOF
 		##########################################
 		statusBanner "Editing info.plist"
 		plutil -replace CFBundleName -string KStars ${KSTARS_APP}/Contents/info.plist
-		plutil -replace CFBundleVersion -string 2.8 ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleVersion -string 2.9.1 ${KSTARS_APP}/Contents/info.plist
 		plutil -replace CFBundleLongVersionString -string 2.8 ${KSTARS_APP}/Contents/info.plist
 		plutil -replace CFBundleShortVersionString -string 2.8 ${KSTARS_APP}/Contents/info.plist
 		plutil -replace NSHumanReadableCopyright -string "© 2001 - 2017, The KStars Team, Freely Released under GNU GPL V2" ${KSTARS_APP}/Contents/info.plist
