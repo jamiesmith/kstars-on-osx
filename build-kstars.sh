@@ -267,7 +267,7 @@ EOF
 		brewInstallIfNeeded gphoto2
 		brewInstallIfNeeded libraw
 
-		brew tap homebrew/science
+		brew tap brewsci/science  #Note homebrew-science is depreciated and we may need to make changes.
 		brewInstallIfNeeded pkgconfig
 		brewInstallIfNeeded cfitsio
 		brewInstallIfNeeded eigen
