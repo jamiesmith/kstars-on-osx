@@ -432,6 +432,19 @@ EOF
 		craft -vvv -i kstars
 		
 		cp -f  ${CRAFT_DIR}/oxygen/sounds/*.ogg ${CRAFT_DIR}/share/sounds/
+		
+		#This should be changed because craft does download the icons, but its not easy to do yet.
+		if [ ! -d $${CRAFT_DIR}/share/icons/breeze-icons ]
+		then
+			statusBanner "Downloading icons"
+			mkdir -p ${CRAFT_DIR}/share/icons
+			cd ${CRAFT_DIR}/share/icons
+			git clone https://github.com/KDE/breeze-icons.git
+		else
+			statusBanner "Updating icons"
+			cd ${CRAFT_DIR}/share/icons/breeze-icons
+			git pull
+		fi
 	
 		announce "CRAFT COMPLETE"
 	}
@@ -471,7 +484,18 @@ EOF
 			make
 			make install
 		fi
-   
+		
+		if [ ! -d ${KSTARS_CMAKE_DIR}/share/icons/breeze-icons ]
+		then
+			statusBanner "Downloading icons"
+			mkdir -p ${KSTARS_CMAKE_DIR}/share/icons
+			cd ${KSTARS_CMAKE_DIR}/share/icons
+			git clone https://github.com/KDE/breeze-icons.git
+		else
+			statusBanner "Updating icons"
+			cd ${KSTARS_CMAKE_DIR}/share/icons/breeze-icons
+			git pull
+		fi
 	}
 
 #This function handles KStars after it is built.
@@ -484,10 +508,10 @@ EOF
 		##########################################
 		statusBanner "Editing info.plist"
 		plutil -replace CFBundleName -string KStars ${KSTARS_APP}/Contents/info.plist
-		plutil -replace CFBundleVersion -string 2.9.1 ${KSTARS_APP}/Contents/info.plist
-		plutil -replace CFBundleLongVersionString -string 2.8 ${KSTARS_APP}/Contents/info.plist
-		plutil -replace CFBundleShortVersionString -string 2.8 ${KSTARS_APP}/Contents/info.plist
-		plutil -replace NSHumanReadableCopyright -string "© 2001 - 2017, The KStars Team, Freely Released under GNU GPL V2" ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleVersion -string 2.9.2 ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleLongVersionString -string 2.9.2 ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleShortVersionString -string 2.9.2 ${KSTARS_APP}/Contents/info.plist
+		plutil -replace NSHumanReadableCopyright -string "© 2001 - 2018, The KStars Team, Freely Released under GNU GPL V2" ${KSTARS_APP}/Contents/info.plist
 		##########################################
 		statusBanner "The Data Directory and Translations Directory"
 		appDataFolder=${KSTARS_APP}/Contents/Resources/data
@@ -584,18 +608,19 @@ EOF
 		chmod +w ${xplanet_dir}/bin/xplanet
 		cp -rf $(brew --prefix xplanet)/share ${xplanet_dir}
 	
+		statusBanner "Copying qhy, apogee, and DSI firmware"
+		cp -rf /usr/local/lib/indi/DriverSupport ${KSTARS_APP}/Contents/Resources/
+		#cp -rf /usr/local/lib/qhy ${KSTARS_APP}/Contents/PlugIns/	
+		#cp -rf /usr/local/etc/Apogee ${KSTARS_APP}/Contents/PlugIns/
+		#cp -rf /usr/local/lib/firmware/ ${KSTARS_APP}/Contents/PlugIns/
+	
 		statusBanner "Copying GPhoto Plugins"
 		GPHOTO_VERSION=$(pkg-config --modversion libgphoto2)
 		PORT_VERSION=$(pkg-config --modversion libgphoto2_port)
-		mkdir -p ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port
-		mkdir -p ${KSTARS_APP}/Contents/PlugIns/libgphoto2
-		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/${PORT_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2_port/
-		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/${GPHOTO_VERSION}/* ${KSTARS_APP}/Contents/PlugIns/libgphoto2/
-	
-		statusBanner "Copying qhy, apogee, and DSI firmware"
-		cp -rf /usr/local/lib/qhy ${KSTARS_APP}/Contents/PlugIns/	
-		cp -rf /usr/local/etc/Apogee ${KSTARS_APP}/Contents/PlugIns/
-		cp -rf /usr/local/lib/firmware/ ${KSTARS_APP}/Contents/PlugIns/
+		mkdir -p ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/IOLIBS
+		mkdir -p ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/CAMLIBS
+		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/${PORT_VERSION}/* ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/IOLIBS/
+		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/${GPHOTO_VERSION}/* ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/CAMLIBS/
 	
 		statusBanner "Copying dbus programs and files."
 		cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
@@ -628,6 +653,11 @@ EOF
 		
 			#statusBanner "Copying icontheme"
 			#cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
+			
+			statusBanner "Copying icons."
+			mkdir ${KSTARS_APP}/Contents/Resources/icons
+			cp -rf ${CRAFT_DIR}/share/icons/breeze-icons/icons ${KSTARS_APP}/Contents/Resources/icons/breeze
+			cp -rf ${CRAFT_DIR}/share/icons/breeze-icons/icons-dark ${KSTARS_APP}/Contents/Resources/icons/breeze-dark
 
 		elif [ "$KSTARS_BUILD_TYPE" == "CMAKE" ] || [ "$KSTARS_BUILD_TYPE" == "XCODE" ]
 		then
@@ -656,6 +686,11 @@ EOF
 			
 			statusBanner "Copying Sounds."
 			cp -rf ${KSTARS_CMAKE_DIR}/share/sounds ${KSTARS_APP}/Contents/Resources/
+			
+			statusBanner "Copying icons."
+			mkdir ${KSTARS_APP}/Contents/Resources/icons
+			cp -rf ${KSTARS_CMAKE_DIR}/share/icons/breeze-icons/icons ${KSTARS_APP}/Contents/Resources/icons/breeze
+			cp -rf ${KSTARS_CMAKE_DIR}/share/icons/breeze-icons/icons-dark ${KSTARS_APP}/Contents/Resources/icons/breeze-dark
 		
 		else
 			announce "Plugins and K I O Slave ERROR"
