@@ -621,6 +621,9 @@ EOF
 		mkdir -p ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/CAMLIBS
 		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2_port/${PORT_VERSION}/* ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/IOLIBS/
 		cp -rf $(brew --prefix libgphoto2)/lib/libgphoto2/${GPHOTO_VERSION}/* ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/CAMLIBS/
+		#This is needed so we will be able to run the install_name_tool on them.
+		chmod +w ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/IOLIBS/*
+		chmod +w ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/CAMLIBS/*
 	
 		statusBanner "Copying dbus programs and files."
 		cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
