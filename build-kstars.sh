@@ -434,7 +434,7 @@ EOF
 		cp -f  ${CRAFT_DIR}/oxygen/sounds/*.ogg ${CRAFT_DIR}/share/sounds/
 		
 		#This should be changed because craft does download the icons, but its not easy to do yet.
-		if [ ! -d $${CRAFT_DIR}/share/icons/breeze-icons ]
+		if [ ! -d ${CRAFT_DIR}/share/icons/breeze-icons ]
 		then
 			statusBanner "Downloading icons"
 			mkdir -p ${CRAFT_DIR}/share/icons
