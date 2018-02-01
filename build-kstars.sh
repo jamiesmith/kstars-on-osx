@@ -710,6 +710,12 @@ EOF
 		chmod -R +w ${KSTARS_APP}/Contents/MacOS/kioslave
 		chmod -R +w ${KSTARS_APP}/Contents/PlugIns/
 		
+		if [ "$KSTARS_BUILD_TYPE" == "CRAFT" ]
+		then
+			statusBanner "Copying Craft app bundle into build folder in case you want to edit kstars in QT Creator."
+			cp -rf ${KSTARS_APP} ${CRAFT_DIR}/build/kde/applications/kstars/work/RelWithDebInfo-master/kstars
+		fi
+		
 	}
 
 
