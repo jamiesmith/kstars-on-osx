@@ -508,9 +508,9 @@ EOF
 		##########################################
 		statusBanner "Editing info.plist"
 		plutil -replace CFBundleName -string KStars ${KSTARS_APP}/Contents/info.plist
-		plutil -replace CFBundleVersion -string 2.9.2 ${KSTARS_APP}/Contents/info.plist
-		plutil -replace CFBundleLongVersionString -string 2.9.2 ${KSTARS_APP}/Contents/info.plist
-		plutil -replace CFBundleShortVersionString -string 2.9.2 ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleVersion -string $KSTARS_VERSION ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleLongVersionString -string $KSTARS_VERSION ${KSTARS_APP}/Contents/info.plist
+		plutil -replace CFBundleShortVersionString -string $KSTARS_VERSION ${KSTARS_APP}/Contents/info.plist
 		plutil -replace NSHumanReadableCopyright -string "© 2001 - 2018, The KStars Team, Freely Released under GNU GPL V2" ${KSTARS_APP}/Contents/info.plist
 		##########################################
 		statusBanner "The Data Directory and Translations Directory"

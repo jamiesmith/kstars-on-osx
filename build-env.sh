@@ -54,6 +54,8 @@ export KSTARS_REPO=git://anongit.kde.org/kstars.git
 export LIBINDI_REPO=https://github.com/indilib/indi.git
 export CRAFT_REPO=git://anongit.kde.org/craft.git
 
+export KSTARS_VERSION=2.9.3
+
 echo "DIR          		 is [${DIR}]"
 echo "ASTRO_ROOT          is [${ASTRO_ROOT}]"
 echo "INDI_DIR           is [${INDI_DIR}]"
@@ -77,3 +79,4 @@ echo "QT5NETWORK_DIR     is [${QT5NETWORK_DIR}]"
 
 echo "GSC_TARGET_DIR     is [${GSC_TARGET_DIR}]"
 echo "OSX Deployment target [${QMAKE_MACOSX_DEPLOYMENT_TARGET}]"
+echo "KStars Version [${KSTARS_VERSION}]"
