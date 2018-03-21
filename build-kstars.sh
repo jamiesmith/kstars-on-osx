@@ -597,7 +597,7 @@ EOF
 			chmod +w ${KSTARS_APP}/Contents/MacOS/netpbm/bin/*
 			
 			mkdir -p ${KSTARS_APP}/Contents/MacOS/python/bin
-			cp -f $(brew --prefix python)/bin/python2 ${KSTARS_APP}/Contents/MacOS/python/bin/python
+			cp -f $(brew --prefix python2)/bin/python2 ${KSTARS_APP}/Contents/MacOS/python/bin/python
 			mkdir -p ${KSTARS_APP}/Contents/MacOS/python/bin/site-packages
 			cp -RLf /usr/local/lib/python2.7/site-packages/numpy ${KSTARS_APP}/Contents/MacOS/python/bin/site-packages/
 			cp -RLf /usr/local/lib/python2.7/site-packages/pyfits ${KSTARS_APP}/Contents/MacOS/python/bin/site-packages/
