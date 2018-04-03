@@ -303,6 +303,9 @@ EOF
 		brewInstallIfNeeded cpanminus
 		cpanm URI
 		announce "IF Kdoctools fails to install, exit the script, run cpanm URI, and then restart the script"
+		
+		announce "Installing XML parser for Craft."
+		cpanm XML::Parser
 	
 		# Only do this if we are doing a cmake build
 		#
@@ -432,19 +435,6 @@ EOF
 		craft -vvv -i kstars
 		
 		cp -f  ${CRAFT_DIR}/oxygen/sounds/*.ogg ${CRAFT_DIR}/share/sounds/
-		
-		#This should be changed because craft does download the icons, but its not easy to do yet.
-		if [ ! -d ${CRAFT_DIR}/share/icons/breeze-icons ]
-		then
-			statusBanner "Downloading icons"
-			mkdir -p ${CRAFT_DIR}/share/icons
-			cd ${CRAFT_DIR}/share/icons
-			git clone https://github.com/KDE/breeze-icons.git
-		else
-			statusBanner "Updating icons"
-			cd ${CRAFT_DIR}/share/icons/breeze-icons
-			git pull
-		fi
 	
 		announce "CRAFT COMPLETE"
 	}
@@ -485,17 +475,22 @@ EOF
 			make install
 		fi
 		
-		if [ ! -d ${KSTARS_CMAKE_DIR}/share/icons/breeze-icons ]
+		if [ ! -d ${KSTARS_CMAKE_DIR}/breeze-icons ]
 		then
 			statusBanner "Downloading icons"
-			mkdir -p ${KSTARS_CMAKE_DIR}/share/icons
-			cd ${KSTARS_CMAKE_DIR}/share/icons
+			cd ${KSTARS_CMAKE_DIR}
 			git clone https://github.com/KDE/breeze-icons.git
 		else
 			statusBanner "Updating icons"
-			cd ${KSTARS_CMAKE_DIR}/share/icons/breeze-icons
+			cd ${KSTARS_CMAKE_DIR}/breeze-icons
 			git pull
 		fi
+		mkdir -p ${KSTARS_CMAKE_DIR}/breeze-icons-build
+		cd ${KSTARS_CMAKE_DIR}/breeze-icons-build
+		cmake -DCMAKE_INSTALL_PREFIX=${KSTARS_CMAKE_DIR} ../breeze-icons
+		make
+		make install
+		
 	}
 
 #This function handles KStars after it is built.
@@ -559,17 +554,7 @@ EOF
 		statusBanner "The indi drivers"
 		mkdir -p ${KSTARS_APP}/Contents/MacOS/indi
 		cp -f /usr/local/bin/indi*    ${KSTARS_APP}/Contents/MacOS/indi/
-		cp -f /usr/local/share/indi/* ${KSTARS_APP}/Contents/MacOS/indi/
-		##########################################
-		statusBanner "All the other XML Files"
-		FILES="$(find ${INDI_DIR} -name '*.xml.cmake')"
-		for FILE in $FILES; do
-			FILENAME=$(basename $FILE)
-			NEWFILENAME="$(echo $FILENAME | sed 's/.cmake//')"
-			echo $NEWFILENAME
-			DESTINATION=${KSTARS_APP}/Contents/MacOS/indi/$NEWFILENAME
-			cp -f $FILE $DESTINATION
-		done
+		
 		##########################################
 		statusBanner "The gsc executable"
 		sourceDir="$(brew --prefix gsc)"
@@ -616,10 +601,20 @@ EOF
 	
 		statusBanner "Copying qhy, apogee, and DSI firmware"
 		cp -rf /usr/local/lib/indi/DriverSupport ${KSTARS_APP}/Contents/Resources/
-		#cp -rf /usr/local/lib/qhy ${KSTARS_APP}/Contents/PlugIns/	
-		#cp -rf /usr/local/etc/Apogee ${KSTARS_APP}/Contents/PlugIns/
-		#cp -rf /usr/local/lib/firmware/ ${KSTARS_APP}/Contents/PlugIns/
-	
+		##########################################
+		statusBanner "Copying Driver XML Files"
+		cp -f /usr/local/share/indi/* ${KSTARS_APP}/Contents/Resources/DriverSupport/
+
+		statusBanner "And all the missed Driver XML Files"
+		FILES="$(find ${INDI_DIR} -name '*.xml.cmake')"
+		for FILE in $FILES; do
+			FILENAME=$(basename $FILE)
+			NEWFILENAME="$(echo $FILENAME | sed 's/.cmake//')"
+			echo $NEWFILENAME
+			DESTINATION=${KSTARS_APP}/Contents/Resources/DriverSupport/$NEWFILENAME
+			cp -f $FILE $DESTINATION
+		done
+		##########################################
 		statusBanner "Copying GPhoto Plugins"
 		GPHOTO_VERSION=$(pkg-config --modversion libgphoto2)
 		PORT_VERSION=$(pkg-config --modversion libgphoto2_port)
@@ -630,7 +625,7 @@ EOF
 		#This is needed so we will be able to run the install_name_tool on them.
 		chmod +w ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/IOLIBS/*
 		chmod +w ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/CAMLIBS/*
-	
+		##########################################
 		statusBanner "Copying dbus programs and files."
 		cp -f $(brew --prefix dbus)/bin/dbus-daemon ${KSTARS_APP}/Contents/MacOS/
 		chmod +w ${KSTARS_APP}/Contents/MacOS/dbus-daemon
@@ -639,11 +634,12 @@ EOF
 		mkdir -p ${KSTARS_APP}/Contents/PlugIns/dbus
 		cp -f $(brew --prefix dbus)/share/dbus-1/session.conf ${KSTARS_APP}/Contents/PlugIns/dbus/kstars.conf
 		cp -f ${DIR}/org.freedesktop.dbus-kstars.plist ${KSTARS_APP}/Contents/PlugIns/dbus/
-		
+		##########################################
 		statusBanner "Copying phonon backend and vlc plugins"
 		tar -xzf ${DIR}/backend.zip -C ${KSTARS_APP}/Contents/PlugIns/
 		tar -xzf ${DIR}/vlc.zip -C ${KSTARS_APP}/Contents/PlugIns/
-	
+		##########################################
+		
 		if [ "$KSTARS_BUILD_TYPE" == "CRAFT" ]
 		then
 			statusBanner "Copying k i o slave."
@@ -659,14 +655,11 @@ EOF
 			
 			statusBanner "Copying Sounds."
 			cp -rf ${CRAFT_DIR}/share/sounds ${KSTARS_APP}/Contents/Resources/
-		
-			#statusBanner "Copying icontheme"
-			#cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icontheme.rcc
 			
 			statusBanner "Copying icons."
 			mkdir ${KSTARS_APP}/Contents/Resources/icons
-			cp -rf ${CRAFT_DIR}/share/icons/breeze-icons/icons ${KSTARS_APP}/Contents/Resources/icons/breeze
-			cp -rf ${CRAFT_DIR}/share/icons/breeze-icons/icons-dark ${KSTARS_APP}/Contents/Resources/icons/breeze-dark
+			cp -f ${CRAFT_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icons/
+			cp -f ${CRAFT_DIR}/share/icons/breeze-dark/breeze-icons-dark.rcc ${KSTARS_APP}/Contents/Resources/icons/
 
 		elif [ "$KSTARS_BUILD_TYPE" == "CMAKE" ] || [ "$KSTARS_BUILD_TYPE" == "XCODE" ]
 		then
@@ -698,8 +691,8 @@ EOF
 			
 			statusBanner "Copying icons."
 			mkdir ${KSTARS_APP}/Contents/Resources/icons
-			cp -rf ${KSTARS_CMAKE_DIR}/share/icons/breeze-icons/icons ${KSTARS_APP}/Contents/Resources/icons/breeze
-			cp -rf ${KSTARS_CMAKE_DIR}/share/icons/breeze-icons/icons-dark ${KSTARS_APP}/Contents/Resources/icons/breeze-dark
+			cp -f ${KSTARS_CMAKE_DIR}/share/icons/breeze/breeze-icons.rcc ${KSTARS_APP}/Contents/Resources/icons/
+			cp -f ${KSTARS_CMAKE_DIR}/share/icons/breeze-dark/breeze-icons-dark.rcc ${KSTARS_APP}/Contents/Resources/icons/
 		
 		else
 			announce "Plugins and K I O Slave ERROR"
