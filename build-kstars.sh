@@ -615,6 +615,9 @@ EOF
 			cp -f $FILE $DESTINATION
 		done
 		##########################################
+		statusBanner "Copying Math Plugins"
+		cp -rf /usr/local/lib/indi/MathPlugins ${KSTARS_APP}/Contents/Resources/
+		##########################################
 		statusBanner "Copying GPhoto Plugins"
 		GPHOTO_VERSION=$(pkg-config --modversion libgphoto2)
 		PORT_VERSION=$(pkg-config --modversion libgphoto2_port)

@@ -281,6 +281,8 @@ processDirectory kio "${KSTARS_APP}/Contents/PlugIns/kf5/kio"
 processDirectory GPHOTO_IOLIBS "${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/IOLIBS"
 processDirectory GPHOTO_CAMLIBS "${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/CAMLIBS"
 
+processDirectory MathPlugins "${KSTARS_APP}/Contents/Resources/MathPlugins"
+
 processDirectory VLC_ACCESS "${KSTARS_APP}/Contents/PlugIns/vlc/access"
 processDirectory VLC_AUDIO_OUTPUT "${KSTARS_APP}/Contents/PlugIns/vlc/audio_output"
 processDirectory VLC_CODEC "${KSTARS_APP}/Contents/PlugIns/vlc/codec"
