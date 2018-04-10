@@ -306,6 +306,13 @@ EOF
 		
 		announce "Installing XML parser for Craft."
 		cpanm XML::Parser
+		
+		#This is a hack that will allow Craft to handle intltool
+		#Because the latest version of perl 5.26.0 causes errors when running intltool-update
+		#This should be changed back once the error is fixed!
+		#This forces the system to use /usr/bin perl which should be an older version than /usr/local/bin/perl
+		brew remove perl
+		ln -s /usr/bin/perl /usr/local/bin/perl
 	
 		# Only do this if we are doing a cmake build
 		#
@@ -318,21 +325,27 @@ EOF
 #This builds the INDI 3rd Party Drivers
 	function buildThirdParty
 	{
+		mkdir -p ${INDI_DIR}/build/3rdparty
 		
 		 ## Build 3rd party
-		mkdir -p ${INDI_DIR}/build/qsi
-		cd ${INDI_DIR}/build/qsi
+		mkdir -p ${INDI_DIR}/build/3rdparty/libqsi
+		cd ${INDI_DIR}/build/3rdparty/libqsi
 		cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqsi
 		make
 		make install
 	 
-	    mkdir -p ${INDI_DIR}/build/qhy
-	    cd ${INDI_DIR}/build/qhy
+	    mkdir -p ${INDI_DIR}/build/3rdparty/libqhy
+	    cd ${INDI_DIR}/build/3rdparty/libqhy
 	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqhy
 	    make
 	    make install
+	    
+	    mkdir -p ${INDI_DIR}/build/3rdparty/libapogee
+	    cd ${INDI_DIR}/build/3rdparty/libapogee
+	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libapogee
+	    make
+	    make install
 	 
-		mkdir -p ${INDI_DIR}/build/3rdparty
 		cd ${INDI_DIR}/build/3rdparty
 	
 	
@@ -619,6 +632,7 @@ EOF
 		cp -rf /usr/local/lib/indi/MathPlugins ${KSTARS_APP}/Contents/Resources/
 		##########################################
 		statusBanner "Copying GPhoto Plugins"
+		export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
 		GPHOTO_VERSION=$(pkg-config --modversion libgphoto2)
 		PORT_VERSION=$(pkg-config --modversion libgphoto2_port)
 		mkdir -p ${KSTARS_APP}/Contents/Resources/DriverSupport/gphoto/IOLIBS
