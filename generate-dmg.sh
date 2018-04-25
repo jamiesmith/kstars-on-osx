@@ -164,11 +164,11 @@ macdeployqt KStars.app -executable=${KSTARS_APP}/Contents/MacOS/kioslave -execut
 	hdiutil detach $DEV
 
 # Convert the disk image to read-only
-	hdiutil convert ${UNCOMPRESSED_DMG} -format UDBZ -o ${DMG_DIR}/kstars_${KSTARS_VERSION}.dmg
+	hdiutil convert ${UNCOMPRESSED_DMG} -format UDBZ -o ${DMG_DIR}/kstars-${KSTARS_VERSION}.dmg
 
 # Remove the Read Write DMG
 	rm ${UNCOMPRESSED_DMG}
 
 # Generate Checksums
-	md5 ${DMG_DIR}/kstars_${KSTARS_VERSION}.dmg > ${DMG_DIR}/kstars_${KSTARS_VERSION}.md5
-	shasum -a 256 ${DMG_DIR}/kstars_${KSTARS_VERSION}.dmg > ${DMG_DIR}/kstars_${KSTARS_VERSION}.sha256
+	md5 ${DMG_DIR}/kstars-${KSTARS_VERSION}.dmg > ${DMG_DIR}/kstars-${KSTARS_VERSION}.md5
+	shasum -a 256 ${DMG_DIR}/kstars-${KSTARS_VERSION}.dmg > ${DMG_DIR}/kstars-${KSTARS_VERSION}.sha256

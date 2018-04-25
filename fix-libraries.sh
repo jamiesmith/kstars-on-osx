@@ -242,8 +242,15 @@ announce "Running Fix Libraries Script"
 
 #This deletes and replaces the former Frameworks folder so you can start fresh.  This is needed if it ran before.
 	statusBanner "Replacing the Frameworks Directory"
-	rm - r "${FRAMEWORKS_DIR}"
+	rm -fr "${FRAMEWORKS_DIR}"
 	mkdir -p "${FRAMEWORKS_DIR}"
+	
+#This temporary hack is needed because libraw in CRAFT is different from libraw in homebrew.  Right now it doesn't get copied right.
+	if [ "$KSTARS_BUILD_TYPE" == "CRAFT" ]
+	then
+		statusBanner "Copying libraw library due to a version mismatch error.  This is a hack."
+		cp -f ${CRAFT_DIR}/lib/libraw.15.0.0.dylib ${KSTARS_APP}/Contents/Frameworks/libraw.15.dylib
+	fi
 
 cd ${DMG_DIR}
 
