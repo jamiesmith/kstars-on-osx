@@ -345,6 +345,12 @@ EOF
 	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libapogee
 	    make
 	    make install
+	    
+	    mkdir -p ${INDI_DIR}/build/3rdparty/libsbig
+	    cd ${INDI_DIR}/build/3rdparty/libsbig
+	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libsbig
+	    make
+	    make install
 	 
 		cd ${INDI_DIR}/build/3rdparty
 	
