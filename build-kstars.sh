@@ -366,6 +366,11 @@ EOF
 		statusBanner "make 3rd party drivers 2nd round"
 		make
 		make install
+		
+		#Copy Atik Drivers from Cloudmakers
+		cp -f ${DIR}/atik-cloudmakers/indi_atik_wheel /usr/local/bin/indi_atik_wheel
+		cp -f ${DIR}/atik-cloudmakers/indi_atik_ccd /usr/local/bin/indi_atik_ccd 
+		cp -f ${DIR}/atik-cloudmakers/libindi.dylib /usr/local/lib/libindi.dylib
 	}
 
 #This builds and installs libindi and starts the 3rd party build
