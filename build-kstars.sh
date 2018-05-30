@@ -278,6 +278,10 @@ EOF
 		/usr/local/bin/pip2 install pyfits
 		brewInstallIfNeeded libftdi
 		brewInstallIfNeeded gpsd
+		
+		# This is needed because astrometry-net requires an old version of cfitsio for now.
+		mkdir -p /usr/local/opt/cfitsio/lib/
+		cp -f  ${DIR}/libcfitsio.5.dylib /usr/local/opt/cfitsio/lib/libcfitsio.5.dylib
 	
 		brewInstallIfNeeded dbus
 		
@@ -306,6 +310,8 @@ EOF
 		
 		announce "Installing XML parser for Craft."
 		cpanm XML::Parser
+		
+		
 		
 		#This is a hack that will allow Craft to handle intltool
 		#Because the latest version of perl 5.26.0 causes errors when running intltool-update
@@ -349,6 +355,12 @@ EOF
 	    mkdir -p ${INDI_DIR}/build/3rdparty/libsbig
 	    cd ${INDI_DIR}/build/3rdparty/libsbig
 	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libsbig
+	    make
+	    make install
+	    
+	    mkdir -p ${INDI_DIR}/build/3rdparty/libfishcamp
+	    cd ${INDI_DIR}/build/3rdparty/libfishcamp
+	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libfishcamp
 	    make
 	    make install
 	 
