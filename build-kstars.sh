@@ -277,6 +277,7 @@ EOF
 		brewInstallIfNeeded python
 		/usr/local/bin/pip2 install pyfits
 		brewInstallIfNeeded libftdi
+		brewInstallIfNeeded libdc1394
 		brewInstallIfNeeded gpsd
 		
 		# This is needed because astrometry-net requires an old version of cfitsio for now.
@@ -695,7 +696,10 @@ EOF
 			cp -f ${CRAFT_DIR}/lib/libexec/kf5/kioslave ${KSTARS_APP}/Contents/MacOS/
 
 			statusBanner "Copying plugins"
-			cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			if [ -e "${CRAFT_DIR}/lib/plugins/" ]
+			then
+				cp -rf ${CRAFT_DIR}/lib/plugins/* ${KSTARS_APP}/Contents/PlugIns/
+			fi
 			
 			statusBanner "Copying Notifications."
 			cp -rf ${CRAFT_DIR}/share/knotifications5 ${KSTARS_APP}/Contents/Resources/
