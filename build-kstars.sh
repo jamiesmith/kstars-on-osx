@@ -278,6 +278,8 @@ EOF
 		/usr/local/bin/pip2 install pyfits
 		brewInstallIfNeeded libftdi
 		brewInstallIfNeeded libdc1394
+		brewInstallIfNeeded libfftw3
+		brewInstallIfNeeded librtlsdr
 		brewInstallIfNeeded gpsd
 		
 		# This is needed because astrometry-net requires an old version of cfitsio for now.
@@ -328,55 +330,36 @@ EOF
 			installHomebrewKf5Stuff
 		fi
 	}
+	
+	function buildThirdPartyLibrary
+	{
+		mkdir -p "${INDI_DIR}/build/3rdparty/$*"
+		cd "${INDI_DIR}/build/3rdparty/$*"
+		cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 "${INDI_DIR}/indi/3rdparty/$*"
+		make
+		make install
+	}
 
 #This builds the INDI 3rd Party Drivers
 	function buildThirdParty
 	{
 		mkdir -p ${INDI_DIR}/build/3rdparty
 		
-		 ## Build 3rd party
-		mkdir -p ${INDI_DIR}/build/3rdparty/libqsi
-		cd ${INDI_DIR}/build/3rdparty/libqsi
-		cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqsi
-		make
-		make install
-	 
-	    mkdir -p ${INDI_DIR}/build/3rdparty/libqhy
-	    cd ${INDI_DIR}/build/3rdparty/libqhy
-	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libqhy
-	    make
-	    make install
-	    
-	    mkdir -p ${INDI_DIR}/build/3rdparty/libapogee
-	    cd ${INDI_DIR}/build/3rdparty/libapogee
-	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libapogee
-	    make
-	    make install
-	    
-	    mkdir -p ${INDI_DIR}/build/3rdparty/libsbig
-	    cd ${INDI_DIR}/build/3rdparty/libsbig
-	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libsbig
-	    make
-	    make install
-	    
-	    mkdir -p ${INDI_DIR}/build/3rdparty/libfishcamp
-	    cd ${INDI_DIR}/build/3rdparty/libfishcamp
-	    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty/libfishcamp
-	    make
-	    make install
+		 ## Build 3rd party Libraries
+		 
+		buildThirdPartyLibrary libqsi
+		buildThirdPartyLibrary libqhy
+		buildThirdPartyLibrary libapogee
+		buildThirdPartyLibrary libsbig
+		buildThirdPartyLibrary libfishcamp
+		buildThirdPartyLibrary libdspau
+		buildThirdPartyLibrary libfli
 	 
 		cd ${INDI_DIR}/build/3rdparty
 	
-	
-	
 		## Run cmake and make install twice
 		cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty
-		statusBanner "make 3rd party drivers 1st round"
-		make
-		make install
-	
-		cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MACOSX_RPATH=1 ${INDI_DIR}/indi/3rdparty
-		statusBanner "make 3rd party drivers 2nd round"
+		statusBanner "make 3rd party drivers"
 		make
 		make install
 		
@@ -546,6 +529,8 @@ EOF
 		echo "KSTARS_APP=${KSTARS_APP}"
 		##########################################
 		statusBanner "Editing info.plist"
+		plutil -insert NSPrincipalClass -string NSApplication ${KSTARS_APP}/Contents/info.plist
+		plutil -insert NSHighResolutionCapable -string True ${KSTARS_APP}/Contents/info.plist
 		plutil -replace CFBundleName -string KStars ${KSTARS_APP}/Contents/info.plist
 		plutil -replace CFBundleVersion -string $KSTARS_VERSION ${KSTARS_APP}/Contents/info.plist
 		plutil -replace CFBundleLongVersionString -string $KSTARS_VERSION ${KSTARS_APP}/Contents/info.plist
