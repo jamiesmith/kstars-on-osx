@@ -452,11 +452,11 @@ EOF
 		statusBanner "Crafting icons"
 		craft breeze-icons
 		
-		#Note these two lines are temporary because craft currently can't build libraw?
-		#So we need to copy the include from homebrew
-		#mkdir -p ~/AstroRoot/kstars-craft/include/libraw
-		#cp -r /usr/local/include/libraw/* /Users/rlancaste/AstroRoot/kstars-craft/include/libraw/
-
+		#These currently are done separately because it fails when done while crafting kstars for some reason
+		statusBanner "Crafting libjpeg-turbo"
+		craft -vvv libjpeg-turbo
+		statusBanner "Crafting libraw"
+		craft -vvv libraw
 		
 		statusBanner "Crafting KStars"
 		craft -vvv -i kstars
