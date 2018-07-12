@@ -171,6 +171,11 @@ exit 9
 
         	statusBanner "Processing $directoryName file $base"
         	processTarget $file
+        	
+        	#This hard coded rpath needs to be removed from any files that have it for packaged apps because later there could be rpath conflicts
+        	#if the program is run on a computer with the same paths as the build computer
+        	install_name_tool -delete_rpath ${CRAFT_DIR}/lib $file
+        	
 		done
 
 		statusBanner "Copying required files for $directoryName into frameworks"
