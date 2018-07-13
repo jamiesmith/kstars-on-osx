@@ -446,6 +446,7 @@ EOF
 		
 		statusBanner "Copying Craft Settings"
 		cp ${DIR}/CraftSettings.ini ${CRAFT_DIR}/etc/
+		cp ${DIR}/BlueprintSettings.ini ${CRAFT_DIR}/etc/
 		cd ${CRAFT_DIR}
 		source craft/craftenv.sh
 		
