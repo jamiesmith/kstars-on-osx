@@ -151,21 +151,21 @@ EOF
 	}
 
 #This checks to see if QT is installed before starting.
-	function checkForQT
-	{
-		if [ -z "${FORCE_BREW_QT}" ]
-		then
-			if [ -n "$QT5_DIR" ] 
-			then
-				if [ ! -d "$QT5_DIR" ]
-				then
-					dieUsage "Please check your build-env.sh for the QT5 variable.  QT5 cannot be found.  Either QT is not installed or the wrong directory is selected.  You can also use the homebrew QT.  Please see the readme file."
-				fi
-			else
-				dieUsage "Please check your build-env.sh for the QT5 variable.  It is blank.  You need to either specify it or use the homebrew QT.  Please see the readme file."
-			fi
-		fi
-	}
+#	function checkForQT
+#	{
+#		if [ -z "${FORCE_BREW_QT}" ]
+#		then
+#			if [ -n "$QT5_DIR" ] 
+#			then
+#				if [ ! -d "$QT5_DIR" ]
+#				then
+#					dieUsage "Please check your build-env.sh for the QT5 variable.  QT5 cannot be found.  Either QT is not installed or the wrong directory is selected.  You can also use the homebrew QT.  Please see the readme file."
+#				fi
+#			else
+#				dieUsage "Please check your build-env.sh for the QT5 variable.  It is blank.  You need to either specify it or use the homebrew QT.  Please see the readme file."
+#			fi
+#		fi
+#	}
 
 #This checks to see that this script is up to date.  If it is not, you can use the -f option to force it to run.
 	function checkUpToDate
@@ -743,7 +743,7 @@ EOF
 		if [ "$KSTARS_BUILD_TYPE" == "CRAFT" ]
 		then
 			statusBanner "Copying Craft app bundle into build folder in case you want to edit kstars in QT Creator."
-			cp -rf ${KSTARS_APP} ${CRAFT_DIR}/build/kde/applications/kstars/work/RelWithDebInfo-master/kstars
+			cp -rf ${KSTARS_APP} ${CRAFT_DIR}/build/kde/applications/kstars/work/RelWithDebInfo-2.9.6/kstars
 		fi
 		
 	}
@@ -763,7 +763,7 @@ EOF
 	source "${DIR}/build-env.sh"
 	
 # Before starting, check for QT and to see if the remote servers are accessible
-	checkForQT
+#	checkForQT
 	checkForConnections
 	
 #Check first that the user has entered build options, if not, print the list of options and quit.
@@ -789,10 +789,10 @@ EOF
 	fi
 	
 #Warn about the fact that it is using the homebrew qt even though that was not explicitly requested.
-	if [ -z "${FORCE_BREW_QT}" ]  && [ "$QT5_DIR" == "$(brew --prefix qt)" ]
-		then
-			announce "Currently the path to the QT being used in this build is the homebrew version.  If you want to build with the system QT please update the variable in build-env.sh"
-	fi
+#	if [ -z "${FORCE_BREW_QT}" ]  && [ "$QT5_DIR" == "$(brew --prefix qt)" ]
+#		then
+#			announce "Currently the path to the QT being used in this build is the homebrew version.  If you want to build with the system QT please update the variable in build-env.sh"
+#	fi
 
 #This will install KStars dependencies from Homebrew.  If you know they are installed, you can skip it.
 	if [ -z "$SKIP_BREW" ]

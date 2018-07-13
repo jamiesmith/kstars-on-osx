@@ -26,24 +26,24 @@ export KSTARS_XCODE_DIR=${ASTRO_ROOT}/kstars-xcode
 export KSTARS_CMAKE_DIR=${ASTRO_ROOT}/kstars-cmake
 export GSC_DIR=${ASTRO_ROOT}/gsc
 
-if [ -z "${FORCE_BREW_QT}" ]
-then
+#if [ -z "${FORCE_BREW_QT}" ]
+#then
 	#NOTE: The user of the Script can edit this path to match the system qt if desired.
 	#Please do not use any version less than 5.10.0, there was a serious Window bug that QT fixed in that version.
-	export QT5_DIR=~/Qt/5.10.0/clang_64
+	#export QT5_DIR=~/Qt/5.10.0/clang_64
 	#export QT5_DIR=$(brew --prefix qt)
-else
-	export QT5_DIR=$(brew --prefix qt)
-fi	
+#else
+	#export QT5_DIR=$(brew --prefix qt)
+#fi	
 
 export PATH=$(brew --prefix gettext)/bin:${QT5_DIR}/bin:$PATH
 export PATH=$(brew --prefix bison)/bin:$PATH
 export CMAKE_LIBRARY_PATH=$(brew --prefix gettext)/lib
 export CMAKE_INCLUDE_PATH=$(brew --prefix gettext)/include
 
-export QT5DBUS_DIR=$QT5_DIR
-export QT5TEST_DIR=$QT5_DIR
-export QT5NETWORK_DIR=$QT5_DIR
+#export QT5DBUS_DIR=$QT5_DIR
+#export QT5TEST_DIR=$QT5_DIR
+#export QT5NETWORK_DIR=$QT5_DIR
 
 export GSC_TARGET_DIR=${CRAFT_DIR}/Applications/KDE/kstars.app/Contents/MacOS/gsc
 export QMAKE_MACOSX_DEPLOYMENT_TARGET=10.11
