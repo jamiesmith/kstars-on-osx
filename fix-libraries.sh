@@ -253,8 +253,9 @@ announce "Running Fix Libraries Script"
 #This temporary hack is needed because libraw in CRAFT is different from libraw in homebrew.  Right now it doesn't get copied right.
 	if [ "$KSTARS_BUILD_TYPE" == "CRAFT" ]
 	then
-		statusBanner "Copying libraw library due to a version mismatch error.  This is a hack."
+		statusBanner "Copying libraw and cfitsio libraries due to a version mismatch error.  This is a hack."
 		cp -f ${CRAFT_DIR}/lib/libraw.15.0.0.dylib ${KSTARS_APP}/Contents/Frameworks/libraw.15.dylib
+		cp -f  ${CRAFT_DIR}/lib/libcfitsio.3.dylib /usr/local/opt/cfitsio/lib/libcfitsio.3.dylib
 	fi
 
 cd ${DMG_DIR}
