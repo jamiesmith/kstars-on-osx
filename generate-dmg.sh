@@ -123,6 +123,8 @@ set +e
 #This deletes any previous dmg stuff so a new one can be made.
 	announce "Removing any previous DMG, checksums, and unnecessary files"
 	rm -r ${DMG_DIR}/kglobalaccel5.app
+	rm -r ${DMG_DIR}/kwallet-query.app
+	rm -r ${DMG_DIR}/kwalletd5.app
 	rm ${DMG_DIR}/kstars*.dmg
 	rm ${DMG_DIR}/kstars*.md5
 	rm ${DMG_DIR}/kstars*.sha256
