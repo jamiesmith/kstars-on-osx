@@ -73,7 +73,7 @@ exit 9
 					delay 1 -- sync
 					set icon size of the icon view options of container window to 64
 					set arrangement of the icon view options of container window to not arranged
-					set position of item "QuickStart.pdf" to {100, 45}
+					set position of item "QuickStart READ FIRST.pdf" to {100, 45}
 					set position of item "CopyrightInfo and SourceCode.pdf" to {100, 145}
 					set position of item "Applications" to {340, 45}
 					set position of item "KStars.app" to {340, 145}
@@ -118,7 +118,7 @@ set +e
 #This copies the documentation that will be placed into the dmg.
 	announce "Copying Documentation"
 	cp -f ${DIR}/"CopyrightInfo and SourceCode.pdf" ${DMG_DIR}
-	cp -f ${DIR}/QuickStart.pdf ${DMG_DIR}
+	cp -f ${DIR}/"QuickStart READ FIRST.pdf" ${DMG_DIR}
 
 #This deletes any previous dmg stuff so a new one can be made.
 	announce "Removing any previous DMG, checksums, and unnecessary files"
