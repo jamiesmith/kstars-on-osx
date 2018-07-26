@@ -277,6 +277,7 @@ EOF
 		brewInstallIfNeeded python
 		/usr/local/bin/pip2 install pyfits
 		brewInstallIfNeeded libftdi
+		brewInstallIfNeeded ffmpeg
 		brewInstallIfNeeded libdc1394
 		brewInstallIfNeeded libfftw3
 		brewInstallIfNeeded librtlsdr
