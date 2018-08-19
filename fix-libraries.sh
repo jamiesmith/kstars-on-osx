@@ -302,7 +302,7 @@ processDirectory VLC_CODEC "${KSTARS_APP}/Contents/PlugIns/vlc/codec"
 
 processDirectory Frameworks "${FRAMEWORKS_DIR}"
 
-while [${#FILES_TO_COPY[@]} > 0]
+while [${#FILES_TO_COPY[@]} -gt 0]
 do
 	statusBanner "${#FILES_TO_COPY[@] more files were copied into Frameworks, we need to process it again."
 	processDirectory Frameworks "${FRAMEWORKS_DIR}"
