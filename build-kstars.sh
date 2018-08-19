@@ -744,7 +744,7 @@ EOF
 		if [ "$KSTARS_BUILD_TYPE" == "CRAFT" ]
 		then
 			statusBanner "Copying Craft app bundle into build folder in case you want to edit kstars in QT Creator."
-			cp -rf ${KSTARS_APP} ${CRAFT_DIR}/build/kde/applications/kstars/work/RelWithDebInfo-2.9.6/kstars
+			cp -rf ${KSTARS_APP} ${CRAFT_DIR}/build/kde/applications/kstars/work/RelWithDebInfo-$KSTARS_VERSION/kstars
 		fi
 		
 	}
