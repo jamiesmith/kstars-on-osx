@@ -128,6 +128,7 @@ exit 9
 #This copies all of the files in the list into Frameworks
 	function copyFilesToFrameworks
 	{
+		FILES_COPIED=0
 		for libFile in "${FILES_TO_COPY[@]}"
 		do
 			# if it starts with a / then easy.
@@ -146,6 +147,8 @@ exit 9
 			then
 				echo "HAVE TO COPY [$base] from [${filename}] to Frameworks"
 				cp -fL "${filename}" "${FRAMEWORKS_DIR}"
+				
+				FILES_COPIED=$((FILES_COPIED+1))
 			
 				# Seem to need this for the macqtdeploy
 				#
@@ -302,9 +305,9 @@ processDirectory VLC_CODEC "${KSTARS_APP}/Contents/PlugIns/vlc/codec"
 
 processDirectory Frameworks "${FRAMEWORKS_DIR}"
 
-while [${#FILES_TO_COPY[@]} -gt 0]
+while [${FILES_COPIED} -gt 0]
 do
-	statusBanner "${#FILES_TO_COPY[@] more files were copied into Frameworks, we need to process it again."
+	statusBanner "${FILES_COPIED} more files were copied into Frameworks, we need to process it again."
 	processDirectory Frameworks "${FRAMEWORKS_DIR}"
 done
 
