@@ -533,6 +533,7 @@ EOF
 		statusBanner "Editing info.plist"
 		plutil -insert NSPrincipalClass -string NSApplication ${KSTARS_APP}/Contents/info.plist
 		plutil -insert NSHighResolutionCapable -string True ${KSTARS_APP}/Contents/info.plist
+		plutil -insert NSRequiresAquaSystemAppearance -string NO ${KSTARS_APP}/Contents/info.plist
 		plutil -replace CFBundleName -string KStars ${KSTARS_APP}/Contents/info.plist
 		plutil -replace CFBundleVersion -string $KSTARS_VERSION ${KSTARS_APP}/Contents/info.plist
 		plutil -replace CFBundleLongVersionString -string $KSTARS_VERSION ${KSTARS_APP}/Contents/info.plist
