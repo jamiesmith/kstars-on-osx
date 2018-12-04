@@ -357,7 +357,7 @@ EOF
 		buildThirdPartyLibrary libfli
 		buildThirdPartyLibrary libtoupcam
 		buildThirdPartyLibrary libatik
-		buildThirdPartyLibrary libaltair
+		buildThirdPartyLibrary libaltaircam
 	 
 		cd ${INDI_DIR}/build/3rdparty
 	
