@@ -355,6 +355,9 @@ EOF
 		buildThirdPartyLibrary libfishcamp
 		buildThirdPartyLibrary libdspau
 		buildThirdPartyLibrary libfli
+		buildThirdPartyLibrary libtoupcam
+		buildThirdPartyLibrary libatik
+		buildThirdPartyLibrary libaltair
 	 
 		cd ${INDI_DIR}/build/3rdparty
 	
@@ -365,9 +368,9 @@ EOF
 		make install
 		
 		#Copy Atik Drivers from Cloudmakers
-		cp -f ${DIR}/atik-cloudmakers/indi_atik_wheel /usr/local/bin/indi_atik_wheel
-		cp -f ${DIR}/atik-cloudmakers/indi_atik_ccd /usr/local/bin/indi_atik_ccd 
-		cp -f ${DIR}/atik-cloudmakers/libindi.dylib /usr/local/lib/libindi.dylib
+		#cp -f ${DIR}/atik-cloudmakers/indi_atik_wheel /usr/local/bin/indi_atik_wheel
+		#cp -f ${DIR}/atik-cloudmakers/indi_atik_ccd /usr/local/bin/indi_atik_ccd 
+		#cp -f ${DIR}/atik-cloudmakers/libindi.dylib /usr/local/lib/libindi.dylib
 	}
 
 #This builds and installs libindi and starts the 3rd party build
