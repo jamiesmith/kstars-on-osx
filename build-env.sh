@@ -54,7 +54,7 @@ export KSTARS_REPO=git://anongit.kde.org/kstars.git
 export LIBINDI_REPO=https://github.com/indilib/indi.git
 export CRAFT_REPO=git://anongit.kde.org/craft.git
 
-export KSTARS_VERSION=3.0.0
+export KSTARS_VERSION=3.0.0beta
 
 echo "DIR          		 is [${DIR}]"
 echo "ASTRO_ROOT          is [${ASTRO_ROOT}]"
